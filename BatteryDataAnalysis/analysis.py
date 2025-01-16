@@ -122,8 +122,6 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
         sigma=None
         # Loop for charge and discharge cycles with the parameters computed at the first cycle
         for cycle in df['Cycle'].unique():
-            print('Cycle '+str(cycle)+', State : '+str(charging_state))
-            
             df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
 
             if len(df_cycle) > 1:
