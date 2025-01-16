@@ -4,6 +4,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from cmcrameri import cm
 
+cycle_colorscale = [[0.0, "#A3D8FF"], [0.5, "#3399FF"], [1.0, "#003366"]]
+
 def matplotlib_to_plotly_colorscale(colormap, n_colors=256):
     colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]
     colorscale = [(0, f"rgb({int(colors[0][0] * 255)}, {int(colors[0][1] * 255)}, {int(colors[0][2] * 255)})")]

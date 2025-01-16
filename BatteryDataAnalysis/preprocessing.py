@@ -23,26 +23,15 @@ def preprocessing_files(file_path, column_names=None, cycle=None):
     if column_names:
         df = df.rename(columns=column_names)
     
-    print('1')
     df = standardize_column_names(df)
-    print('2')
 
     if cycle:
         df = df[df['Cycle'].isin(cycle)]
-    # print('Length : '+str(len(df)))
-    # print(df.head())
 
     df = charging_state(df)
-    print('3')
     df = process_useful_columns(df)
-    print('4')
 
     df = df.dropna(subset=['Voltage', 'Current', 'Capacity'])
-    print('5')
-    
-    # folder_path = os.path.join('parquet_files_testing', "files")
-    # output_file_path = os.path.join(folder_path, 'MJ_01_test.parquet')
-    # df.to_parquet(output_file_path, engine='pyarrow', index=False)
 
     return df
 
@@ -107,7 +96,6 @@ def process_useful_columns(df_input):
     """
     df = df_input.copy()
 
-    print('3.1')
     # SysTime to TestTime (seconds)
     if 'SysTime' in df.columns:
         if df['SysTime'].dtype == 'float64':
@@ -119,7 +107,6 @@ def process_useful_columns(df_input):
             df["TestTime"] = (df["SysTime"] - reference_time).dt.total_seconds()
             df = df.dropna(subset=['TestTime'])
 
-    print('3.2')
     # Capacity (Ah)
     if 'Capacity' not in df.columns:
         for charging_state in ['C', 'D']:
@@ -130,7 +117,6 @@ def process_useful_columns(df_input):
                 df.loc[(df['Cycle'] == cycle) & (df['State'] == charging_state), 
                     'Capacity'] = abs((df_cycle['Current'] * df_cycle['TestTime'].diff()).cumsum()) / 3600
 
-    print('3.3')
     # SOC (%)
     df["SOC"] = df["Capacity"] / df["Capacity"].max()
 
