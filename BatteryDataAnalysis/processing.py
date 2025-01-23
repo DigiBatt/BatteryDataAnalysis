@@ -1,6 +1,10 @@
 from preprocessing import preprocessing_files
-from analysis import calculate_dqdv_for_all_cycle
-from plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv
+from BatteryDataAnalysis.analysis_dqdv import calculate_dqdv_for_all_cycle
+from analysis_GITT import pulse_number, global_calculation
+from plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv, plot_GITT
+
+import pyarrow.parquet as pq
+import os
 
 def process_dqdv(file_path, 
                  column_names=None, 
@@ -19,6 +23,12 @@ def process_dqdv(file_path,
     - column_names (optional): Dictionary containing the column names to be used for the analysis
     The useful columns are: Voltage, Current, Capacity, SysTime (system time or test time), Cycle and State (charging state)
     These columns should be the keys of the dictionary and the values should be the corresponding column names in the file
+    - curve (optional): Boolean indicating whether to plot the dQ/dV curves
+    - heatmap (optional): Boolean indicating whether to plot the dQ/dV heatmap
+    - pocv (optional): Boolean indicating whether to plot the Voltage over Capacity curves
+    - save (optional): Boolean indicating whether to save the plots
+    - cycle (optional): List of cycle numbers to process
+    - smoothing (optional): Boolean indicating whether to apply smoothing to the dQ/dV curves
 
     Returns:
     - df_dqdv: DataFrame containing the dQ/dV data
@@ -40,3 +50,27 @@ def process_dqdv(file_path,
         fig_pocv.show()
 
     return df_dqdv
+
+
+def process_GITT(file_path):
+    table = pq.read_table(file_path)
+    df = table.to_pandas()
+
+    df = pulse_number(df)
+
+    df = df[(df['Pulse'] >= 1) & (df['Pulse'] <= 100)]
+
+    df, results_df = global_calculation(df)
+
+    df = df.iloc[::100]
+
+    fig_GITT = plot_GITT(df, file_path)
+    fig_GITT.show()
+
+    return df
+
+
+file = 'GITT_AG4_S_1577'
+folder_path = "C:/Users/edgarl/OneDrive - SINTEF/Documents/Test/cold_test/parquet_files_testing/files"
+file_path = os.path.join(folder_path, f"{file}.parquet")
+process_GITT(file_path)

@@ -151,3 +151,37 @@ def reduce_points_number(df_input, n_cycle):
     N = max(int(len(df_input) / (n_cycle * len(df_input['Cycle'].unique()))), 1)
 
     return df_input.iloc[::N]
+
+
+def plot_GITT(df,
+              file_path,
+              save=False):
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+    folder_path = os.path.dirname(file_path)
+
+    fig_GITT = go.Figure()
+    fig_GITT.add_trace(go.Scatter(
+        x=df['TestTime'],
+        y=df["Voltage/V"],
+        hovertext='Pulse: ' + df['Pulse'].astype(str)
+        + '<br>Relaxation: ' + df['Relaxation'].astype(str),
+        name='Voltage',
+        ))
+    fig_GITT.add_trace(go.Scatter(
+        x=df['TestTime'],
+        y=df["Current/mA"],
+        hovertext='Pulse: ' + df['Pulse'].astype(str) 
+        + '<br>Relaxation: ' + df['Relaxation'].astype(str),
+        name='Current',
+    ))
+    fig_GITT.update_layout(
+        title="Voltage/V over time",
+        xaxis_title="TestTime [√s]",
+        yaxis_title="Voltage",
+        )
+    
+    if save:
+        file_path_GITT = os.path.join(folder_path, f'GITT_{file_name}.html')
+        fig_GITT.write_html(file_path_GITT)
+    
+    return fig_GITT
