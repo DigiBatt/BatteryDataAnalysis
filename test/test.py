@@ -3,7 +3,7 @@ import pyarrow.parquet as pq
 import plotly.express as px
 
 from BatteryDataAnalysis.preprocessing import preprocessing_files, standardize_column_names, charging_state, process_useful_columns
-from BatteryDataAnalysis.analysis import calculate_dqdv_for_all_cycle
+from BatteryDataAnalysis.analysis_dqdv import calculate_dqdv_for_all_cycle
 from BatteryDataAnalysis.plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv
 from BatteryDataAnalysis.processing import process_dqdv
 
