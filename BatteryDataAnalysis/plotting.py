@@ -153,31 +153,87 @@ def reduce_points_number(df_input, n_cycle):
     return df_input.iloc[::N]
 
 
-def plot_GITT(df,
+def plot_GITT_test(df,
               file_path,
               save=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
+    N = max(1, int(len(df) / 100000))
+    df = df.iloc[::N]
+
     fig_GITT = go.Figure()
     fig_GITT.add_trace(go.Scatter(
         x=df['TestTime'],
-        y=df["Voltage/V"],
+        y=df["Voltage"],
         hovertext='Pulse: ' + df['Pulse'].astype(str)
-        + '<br>Relaxation: ' + df['Relaxation'].astype(str),
+        + '<br>Relaxation: ' + df['Relaxation'].astype(str)
+        + '<br>Cycle: ' + df['Cycle'].astype(str)
+        + '<br>State: ' + df['State'].astype(str),
         name='Voltage',
         ))
     fig_GITT.add_trace(go.Scatter(
         x=df['TestTime'],
-        y=df["Current/mA"],
+        y=df["Current"],
         hovertext='Pulse: ' + df['Pulse'].astype(str) 
-        + '<br>Relaxation: ' + df['Relaxation'].astype(str),
+        + '<br>Relaxation: ' + df['Relaxation'].astype(str)
+        + '<br>Cycle: ' + df['Cycle'].astype(str)
+        + '<br>State: ' + df['State'].astype(str),
+        name='Current',
+    ))
+    fig_GITT.add_trace(go.Scatter(
+        x=df['TestTime'],
+        y=df["Capacity"],
+        hovertext='Pulse: ' + df['Pulse'].astype(str) 
+        + '<br>Relaxation: ' + df['Relaxation'].astype(str)
+        + '<br>Cycle: ' + df['Cycle'].astype(str)
+        + '<br>State: ' + df['State'].astype(str),
         name='Current',
     ))
     fig_GITT.update_layout(
-        title="Voltage/V over time",
-        xaxis_title="TestTime [√s]",
+        title="Voltage, Current and Capacity over TestTime<br>"
+        f'File : <b>{file_name}</b><br>',
+        xaxis_title="TestTime (√s)",
         yaxis_title="Voltage",
+        )
+    
+    if save:
+        file_path_GITT = os.path.join(folder_path, f'GITT_{file_name}.html')
+        fig_GITT.write_html(file_path_GITT)
+    
+    return fig_GITT
+
+
+def plot_GITT_result(df,
+                     file_path,
+                     method=1,
+                     save=False):
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+    folder_path = os.path.dirname(file_path)
+
+    colorscale_dict = {'C': [[0.0, "#A3D8FF"],[0.5, "#3399FF"],[1.0, "#003366"]], 'D': [[0.0, "#FF9999"],[0.5, "#FF3333"],[1.0, "#CC0000"]]}
+
+    fig_GITT = go.Figure()
+    nb_cycle = df['Cycle'].max()
+    for state in ['C', 'D']:
+        for i, cycle in enumerate(df['Cycle'].unique()):
+            df_state = df[(df['State'] == state) & (df['Cycle'] == cycle)].sort_values(by='SOC')
+            colorscale = colorscale_dict[state]
+
+            fig_GITT.add_trace(go.Scatter(
+                x=df_state['SOC'],
+                y=df_state[f'D_method{method}'],
+                mode='lines+markers',
+                line=dict(color=colorscale[int(i / nb_cycle * (len(colorscale) - 1))][1]),
+                hovertext = f'Cycle: {cycle}<br>'
+                +'Pulse: ' + df_state['Pulse'].astype(str),
+                name=f'Cycle {cycle}, State {state}',
+                ))
+    fig_GITT.update_layout(
+        title='Diffusion Coefficient numerical results'
+        f'File : <b>{file_name}</b><br>',
+        xaxis_title="SOC (%)",
+        yaxis_title=f"Diffusion Coefficient (m²/s) - Method {method}",
         )
     
     if save:

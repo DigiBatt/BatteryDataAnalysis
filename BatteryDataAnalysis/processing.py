@@ -1,10 +1,7 @@
 from preprocessing import preprocessing_files
-from BatteryDataAnalysis.analysis_dqdv import calculate_dqdv_for_all_cycle
+from analysis_dqdv import calculate_dqdv_for_all_cycle
 from analysis_GITT import pulse_number, global_calculation
-from plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv, plot_GITT
-
-import pyarrow.parquet as pq
-import os
+from plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv, plot_GITT_result, plot_GITT_test
 
 def process_dqdv(file_path, 
                  column_names=None, 
@@ -53,24 +50,51 @@ def process_dqdv(file_path,
 
 
 def process_GITT(file_path):
-    table = pq.read_table(file_path)
-    df = table.to_pandas()
 
+    df = preprocessing_files(file_path)
     df = pulse_number(df)
 
-    df = df[(df['Pulse'] >= 1) & (df['Pulse'] <= 100)]
+    results_df = global_calculation(df)
 
-    df, results_df = global_calculation(df)
+    fig_GITT = plot_GITT_test(df, file_path)
+    fig_GITT.show()
 
-    df = df.iloc[::100]
+    fig_GITT = plot_GITT_result(results_df, file_path, method=1)
+    fig_GITT.show()
 
-    fig_GITT = plot_GITT(df, file_path)
+    fig_GITT = plot_GITT_result(results_df, file_path, method=2)
+    fig_GITT.show()
+
+    fig_GITT = plot_GITT_result(results_df, file_path, method=3)
     fig_GITT.show()
 
     return df
 
 
-file = 'GITT_AG4_S_1577'
+file = 'GITT_AG4_S_1577' # GITT_AG4_S_1577, GITT_S_333, GITT_S_170, GITT_LACB440BP2
 folder_path = "C:/Users/edgarl/OneDrive - SINTEF/Documents/Test/cold_test/parquet_files_testing/files"
 file_path = os.path.join(folder_path, f"{file}.parquet")
 process_GITT(file_path)
+
+
+
+# file = 'estimation_results'
+# folder_path = "C:/Users/edgarl/OneDrive - SINTEF/Documents/Test/cold_test/parquet_files_testing/files/GITT estimation results"
+# # folder_path = "C:/Users/edgarl/OneDrive - SINTEF/Documents/Test/cold_test/parquet_files_testing/files/GITT data"
+# file_path_json = os.path.join(folder_path, f"{file}.json")
+# file_path_csv = os.path.join(folder_path, f"{file}.csv")
+
+# df = pd.read_json(file_path_json)
+
+# df = pd.DataFrame(df['inferred parameters'].tolist()) #.tolist()
+# print(df)
+
+# fig_GITT = px.scatter(
+#     x=df.index,
+#     y=df['Positive electrode diffusivity [m2.s-1]'],
+#     title='GITT Experimental Positive Electrode diffusivity coefficient'
+# )
+# fig_GITT.show()
+
+# Convertir en CSV
+# df.to_csv(file_path_csv, index=False, encoding="utf-8")
