@@ -4,10 +4,10 @@ import pyarrow.parquet as pq
 from rapidfuzz import process
 
 COLUMN_NAME_MAPPING = {
-    'SysTime': ['TestTime', 'Time', 'Time/Sec', 'Time [datetime]', 'SysTime', 'DPt Time', 'TestTime [h]', 't'],
+    'SysTime': ['TestTime', 'Time', 'Time/Sec', 'Time [datetime]', 'SysTime', 'DPt Time', 'TestTime [h]', 't', 'DPtTime'],
     'Voltage': ['Voltage', 'Voltage/V', 'V', 'Volt', "Voltage [V]", 'Volts'],
     'Current': ['Current', 'Current/mA', 'I', 'Current(A)', 'I/mA', "Current [mA]", 'Amps'],
-    'Capacity': ['Capacity', 'Capacity/mAh', 'Capacity(Ah)', 'Q', "Capacity [mAh]", 'Amp-hr'],
+    'Capacity': ['Capacity', 'Capacity/mAh', 'Capacity(Ah)', 'Q', "Capacity [mAh]", 'Amp-hr', 'Amphr'],
     'Cycle': ['Cycle', 'Cycle#', 'Cycle [#]', 'CycleNo', 'Cyc#'],
     'State': ['State', 'Charge', 'C/D', 'Charge/Discharge'],
     'discharging': ['discharging', 'discharge', 'D'],
@@ -19,11 +19,21 @@ def preprocessing_files(file_path, column_names=None, cycle=None):
     table = pq.read_table(file_path)
     df = table.to_pandas()
 
+    # df['Cyc'] = 1
+    # df['State'] = 'D'
+    # df = df.drop(columns='Amphr')
+    # # df = df.drop(columns='State')
+
+
     print('Length : '+str(len(df)))
     if column_names:
         df = df.rename(columns=column_names)
+
+    print('Column names : '+str(df.columns))
     
     df = standardize_column_names(df)
+
+    print('Column names after standardization : '+str(df.columns))
 
     if cycle:
         df = df[df['Cycle'].isin(cycle)]
@@ -31,10 +41,9 @@ def preprocessing_files(file_path, column_names=None, cycle=None):
     df = charging_state(df)
     df = process_useful_columns(df)
 
-    df = df.dropna(subset=['Voltage', 'Current', 'Capacity'])
+    df = df.dropna(subset=['Voltage', 'Current', 'Capacity']) 
 
     return df
-
 
 def fuzzy_match_column(column, known_columns):
     """
@@ -116,9 +125,10 @@ def process_useful_columns(df_input):
                 df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == charging_state)]
                 df.loc[(df['Cycle'] == cycle) & (df['State'] == charging_state), 
                     'Capacity'] = abs((df_cycle['Current'] * df_cycle['TestTime'].diff()).cumsum()) / 3600
+        df['Capacity'] = df['Capacity'].ffill()
 
     # SOC (%)
-    df["SOC"] = df["Capacity"] / df["Capacity"].max()
+    df["SOC"] = df.groupby(["Cycle", "State"])["Capacity"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
 
     return df
 
@@ -143,11 +153,11 @@ def charging_state(df):
             charge_match = process.extractOne(states, known_names['charging'], score_cutoff=50)
             discharge_match = process.extractOne(states, known_names['discharging'], score_cutoff=50)
         
-            if charge_match and discharge_match:
+            if charge_match:
                 df.loc[df['State'] == charge_match[0], 'State'] = 'C'
+            if discharge_match:
                 df.loc[df['State'] == discharge_match[0], 'State'] = 'D'
-
-                return df
+            return df
     
     # In case a discharging column contains 0 and 1 values
     if 'discharging' in df.columns and df['discharging'].isin([0, 1]).all():
@@ -166,6 +176,7 @@ def charging_state(df):
             df.loc[df['Current'] > 0, 'State'] = 'D'
             df['Current'] = -df['Current']
             
+        df['State'] = df['State'].ffill()
         return df
 
     print('Could not identify charging state')
