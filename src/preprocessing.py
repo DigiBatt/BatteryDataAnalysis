@@ -10,38 +10,47 @@ COLUMN_NAME_MAPPING = {
     'Capacity': ['Capacity', 'Capacity/mAh', 'Capacity(Ah)', 'Q', "Capacity [mAh]", 'Amp-hr', 'Amphr'],
     'Cycle': ['Cycle', 'Cycle#', 'Cycle [#]', 'CycleNo', 'Cyc#'],
     'State': ['State', 'Charge', 'C/D', 'Charge/Discharge'],
-    'discharging': ['discharging', 'discharge', 'D'],
+    # 'discharging': ['discharging', 'discharge', 'D'],
 }
 
 def preprocessing_files(file_path, column_names=None, cycle=None):
     print('File : '+str(os.path.basename(file_path)))
+    file_ext = os.path.splitext(file_path)[1].lower()
 
-    table = pq.read_table(file_path)
-    df = table.to_pandas()
+    if file_ext == '.parquet':
+        table = pq.read_table(file_path)
+        df = table.to_pandas()
+        print('parquet')
+    elif file_ext == '.csv':
+        df = pd.read_csv(file_path)
+        print('csv')
+    else:
+        raise ValueError(f"Format de fichier non supporté : {file_ext}")
 
-    # df['Cyc'] = 1
-    # df['State'] = 'D'
-    # df = df.drop(columns='Amphr')
-    # # df = df.drop(columns='State')
-
+    # print(df[['I', 'U']])
+    print(df)
 
     print('Length : '+str(len(df)))
     if column_names:
         df = df.rename(columns=column_names)
-
-    print('Column names : '+str(df.columns))
     
-    df = standardize_column_names(df)
+    print('Columns : '+str(df.columns))
+    print(df[['Current', 'Voltage']])
 
-    print('Column names after standardization : '+str(df.columns))
+    df = standardize_column_names(df, column_names)
 
     if cycle:
         df = df[df['Cycle'].isin(cycle)]
 
-    df = charging_state(df)
-    df = process_useful_columns(df)
+    df = df.dropna(subset=['Voltage', 'Current'])
 
-    df = df.dropna(subset=['Voltage', 'Current', 'Capacity']) 
+    df = charging_state(df)
+    print('Charging_state')
+
+    df = process_useful_columns(df)
+    print('process_useful_columns')
+
+    df = df.dropna(subset=['Voltage', 'Current', 'Capacity'])
 
     return df
 
@@ -66,7 +75,7 @@ def fuzzy_match_column(column, known_columns):
         return column
     
 
-def standardize_column_names(df):
+def standardize_column_names(df, column_names):
     """
     Standardizes column names of the DataFrame using predefined mappings and fuzzy matching
     
@@ -78,6 +87,9 @@ def standardize_column_names(df):
     """
     reverse_mapping = {alias: standard_name for standard_name, aliases in COLUMN_NAME_MAPPING.items() for alias in aliases}
     known_standard_columns = list(COLUMN_NAME_MAPPING.keys())
+
+    if column_names:
+        known_standard_columns = [col for col in known_standard_columns if col not in column_names.values()]
     
     # Rename columns based on predefined mappings or fuzzy matching
     new_columns = []
@@ -116,8 +128,12 @@ def process_useful_columns(df_input):
             df["TestTime"] = (df["SysTime"] - reference_time).dt.total_seconds()
             df = df.dropna(subset=['TestTime'])
 
+    if df['Cycle'].dtype != 'int64':
+        df['Cycle'] = 1
+    
     # Capacity (Ah)
-    if 'Capacity' not in df.columns:
+    df = df.drop('Capacity', axis=1)
+    if 'Capacity' not in df.columns or len(df.dropna(subset=['Capacity'])) == 0:
         for charging_state in ['C', 'D']:
             for cycle in df['Cycle'].unique():
                 print('Cycle '+str(cycle/max(df['Cycle'].unique())))
@@ -126,9 +142,12 @@ def process_useful_columns(df_input):
                 df.loc[(df['Cycle'] == cycle) & (df['State'] == charging_state), 
                     'Capacity'] = abs((df_cycle['Current'] * df_cycle['TestTime'].diff()).cumsum()) / 3600
         df['Capacity'] = df['Capacity'].ffill()
+        print('Capacity')
 
     # SOC (%)
     df["SOC"] = df.groupby(["Cycle", "State"])["Capacity"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
+    df.loc[df['State'] == 'D', "SOC"] = 1 - df.loc[df['State'] == 'D', "SOC"]
+    print('SOC')
 
     return df
 
