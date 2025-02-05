@@ -19,7 +19,7 @@ def process_dqdv(file_path,
     - file_path: Path to the file to process
     - column_names (optional): Dictionary containing the column names to be used for the analysis
     The useful columns are: Voltage, Current, Capacity, SysTime (system time or test time), Cycle and State (charging state)
-    These columns should be the keys of the dictionary and the values should be the corresponding column names in the file
+    These columns should be the values of the dictionary and the keys should be the corresponding column names in the file
     - curve (optional): Boolean indicating whether to plot the dQ/dV curves
     - heatmap (optional): Boolean indicating whether to plot the dQ/dV heatmap
     - pocv (optional): Boolean indicating whether to plot the Voltage over Capacity curves
@@ -65,12 +65,15 @@ def process_GITT(file_path):
     df = pulse_number(df)
 
     results_df = global_calculation(df)
+    print(results_df)
 
     fig_GITT = plot_GITT_test(df, file_path)
     fig_GITT.show()
 
-    for method in [1, 2, 3]:
-        fig_GITT = plot_GITT_result(results_df, file_path, method=method)
-        fig_GITT.show()
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient')
+    fig_GITT.show()
+
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance')
+    fig_GITT.show()
 
     return df

@@ -11,6 +11,8 @@ def pulse_number(df_input):
     
     df.drop(columns=['is_transition'], inplace=True)
 
+    df_nested = {pulse: sub_df for pulse, sub_df in df.groupby('Pulse')}
+
     return df
 
 
@@ -52,59 +54,21 @@ def tau_calculation(df_pulse):
     return tau
 
 
-def diffusion_coefficient1(delta_Es, delta_Et, tau):
+def diffusion_coefficient(delta_Es, delta_Et, tau):
     radius = 5e-6
 
     D = 4/(9 * np.pi) * radius**2 / tau * (delta_Es / delta_Et)**2
     return D
 
-def diffusion_coefficient2(df_input, delta_Es, tau):
-    radius = 5e-6
-
-    df_pulse = df_input.copy()
-    df_relax = df_pulse[(df_pulse['Relaxation'] == 1)].iloc[1:]
-
-    time = np.sqrt(df_relax['TestTime'] - df_relax['TestTime'].min())
-
-    start_time, end_time = time.min(), time.max()
-    max_time = 0.1 * (end_time - start_time) + start_time
-
-    voltage_min = df_relax.loc[time == start_time, 'Voltage'].iloc[0]
-    voltage_max = df_relax.loc[time >= max_time, 'Voltage'].iloc[0]
-
-    slope = (voltage_max - voltage_min) / (max_time - start_time)
-
-    D = 4/(9 * np.pi) * (radius / tau)**2 * (delta_Es / slope)**2
-
-    return D
-
-def diffusion_coefficient3(df_input, delta_Es, tau):
-    radius = 5e-6
-
-    df_pulse = df_input.copy()
-    df_relax = df_pulse[(df_pulse['Relaxation'] == 1)].iloc[1:]
-
-    t_relax = df_relax['TestTime'] - df_relax['TestTime'].min()
-    time = (t_relax + tau)**0.5 - (t_relax)**0.5
-    
-    start_time, end_time = time.min(), time.max()
-    min_time = 0.05 * (end_time - start_time) + start_time
-
-    voltage_max = df_relax.loc[time == start_time, 'Voltage'].iloc[0]
-    voltage_min = df_relax.loc[time <= min_time, 'Voltage'].iloc[0]
-
-    slope = (voltage_max - voltage_min) / (min_time - start_time)
-
-    D = 4/(9 * np.pi) * (radius / tau)**2 * (delta_Es / slope)**2
-
-    return D
 
 def global_calculation(df):
     df_total = pd.DataFrame()
     for pulse in df['Pulse'].unique():
         print('Pulse: '+str(pulse))
         df_pulse = df[df['Pulse'] == pulse].copy()
+
         pulse_current = abs(df_pulse[df_pulse['Relaxation'] == 0]['Current']).mean() * 1e-3
+        start_time = df_pulse[df_pulse['Relaxation'] == 1]['TestTime'].min()
 
         if len(df_pulse[df_pulse['Relaxation'] == 0]) >= 2 and len(df_pulse[df_pulse['Relaxation'] == 1]) >= 2:
 
@@ -112,23 +76,19 @@ def global_calculation(df):
             delta_Es = delta_Es_calculation(df_pulse)
             delta_Et = delta_Et_calculation(df_pulse)
             tau = tau_calculation(df_pulse)
-            D_method1 = diffusion_coefficient1(delta_Es, delta_Et, tau)
-            D_method2 = diffusion_coefficient2(df_pulse, delta_Es, tau)
-            D_method3 = diffusion_coefficient3(df_pulse, delta_Es, tau)
+            D = diffusion_coefficient(delta_Es, delta_Et, tau)
 
-            relax_time = df_pulse[df_pulse['Relaxation'] == 0]['TestTime'].max()
 
             df_coefficient = pd.DataFrame({'Pulse': pulse,
                             'Cycle': df_pulse['Cycle'].iloc[0],
-                            'SysTime': relax_time,
-                            'SOC': df_pulse[df_pulse['TestTime'] == relax_time]['SOC'].mean(),
-                            'D_method1': D_method1,
-                            'D_method2': D_method2,
-                            'D_method3': D_method3,
+                            'TestTime': start_time,
+                            'SOC': df_pulse[df_pulse['TestTime'] == start_time]['SOC'].mean(),
+                            'Voltage': df_pulse[df_pulse['TestTime'] == start_time]['Voltage'].mean(),
+                            'Diffusion Coefficient': D,
                             'Resistance': resistance,
                             'delta_Es': delta_Es,
                             'delta_Et': delta_Et,
-                            'τ': tau,
+                            'tau': tau,
                             'State': df_pulse['State'].iloc[0],},
                             index=['Pulse'])
 

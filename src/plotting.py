@@ -170,7 +170,7 @@ def plot_GITT_test(df,
         + '<br>Relaxation: ' + df['Relaxation'].astype(str)
         + '<br>Cycle: ' + df['Cycle'].astype(str)
         + '<br>State: ' + df['State'].astype(str),
-        name='Voltage',
+        name='Voltage (V)',
         ))
     fig_GITT.add_trace(go.Scatter(
         x=df['TestTime'],
@@ -193,7 +193,7 @@ def plot_GITT_test(df,
     fig_GITT.update_layout(
         title="Voltage, Current and Capacity over TestTime<br>"
         f'File : <b>{file_name}</b><br>',
-        xaxis_title="TestTime (√s)",
+        xaxis_title="TestTime (s)",
         yaxis_title="Voltage",
         )
     
@@ -206,7 +206,7 @@ def plot_GITT_test(df,
 
 def plot_GITT_result(df,
                      file_path,
-                     method=1,
+                     column='Diffusion Coefficient',
                      save=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
@@ -222,7 +222,7 @@ def plot_GITT_result(df,
 
             fig_GITT.add_trace(go.Scatter(
                 x=df_state['SOC'],
-                y=df_state[f'D_method{method}'],
+                y=df_state[column],
                 mode='lines+markers',
                 line=dict(color=colorscale[int(i / nb_cycle * (len(colorscale) - 1))][1]),
                 hovertext = f'Cycle: {cycle}<br>'
@@ -230,10 +230,11 @@ def plot_GITT_result(df,
                 name=f'Cycle {cycle}, State {state}',
                 ))
     fig_GITT.update_layout(
-        title='Diffusion Coefficient numerical results'
-        f'File : <b>{file_name}</b><br>',
+        title='Diffusion Coefficient numerical results<br>'
+        f'File : <b>{file_name}</b>',
         xaxis_title="SOC (%)",
-        yaxis_title=f"Diffusion Coefficient (m²/s) - Method {method}",
+        # yaxis_title=f"Diffusion Coefficient (m²/s) - {column}",
+        yaxis_title=column,
         )
     
     if save:

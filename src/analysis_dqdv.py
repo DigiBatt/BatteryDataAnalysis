@@ -4,7 +4,8 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks, peak_widths
-
+import sys
+print(sys.path)
 
 def calculate_dqdv_for_one_cycle(df, smoothing=True, sigma=None):
     '''
