@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import pyarrow.parquet as pq
 from rapidfuzz import process
+import numpy as np
 
 COLUMN_NAME_MAPPING = {
     'SysTime': ['TestTime', 'Time', 'Time/Sec', 'Time [datetime]', 'SysTime', 'DPt Time', 'TestTime [h]', 't', 'DPtTime'],
@@ -12,45 +13,53 @@ COLUMN_NAME_MAPPING = {
     'State': ['State', 'Charge', 'C/D', 'Charge/Discharge'],
     # 'discharging': ['discharging', 'discharge', 'D'],
 }
+import plotly.express as px
+def preprocessing_files(file_path, column_names=None, cycle=None, debug_func=None):
+    '''
+    Preprocessing of the file
+    It reads the file and applies the preprocessing functions of renaming and calculating useful columns for future analysis
 
-def preprocessing_files(file_path, column_names=None, cycle=None):
+    Parameters:
+    - file_path: Path to the file to process
+    - column_names (optional): Dictionary containing the column names to be used for the analysis
+    - cycle (optional): List of cycle numbers to process
+    - debug_func (optional): Function to apply to the DataFrame before preprocessing to remove specific bugs of one dataset
+
+    Returns:
+    - df: DataFrame containing the preprocessed data
+    '''
     print('File : '+str(os.path.basename(file_path)))
     file_ext = os.path.splitext(file_path)[1].lower()
 
     if file_ext == '.parquet':
         table = pq.read_table(file_path)
         df = table.to_pandas()
-        print('parquet')
     elif file_ext == '.csv':
         df = pd.read_csv(file_path)
-        print('csv')
     else:
         raise ValueError(f"Format de fichier non supporté : {file_ext}")
-
-    # print(df[['I', 'U']])
-    print(df)
+    
+    if debug_func is not None:
+        df = debug_func(df)
 
     print('Length : '+str(len(df)))
     if column_names:
         df = df.rename(columns=column_names)
-    
-    print('Columns : '+str(df.columns))
-    print(df[['Current', 'Voltage']])
 
     df = standardize_column_names(df, column_names)
+
+    for col in df.columns:
+        if col not in ['Voltage', 'Current', 'SysTime']:
+            df = df.drop(col, axis=1)
+
+    df = df.groupby(["SysTime"]).median().reset_index()
 
     if cycle:
         df = df[df['Cycle'].isin(cycle)]
 
     df = df.dropna(subset=['Voltage', 'Current'])
-
-    df = charging_state(df)
-    print('Charging_state')
-
     df = process_useful_columns(df)
-    print('process_useful_columns')
-
-    df = df.dropna(subset=['Voltage', 'Current', 'Capacity'])
+    df = df.dropna(subset=['Capacity'])
 
     return df
 
@@ -108,6 +117,7 @@ def standardize_column_names(df, column_names):
 def process_useful_columns(df_input):
     """
     Process useful columns in the DataFrame
+    The processed columns are: TestTime, Capacity, Cycle, State and SOC
     
     Parameters:
     - df: The input DataFrame with standardized column names
@@ -117,7 +127,7 @@ def process_useful_columns(df_input):
     """
     df = df_input.copy()
 
-    # SysTime to TestTime (seconds)
+    ## SysTime to TestTime (seconds)
     if 'SysTime' in df.columns:
         if df['SysTime'].dtype == 'float64':
             df["TestTime"] = df["SysTime"] - df["SysTime"].min()
@@ -128,75 +138,48 @@ def process_useful_columns(df_input):
             df["TestTime"] = (df["SysTime"] - reference_time).dt.total_seconds()
             df = df.dropna(subset=['TestTime'])
 
-    if df['Cycle'].dtype != 'int64':
-        df['Cycle'] = 1
+    ## Current (A)
+    if df['Current'].max() > 15:
+        df['Current'] = df['Current'] / 1000
     
-    # Capacity (Ah)
-    df = df.drop('Capacity', axis=1)
-    if 'Capacity' not in df.columns or len(df.dropna(subset=['Capacity'])) == 0:
-        for charging_state in ['C', 'D']:
-            for cycle in df['Cycle'].unique():
-                print('Cycle '+str(cycle/max(df['Cycle'].unique())))
+    ## Capacity (Ah)
+    df['Capacity'] = (df['Current'] * df['TestTime'].diff()).cumsum() / 3600
+    df['Capacity'] = df['Capacity'] - df['Capacity'].min()
 
-                df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == charging_state)]
-                df.loc[(df['Cycle'] == cycle) & (df['State'] == charging_state), 
-                    'Capacity'] = abs((df_cycle['Current'] * df_cycle['TestTime'].diff()).cumsum()) / 3600
-        df['Capacity'] = df['Capacity'].ffill()
-        print('Capacity')
+    ## Cycle and State
+    # Rounding of the current near 0
+    df_nocurrent = df[abs(df['Current']) <= abs(df['Current'].max()) * 0.05]
+    nocurrent_max = abs(df_nocurrent['Current']).max()
 
-    # SOC (%)
-    df["SOC"] = df.groupby(["Cycle", "State"])["Capacity"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
-    df.loc[df['State'] == 'D', "SOC"] = 1 - df.loc[df['State'] == 'D', "SOC"]
-    print('SOC')
+    df['normcurrent'] = df['Current']
+    if nocurrent_max != 0 and not np.isnan(nocurrent_max):
+        df['normcurrent'] = round(df['normcurrent'] / (nocurrent_max * 2.1)) * (nocurrent_max * 2.1)
+
+    # Local charging/discharging state and counting each state
+    df.loc[df['normcurrent'] < 0, 'Local_state'] = 'D'
+    df.loc[df['normcurrent'] > 0, 'Local_state'] = 'C'
+    df['Local_state'] = df['Local_state'].ffill().infer_objects(copy=False)
+
+    df['Group'] = (df['Local_state'] != df['Local_state'].shift()).cumsum()
+    df_group = df.groupby('Group')['TestTime'].agg(lambda x: x.max() - x.min() + 1)
+
+    # Global charging/discharging state according to the duration of each local state
+    for group in df['Group'].unique():
+        if df_group.loc[group] > 200:
+            df.loc[df['Group'] == group, 'State'] = ('C' if df[df['Group'] == group]['normcurrent'].mean() >= 0 
+                                                     else 'D')
+    df['State'] = df['State'].ffill()
+
+    # First cycle starts with the first discharge and ends with the end of the next charge
+    fist_discharge_time = df[df['State'] == 'D']['TestTime'].min()
+    df_discharge = df[df['TestTime'] > fist_discharge_time]
+
+    df['Cycle'] = 0
+    df.loc[df['TestTime'] > fist_discharge_time, 'Cycle'] = (((df_discharge['State'] != df_discharge['State'].shift()
+                                                               ).cumsum() + 1) // 2
+                                                               ).astype(int)
+
+    ## State of charge for each cycle
+    df["SOC"] = df.groupby(["Cycle"])["Capacity"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
 
     return df
-
-
-def charging_state(df):
-    """
-    Standardizes the charging state column based on the current sign and voltage trend, or try fuzzy matching.
-    
-    Parameters:
-    - df (DataFrame): The input DataFrame with standardized column names.
-    
-    Returns:
-    - DataFrame: DataFrame with standardized charging state column.
-    """
-    # Fuzzy matching to identify the charging state names
-    if 'State' in df.columns:
-            known_names = {
-                'charging': ['C', 'charge', 'charging'],
-                'discharging': ['D', 'discharge', 'discharging']
-            }
-            states = df['State'].unique()
-            charge_match = process.extractOne(states, known_names['charging'], score_cutoff=50)
-            discharge_match = process.extractOne(states, known_names['discharging'], score_cutoff=50)
-        
-            if charge_match:
-                df.loc[df['State'] == charge_match[0], 'State'] = 'C'
-            if discharge_match:
-                df.loc[df['State'] == discharge_match[0], 'State'] = 'D'
-            return df
-    
-    # In case a discharging column contains 0 and 1 values
-    if 'discharging' in df.columns and df['discharging'].isin([0, 1]).all():
-        df.loc[df['discharging'] == 1, 'State'] = 'D'
-        df.loc[df['discharging'] != 1, 'State'] = 'C'
-
-        return df
-            
-    # Link the current sign to the charging state
-    if df['Current'].min() * df['Current'].max() < 0:
-        if df[df['Current'] < 0]['Voltage'].diff().mean() < 0:
-            df.loc[df['Current'] < 0, 'State'] = 'D'
-            df.loc[df['Current'] > 0, 'State'] = 'C'
-        else:
-            df.loc[df['Current'] < 0, 'State'] = 'C'
-            df.loc[df['Current'] > 0, 'State'] = 'D'
-            df['Current'] = -df['Current']
-            
-        df['State'] = df['State'].ffill()
-        return df
-
-    print('Could not identify charging state')
-    return False

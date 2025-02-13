@@ -1,26 +1,26 @@
 import pandas as pd
 import numpy as np
 
-def pulse_number(df_input):
+def pulse_number_GITT(df_input):
     # A pulse starts the time just before the pulse and ends the time just before the next pulse at the end of the relaxation time
     df = df_input.copy()
+    # df['Current_rounded'] = round(df['Current'], 1)
+    df['Current_rounded'] = df['Current']
 
-    df['is_transition'] = (df['Current'] != 0).astype(int).diff().fillna(0).gt(0).cumsum()
-    df['Pulse'] = df['is_transition'].where(df['Current'] != 0).ffill().fillna(0).astype(int).shift(-1)
-    df['Relaxation'] = (df['Current'] == 0).astype(int)
-    
-    df.drop(columns=['is_transition'], inplace=True)
+    df['Pulse'] = (df['Current_rounded'] != 0).astype(int).diff().fillna(0).gt(0).cumsum().ffill().shift(-1)
+    df['Relaxation'] = (df['Current_rounded'] == 0).astype(int)
 
-    df_nested = {pulse: sub_df for pulse, sub_df in df.groupby('Pulse')}
+    df = df.drop(columns=['Current_rounded']).dropna(subset=['Pulse'])
+    df_nested = {int(pulse): df[df['Pulse'] == pulse] for pulse in df['Pulse'].unique()}
 
-    return df
+    return df_nested
 
 
 def ohmic_resistance(df_input, pulse_current):
     df_pulse = df_input.copy()
 
     # Given that the drop start at 95% of the mean pulse current
-    time_end = df_pulse[abs(df_pulse['Current'] * 1e-3) >= 0.95 * pulse_current]['TestTime'].min()
+    time_end = df_pulse[abs(df_pulse['Current']) >= 0.95 * pulse_current]['TestTime'].min()
 
     E1 = df_pulse['Voltage'].iloc[0]
     E2 = df_pulse.loc[df_pulse['TestTime'] >= time_end, 'Voltage'].iloc[0]
@@ -61,14 +61,10 @@ def diffusion_coefficient(delta_Es, delta_Et, tau):
     return D
 
 
-def global_calculation(df):
+def global_calculation_GITT(df_nested):
     df_total = pd.DataFrame()
-    for pulse in df['Pulse'].unique():
-        print('Pulse: '+str(pulse))
-        df_pulse = df[df['Pulse'] == pulse].copy()
-
-        pulse_current = abs(df_pulse[df_pulse['Relaxation'] == 0]['Current']).mean() * 1e-3
-        start_time = df_pulse[df_pulse['Relaxation'] == 1]['TestTime'].min()
+    for pulse, df_pulse in df_nested.items():
+        pulse_current = abs(df_pulse[df_pulse['Relaxation'] == 0]['Current']).mean()
 
         if len(df_pulse[df_pulse['Relaxation'] == 0]) >= 2 and len(df_pulse[df_pulse['Relaxation'] == 1]) >= 2:
 
@@ -81,9 +77,9 @@ def global_calculation(df):
 
             df_coefficient = pd.DataFrame({'Pulse': pulse,
                             'Cycle': df_pulse['Cycle'].iloc[0],
-                            'TestTime': start_time,
-                            'SOC': df_pulse[df_pulse['TestTime'] == start_time]['SOC'].mean(),
-                            'Voltage': df_pulse[df_pulse['TestTime'] == start_time]['Voltage'].mean(),
+                            'TestTime': df_pulse['TestTime'].iloc[0],
+                            'SOC': df_pulse['SOC'].iloc[0],
+                            'Voltage': df_pulse['Voltage'].iloc[0],
                             'Diffusion Coefficient': D,
                             'Resistance': resistance,
                             'delta_Es': delta_Es,
@@ -93,5 +89,4 @@ def global_calculation(df):
                             index=['Pulse'])
 
             df_total = pd.concat([df_total, df_coefficient])
-
     return df_total

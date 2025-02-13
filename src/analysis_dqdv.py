@@ -4,8 +4,6 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks, peak_widths
-import sys
-print(sys.path)
 
 def calculate_dqdv_for_one_cycle(df, smoothing=True, sigma=None):
     '''
@@ -125,14 +123,14 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
         for cycle in df['Cycle'].unique():
             df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
 
-            if len(df_cycle) > 1:
+            if len(df_cycle) > 1 and cycle != 0:
                 df_smoothed, sigma = calculate_dqdv_for_one_cycle(df_cycle, 
                                                                   smoothing=smoothing, 
                                                                   sigma=sigma)
                 df_smoothed = df_smoothed.assign(Cycle=cycle, State=charging_state)
 
                 df_dqdv = pd.concat([df_dqdv, df_smoothed])
-            else:
+            elif cycle != 0:
                 print('No data for cycle '+str(cycle)+', '+str(charging_state))
 
     if len(df_dqdv) > 0:
