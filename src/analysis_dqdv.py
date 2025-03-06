@@ -1,4 +1,3 @@
-import time
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
@@ -115,12 +114,12 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
     - Dict containing the DataFrame with the dQ/dV curve and its performance metrics
     '''
     df_dqdv = pd.DataFrame()
-    start_time = time.time()
 
     for charging_state in ['D', 'C']:
         sigma=None
         # Loop for charge and discharge cycles with the parameters computed at the first cycle
         for cycle in df['Cycle'].unique():
+            # print(cycle)
             df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
 
             if len(df_cycle) > 1 and cycle != 0:
@@ -133,14 +132,11 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
             elif cycle != 0:
                 print('No data for cycle '+str(cycle)+', '+str(charging_state))
 
-    if len(df_dqdv) > 0:
+    if len(df_dqdv) > 3:
         volt_step = len(df['Cycle'].unique()) * (df_dqdv['smoothed_voltage'].max() - df_dqdv['smoothed_voltage'].min()) / 50000
 
         df_dqdv = remove_low_dqdv_values(df_dqdv, 0.025)
         df_dqdv = create_linspace_voltage(df_dqdv, volt_step)  # 1e-3
-
-        end_time = time.time()
-        print('Calculation Time per cycle : '+str((end_time-start_time) / (2*len(df['Cycle'].unique()))))
 
         return df_dqdv
     
@@ -173,22 +169,23 @@ def create_linspace_voltage(df, voltage_step):
                           & (df['State'] == charging_state)
                           ].sort_values(by='smoothed_voltage')
             
-            df_linspace_cycle = pd.DataFrame({
-                'smoothed_voltage': linspace_voltage,
-                'Cycle': cycle,
-                'State': charging_state
-            })
+            if len(df_cycle) > 3:
+                df_linspace_cycle = pd.DataFrame({
+                    'smoothed_voltage': linspace_voltage,
+                    'Cycle': cycle,
+                    'State': charging_state
+                })
 
-            for var in ['smoothed_dqdv', 'smoothed_capacity']:
-                f = interp1d(df_cycle['smoothed_voltage'], 
-                             df_cycle[var], 
-                             kind='linear', 
-                             bounds_error=False, 
-                             fill_value=(df_cycle[var].iloc[0], 
-                                         df_cycle[var].iloc[-1]))
-                df_linspace_cycle[var] = f(linspace_voltage)
+                for var in ['smoothed_dqdv', 'smoothed_capacity']:
+                    f = interp1d(df_cycle['smoothed_voltage'], 
+                                df_cycle[var], 
+                                kind='linear', 
+                                bounds_error=False, 
+                                fill_value=(df_cycle[var].iloc[0], 
+                                            df_cycle[var].iloc[-1]))
+                    df_linspace_cycle[var] = f(linspace_voltage)
 
-            df_linspace = pd.concat([df_linspace, df_linspace_cycle])
+                df_linspace = pd.concat([df_linspace, df_linspace_cycle])
 
     return df_linspace
 
