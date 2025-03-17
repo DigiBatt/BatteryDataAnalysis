@@ -15,7 +15,8 @@ def process_dqdv(df,
                  heatmap=False, 
                  pocv=True, 
                  save=False, 
-                 smoothing=True):
+                 smoothing=True,
+                 png=False):
     """
     Process the dQ/dV data for a given file in parquet format
     Plot the dQ/dV curves and the dQ/dV heatmap for every cycles
@@ -36,26 +37,26 @@ def process_dqdv(df,
 
     df_dqdv = calculate_dqdv_for_all_cycle(df, smoothing=smoothing)
 
-    fig = plot_test_over_time(df, file_path)
-    fig.show()
+    fig = plot_test_over_time(df, file_path, png=png)
+    # fig.show()
 
     if curve and df_dqdv is not False:
-        fig_dqdv = plot_DQDV_result(df_dqdv, file_path, save)
-        fig_dqdv.show()
+        fig_dqdv = plot_DQDV_result(df_dqdv, file_path, save, png=png)
+        # fig_dqdv.show()
 
     if heatmap and df_dqdv is not False:
-        heatmap_dqdv = plot_dqdv_heatmap(df_dqdv, file_path, save)
-        heatmap_dqdv.show()
+        heatmap_dqdv = plot_dqdv_heatmap(df_dqdv, file_path, save, png=png)
+        # heatmap_dqdv.show()
 
     if pocv and df_dqdv is not False:
-        fig_pocv = plot_pocv(df, file_path, save)
-        fig_pocv.show()
+        fig_pocv = plot_pocv(df, file_path, save, png=png)
+        # fig_pocv.show()
 
-    print('dQ/dV Time : '+str(time.time() - start_time))
+    print('dQ/dV Time : '+str(int(time.time() - start_time))+' s')
     return df_dqdv
 
 
-def process_GITT(df, file_path):
+def process_GITT(df, file_path, png):
     """
     Process the GITT data for a given file in parquet format
     Plot the GITT Voltage curve and the diffusion coefficient over SOC for every cycles
@@ -72,26 +73,26 @@ def process_GITT(df, file_path):
     results_df = global_calculation_GITT(df_nested)
     print(results_df)
 
-    fig = plot_test_over_time(df_nested, file_path, test='GITT', pulse=True)
-    fig.show()
+    fig = plot_test_over_time(df_nested, file_path, test='GITT', pulse=True, png=png)
+    # fig.show()
 
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient')
-    fig_GITT.show()
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', png=png)
+    # fig_GITT.show()
 
-    fig_GITT = plot_GITT_result(results_df, file_path, column='R_1s')
-    fig_GITT.show()
-    fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s')
-    fig_GITT.show()
-    fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s')
-    fig_GITT.show()
-    fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s')
-    fig_GITT.show()
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', png=png)
+    # fig_GITT.show()
+    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s')
+    # fig_GITT.show()
+    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s')
+    # fig_GITT.show()
+    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s')
+    # fig_GITT.show()
 
-    print('GITT Time : '+str(time.time() - start_time))
+    print('GITT Time : '+str(int(time.time() - start_time))+' s')
     return df_nested
 
 
-def process_ICI(df, file_path):
+def process_ICI(df, file_path, png):
     """
     Process the ICI data for a given file in parquet format
     Plot the ICI Voltage curve and the diffusion coefficient over SOC for every cycles
@@ -108,20 +109,20 @@ def process_ICI(df, file_path):
     results_df = global_calculation_ICI(df_nested)
     print(results_df)
 
-    fig = plot_test_over_time(df_nested, file_path, test='ICI', pulse=True)
-    fig.show()
+    fig = plot_test_over_time(df_nested, file_path, test='ICI', pulse=True, png=png)
+    # fig.show()
 
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient')
-    fig_GITT.show()
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', png=png)
+    # fig_GITT.show()
 
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance')
-    fig_GITT.show()
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', png=png)
+    # fig_GITT.show()
 
-    print('ICI Time : '+str(time.time() - start_time))
+    print('ICI Time : '+str(int(time.time() - start_time))+' s')
     return df_nested
 
 
-def process_HPPC(df, file_path):
+def process_HPPC(df, file_path, png):
     """
     Process the HPPC data for a given file in parquet format
     Plot the HPPC Voltage curve and the diffusion coefficient over SOC for every cycles
@@ -138,16 +139,16 @@ def process_HPPC(df, file_path):
     results_df = global_calculation_HPPC(df_nested)
     print(results_df)
 
-    fig = plot_test_over_time(df_nested, file_path, test='HPPC', pulse=True)
-    fig.show()
+    fig = plot_test_over_time(df_nested, file_path, test='HPPC', pulse=True, png=png)
+    # fig.show()
 
-    fig_HPPC = plot_HPPC_result(results_df, file_path, column='R')
-    fig_HPPC.show()
+    fig_HPPC = plot_HPPC_result(results_df, file_path, column='R', png=png)
+    # fig_HPPC.show()
 
-    fig_HPPC = plot_HPPC_result(results_df, file_path, column='P')
-    fig_HPPC.show()
+    fig_HPPC = plot_HPPC_result(results_df, file_path, column='P', png=png)
+    # fig_HPPC.show()
 
-    print('HPPC Time : '+str(time.time() - start_time))
+    print('HPPC Time : '+str(int(time.time() - start_time))+' s')
     return df_nested
 
 def find_test(df_input):
@@ -159,14 +160,27 @@ def find_test(df_input):
         for state in ['D', 'C']:
             df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == state)].copy()
 
-            if len(df_cycle) > 5 and cycle > 0:
+            if len(df_cycle) > 5:
 
                 discharge_pulse = (df_cycle['normcurrent'] < 0).diff().sum()
+                df_cycle['discharge_pulse'] = (df_cycle['normcurrent'] < 0).diff().cumsum()
                 charge_pulse = (df_cycle['normcurrent'] > 0).diff().sum()
+                df_cycle['charge_pulse'] = (df_cycle['normcurrent'] > 0).diff().cumsum()
 
+                # Remove pulses that last less than 10 data points (noise)
+                for pulse in df_cycle['discharge_pulse'].unique():
+                    if len(df_cycle[df_cycle['discharge_pulse'] == pulse]) < 10:
+                        discharge_pulse -= 1
+
+                for pulse in df_cycle['charge_pulse'].unique():
+                    if len(df_cycle[df_cycle['charge_pulse'] == pulse]) < 10:
+                        charge_pulse -= 1
+
+                # if charge and discharge pulse, it is HPPC
                 if discharge_pulse > 5 and charge_pulse > 5:
                     df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'Test'] = 'HPPC'
 
+                # if charge or discharge pulse, it is either GITT or ICI
                 elif (discharge_pulse > 5 or charge_pulse > 5):
                     df_cycle['Pulse'] = (df_cycle['normcurrent'] != 0).diff().gt(0).cumsum().ffill()
                     relaxation_time = 0
@@ -189,14 +203,15 @@ def find_test(df_input):
 
     df['Test'] = df['Test'].replace('NA', np.nan)
 
-    print('Find Test Time : '+str(time.time() - start_time))
+    print('Find Test Time : '+str(int(time.time() - start_time))+' s')
     return df
 
 
 def process_file(file_path, 
                  column_names=None, 
                  cycle=None,
-                 debug_func=None):
+                 debug_func=None,
+                 png=False):
     """
     Process the data for a given file in parquet format.
     It detects the type of tests applied to the battery and process the data for each type of tests
@@ -221,20 +236,20 @@ def process_file(file_path,
 
     for test in df['Test'].unique():
         if not pd.isna(test) and len(df[df['Test'] == test]) > 5:
-            print(test)
+            print('Test :', test, '; Length :', len(df[df['Test'] == test]))
             
             df_test = df[df['Test'] == test]
 
             if test == 'GITT':
-                df_test = process_GITT(df_test, file_path)
+                df_test = process_GITT(df_test, file_path, png=png)
             elif test == 'ICI':
-                df_test = process_GITT(df_test, file_path)
+                df_test = process_ICI(df_test, file_path, png=png)
             elif test == 'HPPC':
-                df_test = process_HPPC(df_test, file_path)
+                df_test = process_HPPC(df_test, file_path, png=png) 
             elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
                 df_test = df_test[df_test['C_Rate'] > 0.2]
-                df_test = process_dqdv(df_test, file_path, pocv=True)
+                df_test = process_dqdv(df_test, file_path, pocv=True, png=png)
 
-    print('Total Time : '+str(time.time() - start_time))
+    print('Total Time : '+str(int(time.time() - start_time))+' s')
     return df
 
