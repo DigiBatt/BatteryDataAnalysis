@@ -46,7 +46,7 @@ def preprocessing_files(file_path, column_names=None, cycle=None, debug_func=Non
         df = df[df['Cycle'].isin(cycle)]
 
     end_time = time.time()
-    print('Preprocessing Time : '+str(end_time - start_time))
+    print('Preprocessing Time : '+str(int(end_time - start_time))+' s')
     return df
     
 
@@ -136,7 +136,7 @@ def process_useful_columns(df_input):
     # df['normcurrent'] = whittaker_smoother.smooth(df['Current'].values)
 
 
-    df_nocurrent = df[abs(df['Current']) <= abs(df['Current']).max() * 0.05]
+    df_nocurrent = df[abs(df['Current']) <= abs(df['Current']).max() * 0.04]
     nocurrent_max = abs(df_nocurrent['Current']).max()
     
     if nocurrent_max != 0 and not np.isnan(nocurrent_max):
@@ -161,49 +161,50 @@ def process_useful_columns(df_input):
     df['State'] = df['State'].ffill()
 
     # First cycle starts with the first discharge and ends with the end of the next charge
-    df_stated = df[df['State'].isin(['C', 'D'])]
-    df.loc[df['State'].isin(['C', 'D']), 'Cycle'] = (((df_stated['State'] != df_stated['State'].shift()
-                                                               ).cumsum() + 1) // 2
-                                                               ).astype(int)
-    
-    # fist_discharge_time = df[df['State'] == 'D']['TestTime'].min()
-    # first_charge_time = df[df['State'] == 'C']['TestTime'].min()
-    # df_discharge = df[df['TestTime'] > min(fist_discharge_time, first_charge_time)]
-    # df['Cycle'] = 0
-    # df.loc[df['TestTime'] > fist_discharge_time, 'Cycle'] = (((df_discharge['State'] != df_discharge['State'].shift()
+    # df_stated = df[df['State'].isin(['C', 'D'])]
+    # df.loc[df['State'].isin(['C', 'D']), 'Cycle'] = (((df_stated['State'] != df_stated['State'].shift()
     #                                                            ).cumsum() + 1) // 2
     #                                                            ).astype(int)
+    
+    fist_discharge_time = df[df['State'] == 'D']['TestTime'].min()
+    df_discharge = df[df['TestTime'] > fist_discharge_time]
+    df['Cycle'] = 0
+    df.loc[df['TestTime'] > fist_discharge_time, 'Cycle'] = (((df_discharge['State'] != df_discharge['State'].shift()
+                                                               ).cumsum() + 1) // 2
+                                                               ).astype(int)
 
     ## Capacity (Ah)
     df['Capacity'] = df.groupby('Cycle').apply(lambda group: (group['Current'] * group['TestTime'].diff()).cumsum() / 3600).reset_index(level=0, drop=True)
-    df['Capacity'] = df.groupby('Cycle')['Capacity'].transform(lambda x: x - x.min()).ffill()
-    # df.dropna(subset=['Capacity'])
+    df['Capacity'] = df.groupby('Cycle')['Capacity'].transform(lambda x: x - x.min()).ffill().shift(-1)
+    df.dropna(subset=['Capacity'])
 
     ## State of charge
     df["SOC"] = df.groupby(["Cycle", 'State'])["Capacity"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
 
     ## C-Rate
     for cycle in df['Cycle'].unique():
-        for state in df['State'].unique():
-            c_rate = 0
-            df_state = df[(df['Cycle'] == cycle) & (df['State'] == state)].copy()
-            df_state['Pulse'] = (df_state['normcurrent'] != 0).diff().gt(0).cumsum().ffill()
-            for pulse in df_state['Pulse'].unique():
-                df_pulse = df_state[(df_state['Pulse'] == pulse) & (df_state['normcurrent'] != 0)]
-                if not df_pulse.empty:
-                    c_rate += (df_pulse['TestTime'].max() - df_pulse['TestTime'].min()) / 3600
-            if c_rate >= 1:
-                c_rate = int(c_rate)
-            elif c_rate < 1 and c_rate > 0:
-                c_rate = 1 / int(1 / c_rate)
-            else:
-                c_rate = np.nan
-            df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'C_Rate'] = c_rate
+        # for state in df['State'].unique():
+        c_rate = 0
+        # df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == state)].copy()
+        df_cycle = df[(df['Cycle'] == cycle)].copy()
+        df_cycle['Pulse'] = (df_cycle['normcurrent'] != 0).diff().gt(0).cumsum().ffill()
+        for pulse in df_cycle['Pulse'].unique():
+            df_pulse = df_cycle[(df_cycle['Pulse'] == pulse) & (df_cycle['normcurrent'] != 0)]
+            if not df_pulse.empty:
+                c_rate += (df_pulse['TestTime'].max() - df_pulse['TestTime'].min()) / 3600
+        if c_rate >= 1:
+            c_rate = int(c_rate)
+        elif c_rate < 1 and c_rate > 0:
+            c_rate = 1 / int(1 / c_rate)
+        else:
+            c_rate = np.nan
+        # df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'C_Rate'] = c_rate
+        df.loc[(df['Cycle'] == cycle), 'C_Rate'] = c_rate
 
     ## 
-    for col in ['State', 'Cycle']:
-        df[col] = df[col].shift(-1)
-        df = df.dropna(subset=[col])
+    # for col in ['State', 'Cycle']:
+    #     df[col] = df[col].shift(-1)
+    #     df = df.dropna(subset=[col])
 
     df['Cycle'] = df['Cycle'].astype(int)
 

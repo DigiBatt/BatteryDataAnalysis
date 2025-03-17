@@ -4,7 +4,7 @@
    :hidden:
 
    Get Started <pages/getstarted>
-   Examples <pages/examples>
+   Examples <examples/example_docs>
    User Guide <userguide/index>
    About <pages/about>
    FAQ <pages/faq>
@@ -12,7 +12,9 @@
 Battery Data Analysis Toolkit
 ================================
 
-Some text...
+Welcome to BatteryDataAnalysis, a Python package dedicated to the extraction and the analysis of battery data. 
+It provides tools for processing, analyzing, and visualizing battery data, helping researchers and engineers to understand battery performance and behavior.
+   
 
 Check out these resources to get started!
 -----------------------------------------
@@ -35,15 +37,15 @@ Check out these resources to get started!
 .. grid::
 
     .. grid-item-card::
-        :link: pages/examples.html
+        :link: examples/example_docs.html
 
         :octicon:`pencil;1em;sd-text-info`  Examples
         ^^^^^^^^
-        Here are some examples that demonstrate basic usage of the ontology
+        Here are some examples that demonstrate basic usage of the toolkit
 
     .. grid-item-card::
         :link: pages/contribute.html
 
         :octicon:`thumbsup;1em;sd-text-info`  Contribute
         ^^^^^^^^^^
-        Help us develop the ontology by following these guidelines
+        Help us develop the package by following these guidelines

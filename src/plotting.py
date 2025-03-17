@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from cmcrameri import cm
 import matplotlib.pyplot as plt
+from IPython.display import Image, display
 
 cycle_colorscale = [[0.0, "#A3D8FF"], [0.5, "#3399FF"], [1.0, "#003366"]]
 
@@ -42,7 +43,8 @@ def plot_test_over_time(df_input,
                         file_path,
                         test='CCCV',
                         pulse=False,
-                        save=False):
+                        save=False,
+                        png=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -95,16 +97,23 @@ def plot_test_over_time(df_input,
     if save:
         file_path = os.path.join(folder_path, f'{test}_{file_name}.html')
         fig.write_html(file_path)
+    if png:
+        png_image = fig.to_image(format="png", width=2000, height=800)
+        display(Image(data=png_image))
+    else:
+        fig.show()
+
     return fig
 
 
 def plot_DQDV_result(df,
                      file_path,
-                     save=False):
+                     save=False,
+                     png=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
-    fig_DQDV = go.Figure()
+    fig_dqdv = go.Figure()
     nb_cycle = df['Cycle'].max()
     for state in ['C', 'D']:
         for i, cycle in enumerate(df['Cycle'].unique()):
@@ -112,7 +121,7 @@ def plot_DQDV_result(df,
             if len(df_state) > 0:
 
                 hex_color = get_colorscale(state, nb_cycle, i)
-                fig_DQDV.add_trace(go.Scatter(
+                fig_dqdv.add_trace(go.Scatter(
                     x=df_state['smoothed_voltage'],
                     y=df_state['smoothed_dqdv'],
                     mode='lines+markers',
@@ -126,7 +135,7 @@ def plot_DQDV_result(df,
                     name=f'Cycle {cycle}, State {state}',
                     ))
     
-    fig_DQDV.update_layout(
+    fig_dqdv.update_layout(
         title={
             'text': f'<b>dQ/dV curves over cycles</b><br>',
             # f'<i>File : {file_name}</i>',
@@ -142,15 +151,21 @@ def plot_DQDV_result(df,
         )
     
     if save:
-        file_path_DQDV = os.path.join(folder_path, f'DQDV_{file_name}.html')
-        fig_DQDV.write_html(file_path_DQDV)
+        file_path_dqdv = os.path.join(folder_path, f'DQDV_{file_name}.html')
+        fig_dqdv.write_html(file_path_dqdv)
+    if png:
+        png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
+        display(Image(data=png_image))
+    else:
+        fig_dqdv.show()
     
-    return fig_DQDV
+    return fig_dqdv
 
 
 def plot_dqdv_heatmap(df,
                       file_path,
-                      save=False):
+                      save=False,
+                      png=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -209,13 +224,19 @@ def plot_dqdv_heatmap(df,
     if save:
         file_path_heatmap = os.path.join(folder_path, f'dqdv_heatmap_{file_name}.html')
         fig_dqdv.write_html(file_path_heatmap)
+    if png:
+        png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
+        display(Image(data=png_image))
+    else:
+        fig_dqdv.show()
 
     return fig_dqdv
 
 
 def plot_pocv(df,
               file_path,
-              save=False):
+              save=False,
+              png=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -226,7 +247,9 @@ def plot_pocv(df,
 
     for state in ['C', 'D']:
         for i, cycle in enumerate(df['Cycle'].unique()):
-            df_state = df[(df['State'] == state) & (df['Cycle'] == cycle)].sort_values(by='Voltage')
+            df_state = df[(df['State'] == state) 
+                          & (df['Cycle'] == cycle) 
+                          & (df['normcurrent'] != 0)].sort_values(by='Voltage')
             if len(df_state) > 0:
 
                 hex_color = get_colorscale(state, nb_cycle, i)
@@ -239,7 +262,8 @@ def plot_pocv(df,
                         size=marker_size,),
                     line=dict(width=3),
                     hovertext = f'Cycle: {cycle}<br>'
-                    +'State: ' + df_state['State'].astype(str),
+                    +'State: ' + df_state['State'].astype(str)
+                    +'C_Rate: ' + df_state['C_Rate'].astype(str),
                     name=f'Cycle {cycle}, State {state}',
                     ))
     
@@ -261,6 +285,11 @@ def plot_pocv(df,
     if save:
         file_path_pocv = os.path.join(folder_path, f'pocv_{file_name}.html')
         fig_pocv.write_html(file_path_pocv)
+    if png:
+        png_image = fig_pocv.to_image(format="png", width=2000, height=800)
+        display(Image(data=png_image))
+    else:
+        fig_pocv.show()
 
     return fig_pocv
 
@@ -274,7 +303,8 @@ def reduce_points_number(df_input, n_cycle):
 def plot_GITT_result(df,
                      file_path,
                      column='Diffusion Coefficient',
-                     save=False):
+                     save=False,
+                     png=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -316,6 +346,11 @@ def plot_GITT_result(df,
     if save:
         file_path_GITT = os.path.join(folder_path, f'GITT_{file_name}.html')
         fig_GITT.write_html(file_path_GITT)
+    if png:
+        png_image = fig_GITT.to_image(format="png", width=2000, height=800)
+        display(Image(data=png_image))
+    else:
+        fig_GITT.show()
     
     return fig_GITT
 
@@ -323,7 +358,8 @@ def plot_GITT_result(df,
 def plot_HPPC_result(df,
                      file_path,
                      column='R',
-                     save=False):
+                     save=False,
+                     png=False):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -366,5 +402,10 @@ def plot_HPPC_result(df,
     if save:
         file_path_HPPC = os.path.join(folder_path, f'HPPC_{file_name}.html')
         fig_HPPC.write_html(file_path_HPPC)
+    if png:
+        png_image = fig_HPPC.to_image(format="png", width=2000, height=800)
+        display(Image(data=png_image))
+    else:
+        fig_HPPC.show()
     
     return fig_HPPC
