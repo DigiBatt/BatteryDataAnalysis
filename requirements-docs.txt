@@ -4,6 +4,8 @@ pydata-sphinx-theme==0.16.1
 sphinx-design
 nbsphinx
 sphinx-copybutton
+sphinx-autoapi
+pypandoc
 
 # Syntax highlighting and accessibility
 Pygments==2.17.2
