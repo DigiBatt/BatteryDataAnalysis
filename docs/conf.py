@@ -35,11 +35,40 @@ autodoc_member_order = 'bysource'
 extensions = ['sphinx.ext.intersphinx',
               'sphinx.ext.viewcode',
               'sphinx.ext.autosectionlabel',
+              'sphinx.ext.autodoc',
               'sphinx_design',
               'nbsphinx',
               'sphinx_copybutton',
+              'autoapi.extension',
+              'sphinx.ext.napoleon'
               ]
 
+templates_path = ["_templates"]
+autoapi_template_dir = "_templates/autoapi"
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# -- Options for autoapi -------------------------------------------------------
+autoapi_type = "python"
+autoapi_dirs = ['../src']
+autoapi_ignore = ['*run.py']
+autoapi_root = "api"
+# autoapi_member_order = "groupwise"
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "private-members",
+    "special-members",
+    "show-inheritance",
+    "show-module-summary",
+    "imported-members",
+    "show-signatures",
+]
+autodoc_typehints = "description"
+autodoc_typehints_format = "short"
+napoleon_numpy_docstring = True
+
+
+# -- Options for notebook -------------------------------------------------------
 autosectionlabel_prefix_document = True
 
 nbsphinx_allow_errors = True
@@ -68,12 +97,12 @@ def setup(app):
     app.connect("builder-inited", ensure_pandoc_installed)
 
 
-
+# ---------------------------------------------------------
 global_substitutions = {
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+###################templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -110,7 +139,7 @@ author = 'SINTEF AS'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+############ exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -354,3 +383,19 @@ add_module_names = False
 # MatAttributeDocumenter.add_directive_header = _add_directive_header
 
 
+# # Spécifier le type de code source à documenter (Python)
+# autoapi_type = 'python'
+
+# # Chemin vers le code source à documenter
+# autoapi_dirs = ['../src']  # Ajustez selon votre structure
+
+# # Optionnel : Spécifier où générer la documentation
+# autoapi_root = 'autoapi'
+
+# # Optionnel : Ignorer certains fichiers ou dossiers
+# # autoapi_ignore = ['*tests*', '*setup.py']
+
+# # Optionnel : Activer l'inclusion des imports
+# autoapi_options = [
+#     'members', 'undoc-members', 'private-members', 'special-members', 'imported-members'
+# ]

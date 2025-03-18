@@ -4,19 +4,73 @@ from scipy.interpolate import interp1d
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks, peak_widths
 
+
+def calculate_dqdv_for_all_cycle(df, smoothing=True):
+    """Calculate dQ/dV for a DataFrame for all the cycles with the columns 'Cycle', 'Voltage', 'Capacity' and 'Current'.
+    
+    Parameters
+    -------
+    df : pandas.DataFrame
+        DataFrame containing the data
+    smoothing : bool, optional
+        Whether to smooth the dQ/dV curve
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the DataFrame with the dQ/dV curve and its performance metrics
+    """
+    df_dqdv = pd.DataFrame()
+
+    for charging_state in ['D', 'C']:
+        sigma=None
+        # Loop for charge and discharge cycles with the parameters computed at the first cycle
+        for cycle in df['Cycle'].unique():
+            # print(cycle)
+            df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
+
+            if len(df_cycle) > 1 and cycle != 0:
+                df_smoothed, sigma = calculate_dqdv_for_one_cycle(df_cycle, 
+                                                                  smoothing=smoothing, 
+                                                                  sigma=sigma)
+                df_smoothed = df_smoothed.assign(Cycle=cycle, State=charging_state)
+
+                df_dqdv = pd.concat([df_dqdv, df_smoothed])
+            elif cycle != 0:
+                print('No data for cycle '+str(cycle)+', '+str(charging_state))
+
+    if len(df_dqdv) > 3:
+        volt_step = len(df['Cycle'].unique()) * (df_dqdv['smoothed_voltage'].max() - df_dqdv['smoothed_voltage'].min()) / 50000
+
+        df_dqdv = remove_low_dqdv_values(df_dqdv, 0.025)
+        df_dqdv = create_linspace_voltage(df_dqdv, volt_step)  # 1e-3
+
+        return df_dqdv
+    
+    else:
+        print('Not possible to calculate dQ/dV')
+        return False
+    
+    
 def calculate_dqdv_for_one_cycle(df, smoothing=True, sigma=None):
-    '''
-    Calculate dQ/dV for a specific cycle from a dataframe with columns 'Voltage', 'Capacity'.
+    """Calculate dQ/dV for a specific cycle from a dataframe using columns 'Voltage' and 'Capacity'.
 
-    Parameters:
-    - df: DataFrame containing the data of a specific cycle with the columns 'Voltage' and 'Capacity'
-    - smoothing: boolean, whether to smooth the dQ/dV curve
-    - sigma: float, standard deviation of the Gaussian filter to use for smoothing to control manually the smoothing
+    Parameters
+    -------
+    df : pandas.DataFrame
+        DataFrame containing the data of a specific cycle with the columns 'Voltage' and 'Capacity'
+    smoothing : boolean, optional
+        Whether to smooth the dQ/dV curve
+    sigma: float, optional
+        Standard deviation of the Gaussian filter to use for smoothing to control manually the smoothing
 
-    Returns:
-    - df_smoothed: DataFrame containing the smoothed dQ/dV curve
-    - parameters: dict containing the parameters used for the smoothing
-    '''
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the smoothed dQ/dV curve
+    float
+        Sigma parameter used for the smoothing
+    """
     df_smoothed = df.sort_values(by='Voltage'
                                  ).drop_duplicates(subset='Voltage'
                                                    ).reset_index(drop=True
@@ -97,65 +151,23 @@ def calculate_dqdv_for_one_cycle(df, smoothing=True, sigma=None):
     else:
         # Raw dQ/dV curve
         return df_smoothed, sigma
-    
-
-
-def calculate_dqdv_for_all_cycle(df, smoothing=True):
-    '''
-    Calculate dQ/dV for a DataFrame with columns 'Cycle', 'Voltage', 'Capacity', 'Current'.
-    
-    Parameters:
-    - df: DataFrame containing the data
-    - smoothing_function: function to use for smoothing
-    - name: name of the smoothing function (if not provided, the name of the function will be used)
-    - **kwargs: arguments to pass to the smoothing function
-
-    Returns:
-    - Dict containing the DataFrame with the dQ/dV curve and its performance metrics
-    '''
-    df_dqdv = pd.DataFrame()
-
-    for charging_state in ['D', 'C']:
-        sigma=None
-        # Loop for charge and discharge cycles with the parameters computed at the first cycle
-        for cycle in df['Cycle'].unique():
-            # print(cycle)
-            df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
-
-            if len(df_cycle) > 1 and cycle != 0:
-                df_smoothed, sigma = calculate_dqdv_for_one_cycle(df_cycle, 
-                                                                  smoothing=smoothing, 
-                                                                  sigma=sigma)
-                df_smoothed = df_smoothed.assign(Cycle=cycle, State=charging_state)
-
-                df_dqdv = pd.concat([df_dqdv, df_smoothed])
-            elif cycle != 0:
-                print('No data for cycle '+str(cycle)+', '+str(charging_state))
-
-    if len(df_dqdv) > 3:
-        volt_step = len(df['Cycle'].unique()) * (df_dqdv['smoothed_voltage'].max() - df_dqdv['smoothed_voltage'].min()) / 50000
-
-        df_dqdv = remove_low_dqdv_values(df_dqdv, 0.025)
-        df_dqdv = create_linspace_voltage(df_dqdv, volt_step)  # 1e-3
-
-        return df_dqdv
-    
-    else:
-        print('Not possible to calculate dQ/dV')
-        return False
 
 
 def create_linspace_voltage(df, voltage_step):
-    '''
-    Create a linspace voltage vector for the dataFrame to have a consistent voltage vector for each cycle
+    """Create a linspace voltage vector for the dataFrame to have a consistent voltage vector for each cycle
     
-    Parameters:
-    - df: DataFrame containing the data
-    - voltage_step: step size for the linspace voltage vector
+    Parameters
+    -------
+    df : pandas.DataFrame
+        DataFrame containing the data
+    voltage_step : float
+        Step size for the linspace voltage vector
 
-    Returns:
-    - DataFrame containing the linspace voltage data
-    '''
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the linspace voltage data
+    """
     # Boundaries of the linspace vector
     min_voltage, max_voltage = df['smoothed_voltage'].min(), df['smoothed_voltage'].max()
     linspace_voltage = np.linspace(min_voltage, max_voltage, int((max_voltage - min_voltage) / voltage_step))
@@ -192,16 +204,20 @@ def create_linspace_voltage(df, voltage_step):
 
 
 def remove_low_dqdv_values(df_input, thresh):
-    '''
-    Remove the low dqdv values from the DataFrame 
+    """Remove the low dqdv values from the DataFrame 
     
-    Parameters:
-    - df_input: DataFrame containing the data
-    - thresh: threshold for the dqdv values
+    Parameters
+    -------
+    df_input : pandas.DataFrame
+        DataFrame containing the data
+    thresh : float
+        Threshold for the low dqdv values
 
-    Returns:
-    - DataFrame without the low dqdv values
-    '''
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame without the low dqdv values
+    """
     df = df_input.copy()
 
     for charging_state in df['State'].unique():

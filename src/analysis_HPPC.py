@@ -2,6 +2,22 @@ import pandas as pd
 import numpy as np
 
 def pulse_number_HPPC(df_input):
+    """Select pulses for HPPC data
+
+    For every cycles, gives a pulse number for every HPPC pattern (containing a charge and discharge pulse followed by a relaxation time).
+    Then it gives this number for the last point before the first pulse until the last point before the end of the relaxation
+    Finally, it creates a nested Dataframe structuring the HPPC data for each pattern (called 'Pulse' to be consistent with GITT and ICI processing)
+    
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the HPPC data to process
+
+    Returns
+    -------
+    Dict
+        Dict containing the nested DataFrames as values and their pulse number as keys
+    """
     # A pulse starts the time just before the pulse and ends the time just before the next pulse at the end of the relaxation time
     df = df_input.copy()
 
@@ -64,7 +80,75 @@ def pulse_number_HPPC(df_input):
     return df_nested
 
 
-def internal_resistance(df_pulse, df_charge, df_discharge):
+def global_calculation_HPPC(df_nested):
+    """Calculates the HPPC parameters
+
+    Given a nested DataFrame containing the HPPC data, this function calculates the HPPC parameters for each pulse
+    
+    Parameters
+    ----------
+    df_nested : Dict
+        Dict containing the nested DataFrames corresponding to each pulse
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the HPPC parameters structured by pulse number
+    """
+    df_total = pd.DataFrame()
+
+    df = pd.concat(df_nested.values())
+    Vmin = df['Voltage'].min()
+    Vmax = df['Voltage'].max()
+
+    for pulse, df_pulse in df_nested.items():
+        # print('Pulse: '+str(pulse))
+
+        df_charge = df_pulse[df_pulse['charge_pulse'] == 1]
+        df_discharge = df_pulse[df_pulse['discharge_pulse'] == 1]
+
+        OCV = df_pulse['Voltage'].iloc[0]
+
+        if len(df_charge) >= 2 and len(df_discharge) >= 2 and pulse != 0:
+
+            R_discharge, R_charge = calculate_internal_resistance(df_pulse, df_charge, df_discharge)
+            P_discharge, P_charge = calculate_pulse_power_capability(Vmin, Vmax, OCV, R_discharge, R_charge)
+
+            df_coefficient = pd.DataFrame({'Pulse': pulse,
+                                           'Cycle': df_pulse['Cycle'].iloc[0],
+                                           'TestTime': df_pulse['TestTime'].iloc[0],
+                                           'SOC': df_pulse['SOC'].iloc[0],
+                                           'Voltage': OCV,
+                                           'State': df_pulse['State'].iloc[0],
+                                           'R_charge': R_charge,
+                                           'R_discharge': R_discharge,
+                                           'P_charge': P_charge,
+                                           'P_discharge': P_discharge,
+                                           },
+                                           index=['Pulse'])
+
+            df_total = pd.concat([df_total, df_coefficient])
+    return df_total
+
+
+
+def calculate_internal_resistance(df_pulse, df_charge, df_discharge):
+    """Calculates internal resistance for HPPC test
+    
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data corresponding to one HPPC pattern
+    df_charge : pandas.DataFrame
+        DataFrame containing the data corresponding to the charge pulse
+    df_discharge : pandas.DataFrame
+        DataFrame containing the data corresponding to the discharge pulse
+
+    Returns
+    -------
+    tuple(float, float)
+        Charge and discharge internal resistance
+    """
     df = df_pulse.copy()
 
     discharge_start = df_discharge['TestTime'].iloc[0]
@@ -91,44 +175,28 @@ def internal_resistance(df_pulse, df_charge, df_discharge):
     return R_discharge, R_charge
 
 
-def pulse_power_capability(Vmin, Vmax, OCV, R_discharge, R_charge):
+def calculate_pulse_power_capability(Vmin, Vmax, OCV, R_discharge, R_charge):
+    """Calculates internal resistance for HPPC test
+    
+    Parameters
+    ----------
+    Vmin : float
+        Minimum voltage of the pulse
+    Vmax : float
+        Maximum voltage of the pulse
+    OCV : float
+        Open circuit voltage
+    R_discharge : float
+        Discharge internal resistance
+    R_charge : float
+        Charge internal resistance
+
+    Returns
+    -------
+    tuple(float, float)
+        Charge and discharge Pulse Power
+    """
     P_discharge = Vmin * (OCV - Vmin) / R_discharge 
     P_charge = Vmax * (Vmax - OCV) / R_charge 
     return P_discharge, P_charge
 
-
-def global_calculation_HPPC(df_nested):
-    df_total = pd.DataFrame()
-
-    df = pd.concat(df_nested.values())
-    Vmin = df['Voltage'].min()
-    Vmax = df['Voltage'].max()
-
-    for pulse, df_pulse in df_nested.items():
-        # print('Pulse: '+str(pulse))
-
-        df_charge = df_pulse[df_pulse['charge_pulse'] == 1]
-        df_discharge = df_pulse[df_pulse['discharge_pulse'] == 1]
-
-        OCV = df_pulse['Voltage'].iloc[0]
-
-        if len(df_charge) >= 2 and len(df_discharge) >= 2 and pulse != 0:
-
-            R_discharge, R_charge = internal_resistance(df_pulse, df_charge, df_discharge)
-            P_discharge, P_charge = pulse_power_capability(Vmin, Vmax, OCV, R_discharge, R_charge)
-
-            df_coefficient = pd.DataFrame({'Pulse': pulse,
-                                           'Cycle': df_pulse['Cycle'].iloc[0],
-                                           'TestTime': df_pulse['TestTime'].iloc[0],
-                                           'SOC': df_pulse['SOC'].iloc[0],
-                                           'Voltage': OCV,
-                                           'State': df_pulse['State'].iloc[0],
-                                           'R_charge': R_charge,
-                                           'R_discharge': R_discharge,
-                                           'P_charge': P_charge,
-                                           'P_discharge': P_discharge,
-                                           },
-                                           index=['Pulse'])
-
-            df_total = pd.concat([df_total, df_coefficient])
-    return df_total

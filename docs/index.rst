@@ -5,7 +5,7 @@
 
    Get Started <pages/getstarted>
    Examples <examples/example_docs>
-   User Guide <userguide/index>
+   API Reference <api/index>
    About <pages/about>
    FAQ <pages/faq>
 
@@ -28,11 +28,11 @@ Check out these resources to get started!
         Let's go! Here is some information to help you get started
 
     .. grid-item-card::
-        :link: pages/electrochemistry.html
+        :link: api/index.html
 
-        :octicon:`book;1em;sd-text-info`  Class Index
+        :octicon:`book;1em;sd-text-info`  API Reference
         ^^^^^^^^^^^
-        A complete list of terms and some human-readable annotations
+        Get detailed information on functions and modules that allow you to use BatteryDataAnalysis in your own projects.
 
 .. grid::
 
