@@ -6,152 +6,88 @@ from analysis_ICI import pulse_number_ICI, global_calculation_ICI
 from plotting import *
 
 import time
-import os
 import pandas as pd
 
-def process_dqdv(df, 
-                 file_path,
-                 curve=True, 
-                 heatmap=False, 
-                 pocv=True, 
-                 save=False, 
-                 smoothing=True,
+def process_file(file_path, 
+                 column_names=None, 
+                 cycle=None,
+                 debug_func=None,
+                 save=False,
                  png=False):
-    """
-    Process the dQ/dV data for a given file in parquet format
-    Plot the dQ/dV curves and the dQ/dV heatmap for every cycles
-    
-    Parameters:
-    - df: DataFrame containing the CCCV data to process
-    - file_path: Path to the file to process
-    - curve (optional): Boolean indicating whether to plot the dQ/dV curves
-    - heatmap (optional): Boolean indicating whether to plot the dQ/dV heatmap
-    - pocv (optional): Boolean indicating whether to plot the Voltage over Capacity curves
-    - save (optional): Boolean indicating whether to save the plots
-    - smoothing (optional): Boolean indicating whether to apply smoothing to the dQ/dV curves
+    """Processes the data for a given file in .parquet or .csv format
 
-    Returns:
-    - df_dqdv: DataFrame containing the dQ/dV data
-    """
-    start_time = time.time()
+    It detects the type of tests applied to the battery and process the data for each type of tests
 
-    df_dqdv = calculate_dqdv_for_all_cycle(df, smoothing=smoothing)
+    Parameters
+    ----------
+    file_path : str
+        Path to the file to process
+    column_names : Dict, optional
+        Dictionary containing the column names to be used for the analysis
+        The useful columns are: Voltage, Current, and SysTime (system time or test time) that should be values and the real column names should be their keys
+    cycle : int, optional
+        List of cycle numbers to process
+    debug_func : function, optional
+        Function to be called during the preprocessing of the data to debug a file
+    save : bool, optional
+        Whether to save the result plots in format .html (default is False).
+    png : bool, optional
+        Whether to save the result plots as png files (default is False).
 
-    fig = plot_test_over_time(df, file_path, png=png)
-    # fig.show()
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the processed data
 
-    if curve and df_dqdv is not False:
-        fig_dqdv = plot_DQDV_result(df_dqdv, file_path, save, png=png)
-        # fig_dqdv.show()
-
-    if heatmap and df_dqdv is not False:
-        heatmap_dqdv = plot_dqdv_heatmap(df_dqdv, file_path, save, png=png)
-        # heatmap_dqdv.show()
-
-    if pocv and df_dqdv is not False:
-        fig_pocv = plot_pocv(df, file_path, save, png=png)
-        # fig_pocv.show()
-
-    print('dQ/dV Time : '+str(int(time.time() - start_time))+' s')
-    return df_dqdv
-
-
-def process_GITT(df, file_path, png):
-    """
-    Process the GITT data for a given file in parquet format
-    Plot the GITT Voltage curve and the diffusion coefficient over SOC for every cycles
-
-    Parameters:
-    - file_path: Path to the file to process
-
-    Returns:
-    - df: DataFrame containing the GITT data
+    Examples
+    --------
+    >>> column_names={'time_column': 'SysTime', 'voltage_column': 'Voltage', 'current_column': 'Current'}
+    >>> df = process_file(file_path, column_names=column_names)
     """
     start_time = time.time()
 
-    df_nested = pulse_number_GITT(df)
-    results_df = global_calculation_GITT(df_nested)
-    print(results_df)
+    df = preprocessing_files(file_path, column_names, cycle, debug_func)
+    df = find_test(df)
 
-    fig = plot_test_over_time(df_nested, file_path, test='GITT', pulse=True, png=png)
-    # fig.show()
+    for test in df['Test'].unique():
+        if not pd.isna(test) and len(df[df['Test'] == test]) > 5:
+            print('Test :', test, '; Length :', len(df[df['Test'] == test]))
+            
+            df_test = df[df['Test'] == test]
 
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', png=png)
-    # fig_GITT.show()
+            if test == 'GITT':
+                df_test = process_GITT(df_test, file_path, save=save, png=png)
 
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', png=png)
-    # fig_GITT.show()
-    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s')
-    # fig_GITT.show()
-    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s')
-    # fig_GITT.show()
-    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s')
-    # fig_GITT.show()
+            elif test == 'ICI':
+                df_test = process_ICI(df_test, file_path, save=save, png=png)
 
-    print('GITT Time : '+str(int(time.time() - start_time))+' s')
-    return df_nested
+            elif test == 'HPPC':
+                df_test = process_HPPC(df_test, file_path, save=save, png=png) 
 
+            elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
+                df_test = df_test[df_test['C_Rate'] > 0.2]
+                df_test = process_dqdv(df_test, file_path, save=save, png=png)
 
-def process_ICI(df, file_path, png):
-    """
-    Process the ICI data for a given file in parquet format
-    Plot the ICI Voltage curve and the diffusion coefficient over SOC for every cycles
+    print('Total Time : '+str(int(time.time() - start_time))+' s')
+    return df
 
-    Parameters:
-    - file_path: Path to the file to process
-
-    Returns:
-    - df: DataFrame containing the ICI data
-    """
-    start_time = time.time()
-
-    df_nested = pulse_number_ICI(df)
-    results_df = global_calculation_ICI(df_nested)
-    print(results_df)
-
-    fig = plot_test_over_time(df_nested, file_path, test='ICI', pulse=True, png=png)
-    # fig.show()
-
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', png=png)
-    # fig_GITT.show()
-
-    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', png=png)
-    # fig_GITT.show()
-
-    print('ICI Time : '+str(int(time.time() - start_time))+' s')
-    return df_nested
-
-
-def process_HPPC(df, file_path, png):
-    """
-    Process the HPPC data for a given file in parquet format
-    Plot the HPPC Voltage curve and the diffusion coefficient over SOC for every cycles
-
-    Parameters:
-    - file_path: Path to the file to process
-
-    Returns:
-    - df: DataFrame containing the HPPC data
-    """
-    start_time = time.time()
-
-    df_nested = pulse_number_HPPC(df)
-    results_df = global_calculation_HPPC(df_nested)
-    print(results_df)
-
-    fig = plot_test_over_time(df_nested, file_path, test='HPPC', pulse=True, png=png)
-    # fig.show()
-
-    fig_HPPC = plot_HPPC_result(results_df, file_path, column='R', png=png)
-    # fig_HPPC.show()
-
-    fig_HPPC = plot_HPPC_result(results_df, file_path, column='P', png=png)
-    # fig_HPPC.show()
-
-    print('HPPC Time : '+str(int(time.time() - start_time))+' s')
-    return df_nested
 
 def find_test(df_input):
+    """Finds the test applied to the battery
+
+    Analyses the test type for each cycle according to its current pulses number
+    It needs the preprocessed data with in particular the columns Cycle, State and normcurrent
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the preprocessed data
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the HPPC data
+    """
     start_time = time.time()
     df = df_input.copy()
 
@@ -161,6 +97,17 @@ def find_test(df_input):
             df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == state)].copy()
 
             if len(df_cycle) > 5:
+
+                # for pulse in ['discharge_pulse', 'charge_pulse']:
+                #     pulse_number_list = []
+                #     pulse_sign = 1 if pulse == 'discharge_pulse' else -1
+                #     pulse_count = (pulse_sign * df_cycle['normcurrent'] < 0).diff().sum()
+                #     df_cycle[pulse] = (pulse_sign * df_cycle['normcurrent'] < 0).diff().cumsum()
+
+                #     for pulse_number in df_cycle[pulse].unique():
+                #         if len(df_cycle[df_cycle[pulse] == pulse_number]) < 10:
+                #             pulse_count -= 1
+                #     pulse_number_list.append(pulse_count)
 
                 discharge_pulse = (df_cycle['normcurrent'] < 0).diff().sum()
                 df_cycle['discharge_pulse'] = (df_cycle['normcurrent'] < 0).diff().cumsum()
@@ -207,49 +154,175 @@ def find_test(df_input):
     return df
 
 
-def process_file(file_path, 
-                 column_names=None, 
-                 cycle=None,
-                 debug_func=None,
+def process_dqdv(df, 
+                 file_path,
+                 heatmap=False,
+                 save=False,
                  png=False):
-    """
-    Process the data for a given file in parquet format.
-    It detects the type of tests applied to the battery and process the data for each type of tests
+    """Process the CCCV data for a given preprocessed file
 
-    Parameters:
-    - file_path: Path to the file to process
-    - column_names (optional): Dictionary containing the column names to be used for the analysis
-    The useful columns are: Voltage, Current, and SysTime (system time or test time)
-    The dictionnary should look like: 
-        column_names = {'time_column': 'SysTime',
-                        'voltage_column': 'Voltage',
-                        'current_column': 'Current',}
-    - cycle (optional): List of cycle numbers to process
+    Plots the dQ/dV curves and the dQ/dV heatmap for every cycles
+    
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the CCCV data to process.
+    file_path : str
+        Path to the file to process.
+    heatmap : bool, optional
+        Whether to plot the dQ/dV heatmap (default is False).
+    save : bool, optional
+        Whether to save the plots in format .html(default is False).
+    png : bool, optional
+        Whether to save the plots as png files (default is False).
 
-    Returns:
-    - df: DataFrame containing the processed data
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the dQ/dV data.
     """
     start_time = time.time()
 
-    df = preprocessing_files(file_path, column_names, cycle, debug_func)
-    df = find_test(df)
+    df_dqdv = calculate_dqdv_for_all_cycle(df)
 
-    for test in df['Test'].unique():
-        if not pd.isna(test) and len(df[df['Test'] == test]) > 5:
-            print('Test :', test, '; Length :', len(df[df['Test'] == test]))
-            
-            df_test = df[df['Test'] == test]
+    if df_dqdv is not False:
+        fig = plot_test_over_time(df, file_path, save=save, png=png)
+        fig.show()
 
-            if test == 'GITT':
-                df_test = process_GITT(df_test, file_path, png=png)
-            elif test == 'ICI':
-                df_test = process_ICI(df_test, file_path, png=png)
-            elif test == 'HPPC':
-                df_test = process_HPPC(df_test, file_path, png=png) 
-            elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
-                df_test = df_test[df_test['C_Rate'] > 0.2]
-                df_test = process_dqdv(df_test, file_path, pocv=True, png=png)
+        fig_dqdv = plot_DQDV_result(df_dqdv, file_path, save=save, png=png)
+        fig_dqdv.show()
 
-    print('Total Time : '+str(int(time.time() - start_time))+' s')
-    return df
+        fig_pocv = plot_pocv(df, file_path, save=save, png=png)
+        fig_pocv.show()
 
+        if heatmap:
+            heatmap_dqdv = plot_dqdv_heatmap(df_dqdv, file_path, save=save, png=png)
+            heatmap_dqdv.show()
+    
+    print('dQ/dV Time : '+str(int(time.time() - start_time))+' s')
+    return df_dqdv
+
+
+def process_GITT(df, 
+                 file_path, 
+                 save=False,
+                 png=False):
+    """Processes the GITT data for a given preprocessed file
+
+    Plots the GITT Voltage curve and the diffusion coefficient over SOC for every cycles
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the GITT data to process
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots in format .html(default is False).
+    png : bool, optional
+        Whether to save the plots as png files (default is False).
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the GITT data
+    """
+    start_time = time.time()
+
+    df_nested = pulse_number_GITT(df)
+    results_df = global_calculation_GITT(df_nested)
+    print(results_df)
+
+    fig = plot_test_over_time(df_nested, file_path, test='GITT', pulse=True, save=save, png=png)
+    fig.show()
+
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', save=save, png=png)
+    fig_GITT.show()
+
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', save=save, png=png)
+    # fig_GITT.show()
+    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s', save=save)
+    # fig_GITT.show()
+    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s', save=save)
+    # fig_GITT.show()
+    # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s', save=save)
+    # fig_GITT.show()
+
+    print('GITT Time : '+str(int(time.time() - start_time))+' s')
+    return df_nested
+
+
+def process_ICI(df, 
+                file_path, 
+                save=False,
+                png=False):
+    """Processes the ICI data for a given preprocessed file
+
+    Plots the ICI Voltage curve and the diffusion coefficient over SOC for every cycles
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the ICI data to process
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots in format .html(default is False).
+    png : bool, optional
+        Whether to save the plots as png files (default is False).
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the ICI data
+    """
+    start_time = time.time()
+
+    df_nested = pulse_number_ICI(df)
+    results_df = global_calculation_ICI(df_nested)
+    print(results_df)
+
+    fig = plot_test_over_time(df_nested, file_path, test='ICI', pulse=True, save=save, png=png)
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', save=save, png=png)
+    fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', save=save, png=png)
+
+    print('ICI Time : '+str(int(time.time() - start_time))+' s')
+    return df_nested
+
+
+def process_HPPC(df, 
+                 file_path, 
+                 save=False,
+                 png=False):
+    """Processes the HPPC data for a given preprocessed file
+
+    Plots the HPPC Voltage curve and the diffusion coefficient over SOC for every cycles
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the HPPC data to process
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots in format .html(default is False).
+    png : bool, optional
+        Whether to save the plots as png files (default is False).
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the HPPC data
+    """
+    start_time = time.time()
+
+    df_nested = pulse_number_HPPC(df)
+    results_df = global_calculation_HPPC(df_nested)
+    print(results_df)
+
+    fig = plot_test_over_time(df_nested, file_path, test='HPPC', pulse=True, save=save, png=png)
+    fig_HPPC = plot_HPPC_result(results_df, file_path, column='R', save=save, png=png)
+    fig_HPPC = plot_HPPC_result(results_df, file_path, column='P', save=save, png=png)
+
+    print('HPPC Time : '+str(int(time.time() - start_time))+' s')
+    return df_nested

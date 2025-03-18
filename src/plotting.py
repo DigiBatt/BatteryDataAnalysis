@@ -7,9 +7,21 @@ from cmcrameri import cm
 import matplotlib.pyplot as plt
 from IPython.display import Image, display
 
-cycle_colorscale = [[0.0, "#A3D8FF"], [0.5, "#3399FF"], [1.0, "#003366"]]
-
 def matplotlib_to_plotly_colorscale(colormap, n_colors=256):
+    """Converts a matplotlib colormap to a Plotly colorscale
+
+    Parameters
+    ----------
+    colormap : matplotlib colormap
+        Colormap to convert
+    n_colors : int, optional
+        Number of colors in the colormap (default is 256).
+
+    Returns
+    -------
+    List
+        Plotly colorscale
+    """
     colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]
     # colorscale = [(0, f"rgb({int(colors[0][0] * 255)}, {int(colors[0][1] * 255)}, {int(colors[0][2] * 255)})")]
     # colorscale += [
@@ -19,9 +31,44 @@ def matplotlib_to_plotly_colorscale(colormap, n_colors=256):
     colorscale = [(i / (n_colors - 1), f"rgb({int(c[0] * 255)}, {int(c[1] * 255)}, {int(c[2] * 255)})")for i, c in enumerate(colors)]
     return colorscale
 
-batlow_colorscale = matplotlib_to_plotly_colorscale(cm.lipari)
+
+def reduce_points_number(df_input, n_cycle):
+    """Reduces the number of points in the dataframe
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    n_cycle : int
+        Number of points that we want to keep for a single cycle
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with reduced number of points
+    """
+    N = max(int(len(df_input) / (n_cycle * len(df_input['Cycle'].unique()))), 1)
+
+    return df_input.iloc[::N]
 
 def get_colorscale(state, nb_cycle, i):
+    """Returns the Plotly colorscale for a given state
+
+    Parameters
+    ----------
+    state : ['C', 'D']
+        State of the cell charging 
+    nb_cycle : int
+        Total number of cycles
+    i : int
+        Cycle number
+
+    Returns
+    -------
+    Plotly colorscale
+        Plotly colorscale corresponding to the charging state
+        
+    """
     colorscale_dict = {'C': 'Blues', 'D': 'Reds'}
     colorscale = colorscale_dict[state]
     color_value = (i+1) / (nb_cycle + 2)
@@ -38,13 +85,34 @@ tickfont_size = 35 # [18,35]
 marker_size = 10
 line_width = 3
 
-
 def plot_test_over_time(df_input,
                         file_path,
                         test='CCCV',
                         pulse=False,
                         save=False,
                         png=False):
+    """Plots the Current, Voltage and Capacity over TestTime for a given test type
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    file_path : str
+        Path to the file to process
+    test : str, optional
+        Type of test to plot (default is 'CCCV')
+    pulse : bool, optional
+        Whether the test type contains current pulses (default is False)
+    save : bool, optional
+        Whether to save the plots as .html files(default is False).
+    png : bool, optional
+        Whether to display the plots as .png files (default is False).
+
+    Returns
+    -------
+    go.Figure
+        Plot as a Plotly figure
+    """
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -110,6 +178,26 @@ def plot_DQDV_result(df,
                      file_path,
                      save=False,
                      png=False):
+    """Plots the dQ/dV curve 
+
+    It gives the derivative of Capacity over Voltage
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots as .html files(default is False).
+    png : bool, optional
+        Whether to display the plots as .png files (default is False).
+
+    Returns
+    -------
+    go.Figure
+        Plot as a Plotly figure
+    """
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -166,8 +254,30 @@ def plot_dqdv_heatmap(df,
                       file_path,
                       save=False,
                       png=False):
+    """Plots the dQ/dV heatmap 
+
+    It gives a plot with Cycles over Voltage colored by the magnitude of dQ/dV
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots as .html files(default is False).
+    png : bool, optional
+        Whether to display the plots as .png files (default is False).
+
+    Returns
+    -------
+    go.Figure
+        Plot as a Plotly figure
+    """
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
+
+    batlow_colorscale = matplotlib_to_plotly_colorscale(cm.lipari)
 
     fig_dqdv = make_subplots(
         rows=2, cols=1,
@@ -237,6 +347,26 @@ def plot_pocv(df,
               file_path,
               save=False,
               png=False):
+    """Plots the POCV curve 
+
+    It gives a plot of the Capacity over Voltage
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots as .html files(default is False).
+    png : bool, optional
+        Whether to display the plots as .png files (default is False).
+
+    Returns
+    -------
+    go.Figure
+        Plot as a Plotly figure
+    """
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -294,17 +424,33 @@ def plot_pocv(df,
     return fig_pocv
 
 
-def reduce_points_number(df_input, n_cycle):
-    N = max(int(len(df_input) / (n_cycle * len(df_input['Cycle'].unique()))), 1)
-
-    return df_input.iloc[::N]
-
-
 def plot_GITT_result(df,
                      file_path,
                      column='Diffusion Coefficient',
                      save=False,
                      png=False):
+    """Plots the GITT results curve
+
+    It gives a plot of the selected parameter over SOC
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    file_path : str
+        Path to the file to process
+    column : str, optional
+        Column to plot (default is 'Diffusion Coefficient').
+    save : bool, optional
+        Whether to save the plots as .html files(default is False).
+    png : bool, optional
+        Whether to display the plots as .png files (default is False).
+
+    Returns
+    -------
+    go.Figure
+        Plot as a Plotly figure
+    """
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 
@@ -360,6 +506,26 @@ def plot_HPPC_result(df,
                      column='R',
                      save=False,
                      png=False):
+    """Plots the HPPC results curve
+
+    It gives a plot of the selected parameter over SOC for both charge and dicharge pulses
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the data to plot
+    file_path : str
+        Path to the file to process
+    save : bool, optional
+        Whether to save the plots as .html files(default is False).
+    png : bool, optional
+        Whether to display the plots as .png files (default is False).
+
+    Returns
+    -------
+    go.Figure
+        Plot as a Plotly figure
+    """
     file_name = os.path.splitext(os.path.basename(file_path))[0]
     folder_path = os.path.dirname(file_path)
 

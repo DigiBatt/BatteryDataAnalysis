@@ -9,19 +9,27 @@ from whittaker_eilers import WhittakerSmoother
 import plotly.express as px
 
 def preprocessing_files(file_path, column_names=None, cycle=None, debug_func=None):
-    '''
-    Preprocessing of the file
-    It reads the file and applies the preprocessing functions of renaming and calculating useful columns for future analysis
+    """Preprocessing the file to format it for future analysis
 
-    Parameters:
-    - file_path: Path to the file to process
-    - column_names (optional): Dictionary containing the column names to be used for the analysis
-    - cycle (optional): List of cycle numbers to process
-    - debug_func (optional): Function to apply to the DataFrame before preprocessing to remove specific bugs of one dataset
+    It reads the file and applies the preprocessing functions of renaming and calculating the useful columns:
+    TestTime, normcurrent, State, Cycle, Capacity, SOC and C-Rate
 
-    Returns:
-    - df: DataFrame containing the preprocessed data
-    '''
+    Parameters
+    -------
+    file_path : str
+        Path to the file to process
+    column_names : Dict, optionnal
+        Dictionary containing the column names to be used for the analysis
+    cycle : int, optionnal
+        List of cycle numbers to process
+    debug_func : function, optionnal
+        Function to apply to the DataFrame before preprocessing to remove specific bugs of one dataset
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the preprocessed data
+    """
     start_time = time.time()
 
     print('File : '+str(os.path.basename(file_path)))
@@ -51,14 +59,17 @@ def preprocessing_files(file_path, column_names=None, cycle=None, debug_func=Non
     
 
 def standardize_column_names(df_input, column_names):
-    """
-    Standardizes column names of the DataFrame using predefined mappings and fuzzy matching
+    """Standardizes column names of the DataFrame using predefined mappings and fuzzy matching
     
-    Parameters:
-    - df: The input DataFrame with raw column names
+    Parameters
+    -------
+    df : pandas.DataFrame
+        The input DataFrame with raw column names
     
-    Returns:
-    - df: DataFrame with only the three columns: Voltage, Current and SysTime
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with only the three columns: Voltage, Current and SysTime
     """
     df = df_input.copy()
 
@@ -93,15 +104,19 @@ def standardize_column_names(df_input, column_names):
 
 
 def process_useful_columns(df_input):
-    """
-    Process useful columns in the DataFrame
+    """Processes useful columns for future analysis
+
     The processed columns are: TestTime, Capacity, Cycle, State and SOC
     
-    Parameters:
-    - df: The input DataFrame with standardized column names
+    Parameters
+    -------
+    df : pandas.DataFrame
+        The input DataFrame with standardized column names
     
-    Returns:
-    - df: DataFrame with processed columns
+    Returns
+    -------
+    pandas.DataFrame 
+        DataFrame with processed columns
     """
     df = df_input.copy()
 
