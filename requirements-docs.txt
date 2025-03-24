@@ -4,6 +4,7 @@ pydata-sphinx-theme==0.16.1
 sphinx-design
 nbsphinx
 sphinx-copybutton
+sphinx-autoapi
 
 # Syntax highlighting and accessibility
 Pygments==2.17.2
@@ -31,6 +32,7 @@ Markdown==3.4.3
 
 # Pandoc for cross-format rendering (required for Sphinx + nbsphinx in some setups)
 pandoc
+pypandoc
 
 # HTTP and network utilities (for ontology tools and FOOPS badge fetching)
 requests==2.31.0

@@ -26,7 +26,6 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
         sigma=None
         # Loop for charge and discharge cycles with the parameters computed at the first cycle
         for cycle in df['Cycle'].unique():
-            # print(cycle)
             df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
 
             if len(df_cycle) > 1 and cycle != 0:
@@ -66,9 +65,9 @@ def calculate_dqdv_for_one_cycle(df, smoothing=True, sigma=None):
 
     Returns
     -------
-    pandas.DataFrame
+    df_smoothed : pandas.DataFrame
         DataFrame containing the smoothed dQ/dV curve
-    float
+    sigma : float
         Sigma parameter used for the smoothing
     """
     df_smoothed = df.sort_values(by='Voltage'
@@ -200,7 +199,6 @@ def create_linspace_voltage(df, voltage_step):
                 df_linspace = pd.concat([df_linspace, df_linspace_cycle])
 
     return df_linspace
-
 
 
 def remove_low_dqdv_values(df_input, thresh):

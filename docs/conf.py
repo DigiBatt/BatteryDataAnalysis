@@ -40,7 +40,8 @@ extensions = ['sphinx.ext.intersphinx',
               'nbsphinx',
               'sphinx_copybutton',
               'autoapi.extension',
-              'sphinx.ext.napoleon'
+              'sphinx.ext.napoleon',
+              'sphinx.ext.mathjax'
               ]
 
 templates_path = ["_templates"]
