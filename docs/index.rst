@@ -4,7 +4,7 @@
    :hidden:
 
    Get Started <pages/getstarted>
-   Examples <examples/example_docs>
+   Examples <pages/examples>
    API Reference <api/index>
    About <pages/about>
    FAQ <pages/faq>
@@ -37,7 +37,7 @@ Check out these resources to get started!
 .. grid::
 
     .. grid-item-card::
-        :link: examples/example_docs.html
+        :link: pages/examples.html
 
         :octicon:`pencil;1em;sd-text-info`  Examples
         ^^^^^^^^

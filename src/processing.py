@@ -12,6 +12,7 @@ def process_file(file_path,
                  column_names=None, 
                  cycle=None,
                  debug_func=None,
+                 my_func_list=[],
                  save=False,
                  png=False):
     """Processes the data for a given file in .parquet or .csv format
@@ -29,6 +30,8 @@ def process_file(file_path,
         List of cycle numbers to process
     debug_func : function, optional
         Function to be called during the preprocessing of the data to debug a file
+    my_func_list : list, optional
+        List of functions to add to the calculation process
     save : bool, optional
         Whether to save the result plots in format .html (default is False).
     png : bool, optional
@@ -36,19 +39,74 @@ def process_file(file_path,
 
     Returns
     -------
-    pandas.DataFrame
-        DataFrame containing the processed data
+    df : pandas.DataFrame
+        DataFrame containing the processed data.
+    result_dict : dict
+        Dictionary containing the processed results for each test type.
+        Keys are test names ('GITT', 'ICI', 'HPPC') and values are DataFrames with the respective results for each test.
 
     Examples
     --------
-    >>> column_names={'time_column': 'SysTime', 'voltage_column': 'Voltage', 'current_column': 'Current'}
-    >>> df = process_file(file_path, column_names=column_names)
+    Basic usage:
+
+    >>> df = process_file(file_path)
+    File : GITT_AG4_S_1577.parquet
+    Length : 9154638
+    Preprocessing Time : 41s
+    Find Test Time : 48s
+    Test : GITT ; Length : 9061575
+        Pulse  Cycle   TestTime       SOC       OCV    Ipulse  Diffusion Coefficient  Resistance      R_1s      R_30s      R_60s     R_180s      Tau    State
+    Pulse      0      1   46801.00  1.000000  2.484417 -0.043325           3.224942e-15   24.730671  6.169087  28.370994  30.130583  36.914223  3598.98     D
+    Pulse      1      1   53999.98  0.980011  0.575001 -0.043325           4.672011e-16    1.997885  1.474679   2.089985   2.411197   3.278645  3599.98     D
+    Pulse      2      1   61199.98  0.960011  0.379431 -0.043325           3.873728e-16    1.412661  1.106010   1.468100   1.685784   2.282023  3599.98     D
+    Pulse      3      1   68399.98  0.940010  0.272730 -0.043324           2.772498e-16    1.205467  0.979083   1.249654   1.411445   1.843224  3599.98     D
+    Pulse      4      1   75599.98  0.920010  0.216829 -0.043325           6.646707e-17    1.077636  0.915281   1.112744   1.224103   1.524546  3599.98     D
+    ...      ...    ...        ...       ...       ...       ...                    ...         ...       ...        ...        ...        ...      ...   ...
+    Pulse    133      2  962099.98  0.136391  0.087613 -0.043325           1.887492e-19    0.220889  0.143877   0.239615   0.273980   0.321392  3599.98     D
+    Pulse    134      2  969299.98  0.111716  0.087493 -0.043325           2.520212e-19    0.225816  0.147635   0.244767   0.279301   0.326996  3599.98     D
+    Pulse    135      2  976499.98  0.087041  0.087352 -0.043325           3.536782e-19    0.231572  0.152126   0.251083   0.285541   0.333647  3599.98     D
+    Pulse    136      2  983699.98  0.062366  0.087180 -0.043325           5.092976e-19    0.238380  0.157598   0.258096   0.292359   0.341250  3599.98     D
+    Pulse    137      2  990899.98  0.037691  0.086971 -0.043325           8.648767e-19    0.246495  0.163909   0.266569   0.300817   0.350488  3599.98     D
+    [138 rows x 15 columns]
+    GITT Time : 21s
+    Total Time : 115s
+
+    In addition, you can add a column_names dictionnary and a debug function if needed:
+
+    >>> column_names={'original_time_column': 'SysTime', 
+    ...               'original_voltage_column': 'Voltage', 
+    ...               'original_current_column': 'Current'}
+    >>> def my_debug_func(df):
+    ...     df = df[df['original_time_column'] < 1e6]
+    ...     return df
+    >>> df = process_file(file_path, column_names=column_names, debug_func=my_debug_func)
+    File : GITT_AG4_S_1577.parquet
+    Length : 9154638
+    Preprocessing Time : 41s
+    Find Test Time : 48s
+    Test : GITT ; Length : 9061575
+        Pulse  Cycle   TestTime       SOC       OCV    Ipulse  Diffusion Coefficient  Resistance      R_1s      R_30s      R_60s     R_180s      Tau    State
+    Pulse      0      1   46801.00  1.000000  2.484417 -0.043325           3.224942e-15   24.730671  6.169087  28.370994  30.130583  36.914223  3598.98     D
+    Pulse      1      1   53999.98  0.980011  0.575001 -0.043325           4.672011e-16    1.997885  1.474679   2.089985   2.411197   3.278645  3599.98     D
+    Pulse      2      1   61199.98  0.960011  0.379431 -0.043325           3.873728e-16    1.412661  1.106010   1.468100   1.685784   2.282023  3599.98     D
+    Pulse      3      1   68399.98  0.940010  0.272730 -0.043324           2.772498e-16    1.205467  0.979083   1.249654   1.411445   1.843224  3599.98     D
+    Pulse      4      1   75599.98  0.920010  0.216829 -0.043325           6.646707e-17    1.077636  0.915281   1.112744   1.224103   1.524546  3599.98     D
+    ...      ...    ...        ...       ...       ...       ...                    ...         ...       ...        ...        ...        ...      ...   ...
+    Pulse    133      2  962099.98  0.136391  0.087613 -0.043325           1.887492e-19    0.220889  0.143877   0.239615   0.273980   0.321392  3599.98     D
+    Pulse    134      2  969299.98  0.111716  0.087493 -0.043325           2.520212e-19    0.225816  0.147635   0.244767   0.279301   0.326996  3599.98     D
+    Pulse    135      2  976499.98  0.087041  0.087352 -0.043325           3.536782e-19    0.231572  0.152126   0.251083   0.285541   0.333647  3599.98     D
+    Pulse    136      2  983699.98  0.062366  0.087180 -0.043325           5.092976e-19    0.238380  0.157598   0.258096   0.292359   0.341250  3599.98     D
+    Pulse    137      2  990899.98  0.037691  0.086971 -0.043325           8.648767e-19    0.246495  0.163909   0.266569   0.300817   0.350488  3599.98     D
+    [138 rows x 15 columns]
+    GITT Time : 21s
+    Total Time : 115s
     """
     start_time = time.time()
 
     df = preprocessing_files(file_path, column_names, cycle, debug_func)
     df = find_test(df)
 
+    result_dict = {}
     for test in df['Test'].unique():
         if not pd.isna(test) and len(df[df['Test'] == test]) > 5:
             print('Test :', test, '; Length :', len(df[df['Test'] == test]))
@@ -56,20 +114,23 @@ def process_file(file_path,
             df_test = df[df['Test'] == test]
 
             if test == 'GITT':
-                df_test = process_GITT(df_test, file_path, save=save, png=png)
+                df_test, GITT_result_df = process_GITT(df_test, file_path, my_func_list, save=save, png=png)
+                result_dict['GITT'] = GITT_result_df
 
             elif test == 'ICI':
-                df_test = process_ICI(df_test, file_path, save=save, png=png)
+                df_test, ICI_result_df = process_ICI(df_test, file_path, my_func_list, save=save, png=png)
+                result_dict['ICI'] = ICI_result_df
 
             elif test == 'HPPC':
-                df_test = process_HPPC(df_test, file_path, save=save, png=png) 
+                df_test, HPPC_result_df = process_HPPC(df_test, file_path, my_func_list, save=save, png=png)
+                result_dict['HPPC'] = HPPC_result_df
 
             elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
                 df_test = df_test[df_test['C_Rate'] > 0.2]
                 df_test = process_dqdv(df_test, file_path, save=save, png=png)
 
-    print('Total Time : '+str(int(time.time() - start_time))+' s')
-    return df
+    print('Total Time : '+str(int(time.time() - start_time))+'s')
+    return df, result_dict
 
 
 def find_test(df_input):
@@ -78,15 +139,10 @@ def find_test(df_input):
     Analyses the test type for each cycle according to its current pulses number
     It needs the preprocessed data with in particular the columns Cycle, State and normcurrent
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame containing the preprocessed data
-
     Returns
     -------
     pandas.DataFrame
-        DataFrame containing the HPPC data
+        DataFrame containing the preprocessed data.
     """
     start_time = time.time()
     df = df_input.copy()
@@ -97,7 +153,6 @@ def find_test(df_input):
             df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == state)].copy()
 
             if len(df_cycle) > 5:
-
                 # for pulse in ['discharge_pulse', 'charge_pulse']:
                 #     pulse_number_list = []
                 #     pulse_sign = 1 if pulse == 'discharge_pulse' else -1
@@ -150,7 +205,7 @@ def find_test(df_input):
 
     df['Test'] = df['Test'].replace('NA', np.nan)
 
-    print('Find Test Time : '+str(int(time.time() - start_time))+' s')
+    print('Find Test Time : '+str(int(time.time() - start_time))+'s')
     return df
 
 
@@ -159,7 +214,7 @@ def process_dqdv(df,
                  heatmap=False,
                  save=False,
                  png=False):
-    """Process the CCCV data for a given preprocessed file
+    """Processes the CCCV data for a given preprocessed file
 
     Plots the dQ/dV curves and the dQ/dV heatmap for every cycles
     
@@ -187,24 +242,19 @@ def process_dqdv(df,
 
     if df_dqdv is not False:
         fig = plot_test_over_time(df, file_path, save=save, png=png)
-        fig.show()
-
         fig_dqdv = plot_DQDV_result(df_dqdv, file_path, save=save, png=png)
-        fig_dqdv.show()
-
         fig_pocv = plot_pocv(df, file_path, save=save, png=png)
-        fig_pocv.show()
 
         if heatmap:
             heatmap_dqdv = plot_dqdv_heatmap(df_dqdv, file_path, save=save, png=png)
-            heatmap_dqdv.show()
     
-    print('dQ/dV Time : '+str(int(time.time() - start_time))+' s')
+    print('dQ/dV Time : '+str(int(time.time() - start_time))+'s')
     return df_dqdv
 
 
 def process_GITT(df, 
-                 file_path, 
+                 file_path,
+                 my_func_list,
                  save=False,
                  png=False):
     """Processes the GITT data for a given preprocessed file
@@ -224,36 +274,31 @@ def process_GITT(df,
 
     Returns
     -------
-    pandas.DataFrame
-        DataFrame containing the GITT data
+    df_nested : dict
+        Dict containing pulses as keys and their respective DataFrames as values
+    results_df : pandas.DataFrame
+        DataFrame containing the GITT parameters structured by pulse number
     """
     start_time = time.time()
 
     df_nested = pulse_number_GITT(df)
-    results_df = global_calculation_GITT(df_nested)
+    results_df = global_calculation_GITT(df_nested, my_func_list)
     print(results_df)
 
     fig = plot_test_over_time(df_nested, file_path, test='GITT', pulse=True, save=save, png=png)
-    fig.show()
-
     fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', save=save, png=png)
-    fig_GITT.show()
-
     fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', save=save, png=png)
-    # fig_GITT.show()
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s', save=save)
-    # fig_GITT.show()
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s', save=save)
-    # fig_GITT.show()
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s', save=save)
-    # fig_GITT.show()
 
-    print('GITT Time : '+str(int(time.time() - start_time))+' s')
-    return df_nested
+    print('GITT Time : '+str(int(time.time() - start_time))+'s')
+    return df_nested, results_df
 
 
 def process_ICI(df, 
-                file_path, 
+                file_path,
+                my_func_list,
                 save=False,
                 png=False):
     """Processes the ICI data for a given preprocessed file
@@ -273,25 +318,28 @@ def process_ICI(df,
 
     Returns
     -------
-    pandas.DataFrame
-        DataFrame containing the ICI data
+    df_nested : dict
+        Dict containing pulses as keys and their respective DataFrames as values
+    results_df : pandas.DataFrame
+        DataFrame containing the ICI parameters structured by pulse number
     """
     start_time = time.time()
 
     df_nested = pulse_number_ICI(df)
-    results_df = global_calculation_ICI(df_nested)
+    results_df = global_calculation_ICI(df_nested, my_func_list)
     print(results_df)
 
     fig = plot_test_over_time(df_nested, file_path, test='ICI', pulse=True, save=save, png=png)
     fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', save=save, png=png)
     fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', save=save, png=png)
 
-    print('ICI Time : '+str(int(time.time() - start_time))+' s')
-    return df_nested
+    print('ICI Time : '+str(int(time.time() - start_time))+'s')
+    return df_nested, results_df
 
 
 def process_HPPC(df, 
-                 file_path, 
+                 file_path,
+                 my_func_list,
                  save=False,
                  png=False):
     """Processes the HPPC data for a given preprocessed file
@@ -311,18 +359,20 @@ def process_HPPC(df,
 
     Returns
     -------
-    pandas.DataFrame
-        DataFrame containing the HPPC data
+    df_nested : dict
+        Dict containing pulses as keys and their respective DataFrames as values
+    results_df : pandas.DataFrame
+        DataFrame containing the HPPC parameters structured by pulse number
     """
     start_time = time.time()
 
     df_nested = pulse_number_HPPC(df)
-    results_df = global_calculation_HPPC(df_nested)
+    results_df = global_calculation_HPPC(df_nested, my_func_list)
     print(results_df)
 
     fig = plot_test_over_time(df_nested, file_path, test='HPPC', pulse=True, save=save, png=png)
     fig_HPPC = plot_HPPC_result(results_df, file_path, column='R', save=save, png=png)
     fig_HPPC = plot_HPPC_result(results_df, file_path, column='P', save=save, png=png)
 
-    print('HPPC Time : '+str(int(time.time() - start_time))+' s')
-    return df_nested
+    print('HPPC Time : '+str(int(time.time() - start_time))+'s')
+    return df_nested, results_df

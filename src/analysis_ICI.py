@@ -1,23 +1,39 @@
 import pandas as pd
 import numpy as np
+from create_custom_functions import add_function
 from whittaker_eilers import WhittakerSmoother
+from scipy.interpolate import interp1d
 
 def pulse_number_ICI(df_input):
-    """Select pulses for ICI data
+    """Pulse selection for ICI data
 
-    For every cycles, gives a pulse number for every current pulses.
-    Then it gives this number for the last point before the pulse until the last point before the end of the relaxation
-    Finally, it creates a nested Dataframe structuring the ICI data for each pulse
-    
+    - For every cycles, it gives a pulse number for every relaxation pulse.
+    - Then it gives this number for the last point before the pulse until the last point before the end of the charging/discharging.
+    - Finally, it creates a nested Dataframe structuring the ICI data for each pulse.
+
+    Here is a schema of a selected pulse and its relevant points:
+
+    .. image:: ../../../../_static/pulse_ICI.png
+        :width: 2000px
+        :align: center
+        :alt: Example of a pulse selected by the function for ICI data
+
+    .. image:: ../../../../_static/pulse_ICI_relaxation.png
+        :width: 2000px
+        :align: center
+        :alt: Relaxation part of a pulse selected by the function for ICI data
+
+    The corresponding parameters that can be used in a custom function (see :func:`add_function`) are:
+    *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_ICI`.
+        
     Parameters
     ----------
     df : pandas.DataFrame
-        DataFrame containing the ICI data to process
+       DataFrame containing the ICI data to process
 
     Returns
     -------
-    Dict
-        DataFrame containing the ICI parameters structured by pulse number
+    Dict containing the nested DataFrames as values and their pulse number as keys
     """
     # A pulse starts the time just before the pulse and ends the time just before the next pulse at the end of the relaxation time
     df = df_input.copy()
@@ -44,7 +60,7 @@ def pulse_number_ICI(df_input):
     return df_nested
 
 
-def global_calculation_ICI(df_nested):
+def global_calculation_ICI(df_nested, my_func_list):
     """Calculates the ICI parameters
 
     Given a nested DataFrame containing the ICI data, this function calculates the ICI parameters for each pulse
@@ -56,123 +72,66 @@ def global_calculation_ICI(df_nested):
 
     Returns
     -------
-    pandas.DataFrame
+    dict
         Dict containing the nested DataFrames as values and their pulse number as keys
     """
     df_total = pd.DataFrame()
     for pulse, df_pulse in df_nested.items():
-        pulse_current = abs(df_pulse[df_pulse['Relaxation'] == 0]['Current']).mean()
 
         if len(df_pulse[df_pulse['Relaxation'] == 0]) > 5 and len(df_pulse[df_pulse['Relaxation'] == 1]) > 5:
 
-            resistance = calculate_ohmic_resistance(df_pulse, pulse_current)
-            delta_Es = calculate_delta_Es(df_pulse)
-            delta_Et = calculate_delta_Et(df_pulse)
-            tau = calculate_tau(df_pulse)
-            D = calculate_diffusion_coefficient(delta_Es, delta_Et, tau)
+            V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse = calculate_relevant_points_ICI(df_pulse)
+
+            tau = t2 - t1
+            resistance = abs((V1 - V0) / Ipulse)
+            D = calculate_diffusion_coefficient_ICI(t1, t2, t3, delta_Ec, delta_Epulse)
 
             df_coefficient = pd.DataFrame({'Pulse': pulse,
-                            'Cycle': df_pulse['Cycle'].iloc[0],
+                            'Cycle': df_pulse['Cycle'].iloc[-1],
+                            'State': df_pulse['State'].iloc[-1],
                             'TestTime': df_pulse['TestTime'].iloc[0],
                             'SOC': df_pulse['SOC'].iloc[0],
-                            'Voltage': df_pulse['Voltage'].iloc[0],
+                            'OCV': df_pulse['Voltage'].iloc[0],
                             'Diffusion Coefficient': D,
                             'Resistance': resistance,
-                            'tau': tau,
-                            'State': df_pulse['State'].iloc[0],},
+                            },
                             index=['Pulse'])
+            
+            # Parameters that can be used in an external function
+            kwargs = {
+                'V0': V0,
+                'V1': V1,
+                'V2': V2,
+                'V3': V3,
+                't0': t0,
+                't1': t1,
+                't2': t2,
+                't3': t3,
+                'Ipulse': Ipulse,
+                'delta_Ec': delta_Ec,
+                'delta_Edrop': delta_Edrop,
+                'delta_Epulse': delta_Epulse,
+                'Voltage': interp1d(df_pulse['TestTime'], df_pulse['Voltage'], kind='linear'),
+                'Current': interp1d(df_pulse['TestTime'], df_pulse['Current'], kind='linear'),
+                'Capacity': interp1d(df_pulse['TestTime'], df_pulse['Capacity'], kind='linear'),
+                'df_pulse': df_pulse,
+                'State': df_pulse['State'].iloc[0],
+            }
+
+            for func in my_func_list:
+                var_name = func.__name__
+                new_var = add_function(func, **kwargs)
+                if new_var is not None:
+                    df_coefficient[var_name] = new_var
 
             df_total = pd.concat([df_total, df_coefficient])
     return df_total
 
 
-def calculate_ohmic_resistance(df_input, pulse_current):
-    """Calculates the ohmic resistance for ICI test
-    
-    Parameters
-    ----------
-    df_input : pandas.DataFrame
-        DataFrame containing the data corresponding to one pulse
-    pulse_current : float
-        Mean current during the pulse
+def calculate_relevant_points_ICI(df_pulse):
+    """Calculates the relevant points represented in the :func:`pulse_number_ICI` documentation.  
 
-    Returns
-    -------
-    float
-        Ohmic resistance of the pulse
-    """
-    df_pulse = df_input.copy()
-    df_relax = df_pulse[(df_pulse['Relaxation'] == 1)].copy()
-
-    E1 = df_pulse['Voltage'].iloc[0]
-    E2 = df_relax['Voltage'].iloc[0]
-
-    resistance = abs((E2 - E1) / pulse_current)
-    return resistance
-    
-
-def calculate_delta_Es(df_input):
-    """Calculates delta_Es for ICI test
-    
-    Parameters
-    ----------
-    df_input : pandas.DataFrame
-        DataFrame containing the data corresponding to one pulse
-
-    Returns
-    -------
-    float
-        delta_Es of the selected pulse
-    """
-    df_pulse = df_input.copy()
-
-    Es1 = df_pulse['Voltage'].iloc[0]
-    Es2 = df_pulse['Voltage'].iloc[-1]
-
-    t1 = df_pulse[df_pulse['Relaxation'] == 1]['TestTime'].iloc[-1]
-    t2 = df_pulse['TestTime'].iloc[-1]
-
-    delta_Es = Es2 - Es1
-    return delta_Es / (t2 - t1)
-
-def calculate_delta_Et(df_input):
-    """Calculates delta_Et for ICI test
-    
-    Parameters
-    ----------
-    df_input : pandas.DataFrame
-        DataFrame containing the data corresponding to one pulse
-
-    Returns
-    -------
-    float
-        delta_Et of the selected pulse
-    """
-    df_relax = df_input[(df_input['Relaxation'] == 1)].copy()
-    
-    signal_noise = np.diff(df_relax['Voltage'], 2)
-    signal_noise_absolute = np.abs(signal_noise).reshape(-1, 1)
-    signal_noise_normalized = signal_noise_absolute / abs(df_relax['Voltage']).max()
-    weights = np.exp(-signal_noise_normalized)
-    weights_padded = np.concatenate(([weights[0]], weights, [weights[-1]]))
-
-    whittaker_smoother = WhittakerSmoother(lmbda=1e3, order=1, data_length=len(df_relax), x_input=df_relax['TestTime'], weights=weights_padded)
-    df_relax['Voltage'] = whittaker_smoother.smooth(df_relax['Voltage'].values)
-
-    # delta_E = abs(df_current['Voltage']).diff().iloc[0:5]
-    # delta_t = np.sqrt((df_current['TestTime'] - df_current['TestTime'].iloc[0])).diff().iloc[0:5]
-
-    delta_E = df_relax['Voltage'].iloc[-1] - df_relax['Voltage'].iloc[0]
-    delta_t = np.sqrt((df_relax['TestTime'].iloc[-1] - df_relax['TestTime'].iloc[0]))
-
-    delta_Et = delta_E / delta_t
-
-    delta_Et = (df_relax['Voltage'].diff() / df_relax['TestTime'].diff()).median()
-    return delta_Et
-
-
-def calculate_tau(df_pulse):
-    """Calculates tau (Time duration of the pulse) for ICI test
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
     
     Parameters
     ----------
@@ -181,31 +140,67 @@ def calculate_tau(df_pulse):
 
     Returns
     -------
-    float
-        delta_Es of the selected pulse
+    tuple
+        Tuple containing the relevant points : V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse
     """
-    df_current = df_pulse[df_pulse['Relaxation'] == 1].iloc[1:]
+    df_relax = df_pulse[(df_pulse['Relaxation'] == 1)].copy()
 
-    tau = df_current['TestTime'].max() - df_current['TestTime'].min()
-    return tau
+    # Relaxation Voltage smoothing
+    signal_noise = np.diff(df_relax['Voltage'], 2)
+    signal_noise_absolute = np.abs(signal_noise).reshape(-1, 1)
+    signal_noise_normalized = signal_noise_absolute / abs(df_relax['Voltage']).max()
+    weights = np.exp(-signal_noise_normalized)
+    weights_padded = np.concatenate(([weights[0]], weights, [weights[-1]]))
+    whittaker_smoother = WhittakerSmoother(lmbda=1e3, order=1, data_length=len(df_relax), x_input=df_relax['TestTime'], weights=weights_padded)
+    df_relax['Voltage'] = whittaker_smoother.smooth(df_relax['Voltage'].values)
+
+    # Relevant points calculation
+    V0 = df_pulse['Voltage'].iloc[0]
+    V1 = df_relax['Voltage'].iloc[0]
+    V2 = df_relax['Voltage'].iloc[-1]
+    V3 = df_pulse['Voltage'].iloc[-1]
+
+    t0 = df_pulse['TestTime'].iloc[0]
+    t1 = df_relax['TestTime'].iloc[0]
+    t2 = df_relax['TestTime'].iloc[-1]
+    t3 = df_pulse['TestTime'].iloc[-1]
+
+    Ipulse = df_pulse[df_pulse['normcurrent'] != 0]['Current'].mean()
+
+    delta_Ec = V3 - V0
+    delta_Edrop = V1 - V0
+    delta_Epulse = V2 - V1
+
+    return V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse
 
 
-def calculate_diffusion_coefficient(delta_Es, delta_Et):
-    """Calculates diffusion coefficient for ICI test
-    
+def calculate_diffusion_coefficient_ICI(t1, t2, t3, delta_Ec, delta_Epulse):
+    r"""Calculates diffusion coefficient for ICI test
+
+    See the :func:`pulse_number_ICI` documentation for the points definition.  
+    The formula comes from the paper from Y. Chien et al. (2023) 
+    *"Rapid determination of solid-state diffusion coefficients in Li-based batteries via intermittent current interruption method"*
+
+    The diffusion coefficient is calculated using the following formula:
+
+    .. math::
+
+        D = \frac{4}{9\pi} \cdot \text{radius}^2 \cdot \left( \frac{\frac{\Delta E_c}{t_3 - t_2}}{\frac{\Delta E_{\text{pulse}}}{\sqrt{t_2 - t_1}}} \right)^2
+
     Parameters
     ----------
-    delta_Es : float
-        delta_Es of the pulse
-    delta_Et : float
-        delta_Et of the pulse
+    t1 : float
+    t2 : float
+    t3 : float
+    delta_Ec : float
+    delta_Epulse : float
 
     Returns
     -------
     float
         Diffusion coefficient of the selected pulse
     """
-    cst = 1e-5
+    radius = 5e-6
 
-    D = 4/np.pi * (delta_Es / delta_Et)**2 * cst**2
+    D = 4/(9 * np.pi) * radius**2 * ((delta_Ec / (t3 - t2)) / (delta_Epulse / (np.sqrt(t2 - t1))))**2
     return D
