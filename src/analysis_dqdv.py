@@ -28,14 +28,14 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
         for cycle in df['Cycle'].unique():
             df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
 
-            if len(df_cycle) > 1 and cycle != 0:
+            if len(df_cycle) > 3:
                 df_smoothed, sigma = calculate_dqdv_for_one_cycle(df_cycle, 
                                                                   smoothing=smoothing, 
                                                                   sigma=sigma)
                 df_smoothed = df_smoothed.assign(Cycle=cycle, State=charging_state)
 
                 df_dqdv = pd.concat([df_dqdv, df_smoothed])
-            elif cycle != 0:
+            else:
                 print('No data for cycle '+str(cycle)+', '+str(charging_state))
 
     if len(df_dqdv) > 3:

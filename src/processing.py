@@ -1,4 +1,4 @@
-from preprocessing import preprocessing_files
+from preprocessing import read_file, preprocessing_files
 from analysis_dqdv import calculate_dqdv_for_all_cycle
 from analysis_GITT import pulse_number_GITT, global_calculation_GITT
 from analysis_HPPC import pulse_number_HPPC, global_calculation_HPPC
@@ -103,34 +103,45 @@ def process_file(file_path,
     """
     start_time = time.time()
 
-    df = preprocessing_files(file_path, column_names, cycle, debug_func)
-    df = find_test(df)
+    df_list = read_file(file_path, column_names, cycle, debug_func)
+    result_dict_list = []
+    for df in df_list:
+        df = find_test(df)
 
-    result_dict = {}
-    for test in df['Test'].unique():
-        if not pd.isna(test) and len(df[df['Test'] == test]) > 5:
-            print('Test :', test, '; Length :', len(df[df['Test'] == test]))
-            
-            df_test = df[df['Test'] == test]
+        result_dict = {}
+        for test in df['Test'].unique():
+            print(test)
+            if len(df[df['Test'] == test]) > 5: #not pd.isna(test) and 
+                print('Test :', test, '; Length :', len(df[df['Test'] == test]))
+                
+                df_test = df[df['Test'] == test]
 
-            if test == 'GITT':
-                df_test, GITT_result_df = process_GITT(df_test, file_path, my_func_list, save=save, png=png)
-                result_dict['GITT'] = GITT_result_df
+                if test == 'GITT':
+                    df_test, GITT_result_df = process_GITT(df_test, file_path, my_func_list, save=save, png=png)
+                    result_dict['GITT'] = GITT_result_df
 
-            elif test == 'ICI':
-                df_test, ICI_result_df = process_ICI(df_test, file_path, my_func_list, save=save, png=png)
-                result_dict['ICI'] = ICI_result_df
+                elif test == 'ICI':
+                    df_test, ICI_result_df = process_ICI(df_test, file_path, my_func_list, save=save, png=png)
+                    result_dict['ICI'] = ICI_result_df
 
-            elif test == 'HPPC':
-                df_test, HPPC_result_df = process_HPPC(df_test, file_path, my_func_list, save=save, png=png)
-                result_dict['HPPC'] = HPPC_result_df
+                elif test == 'HPPC':
+                    df_test, HPPC_result_df = process_HPPC(df_test, file_path, my_func_list, save=save, png=png)
+                    result_dict['HPPC'] = HPPC_result_df
 
-            elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
-                df_test = df_test[df_test['C_Rate'] > 0.2]
-                df_test = process_dqdv(df_test, file_path, save=save, png=png)
+                elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
+                    df_test = df_test[df_test['C_Rate'] > 0.2]
+                    df_test = process_dqdv(df_test, file_path, save=save, png=png)
+
+                else:
+                    df_test = process_dqdv(df_test, file_path, save=save, png=png)
+
+                result_dict_list.append(result_dict)
 
     print('Total Time : '+str(int(time.time() - start_time))+'s')
-    return df, result_dict
+    if len(df_list) == 1:
+        return df_list[0], result_dict_list[0]
+    else:
+        return df_list, result_dict_list
 
 
 def find_test(df_input):
@@ -153,17 +164,6 @@ def find_test(df_input):
             df_cycle = df[(df['Cycle'] == cycle) & (df['State'] == state)].copy()
 
             if len(df_cycle) > 5:
-                # for pulse in ['discharge_pulse', 'charge_pulse']:
-                #     pulse_number_list = []
-                #     pulse_sign = 1 if pulse == 'discharge_pulse' else -1
-                #     pulse_count = (pulse_sign * df_cycle['normcurrent'] < 0).diff().sum()
-                #     df_cycle[pulse] = (pulse_sign * df_cycle['normcurrent'] < 0).diff().cumsum()
-
-                #     for pulse_number in df_cycle[pulse].unique():
-                #         if len(df_cycle[df_cycle[pulse] == pulse_number]) < 10:
-                #             pulse_count -= 1
-                #     pulse_number_list.append(pulse_count)
-
                 discharge_pulse = (df_cycle['normcurrent'] < 0).diff().sum()
                 df_cycle['discharge_pulse'] = (df_cycle['normcurrent'] < 0).diff().cumsum()
                 charge_pulse = (df_cycle['normcurrent'] > 0).diff().sum()
@@ -173,7 +173,6 @@ def find_test(df_input):
                 for pulse in df_cycle['discharge_pulse'].unique():
                     if len(df_cycle[df_cycle['discharge_pulse'] == pulse]) < 10:
                         discharge_pulse -= 1
-
                 for pulse in df_cycle['charge_pulse'].unique():
                     if len(df_cycle[df_cycle['charge_pulse'] == pulse]) < 10:
                         charge_pulse -= 1
@@ -196,14 +195,17 @@ def find_test(df_input):
                     else:
                         df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'Test'] = 'GITT'
 
-    # If there is a complete cycle with no pulses, the test is CCCV
-    df['Group'] = (df['Test'] != df['Test'].shift()).cumsum()
-    for group in df['Group'].unique():
-        df_group = df[df['Group'] == group]
-        if 'C' in df_group['State'].unique() and 'D' in df_group['State'].unique() and df_group['Test'].unique() == ['NA']:
-            df.loc[df['Group'] == group, 'Test'] = 'CCCV'
+                else:
+                    volt_diff = df_cycle['Voltage'].diff()
 
-    df['Test'] = df['Test'].replace('NA', np.nan)
+    # If there is a complete cycle with no pulses, the test is CCCV
+    # df['Group'] = (df['Test'] != df['Test'].shift()).cumsum()
+    # for group in df['Group'].unique():
+    #     df_group = df[df['Group'] == group]
+    #     if 'C' in df_group['State'].unique() and 'D' in df_group['State'].unique() and df_group['Test'].unique() == ['NA']:
+    #         df.loc[df['Group'] == group, 'Test'] = 'CCCV'
+
+    # df['Test'] = df['Test'].replace('NA', np.nan)
 
     print('Find Test Time : '+str(int(time.time() - start_time))+'s')
     return df
@@ -288,6 +290,12 @@ def process_GITT(df,
     fig = plot_test_over_time(df_nested, file_path, test='GITT', pulse=True, save=save, png=png)
     fig_GITT = plot_GITT_result(results_df, file_path, column='Diffusion Coefficient', save=save, png=png)
     fig_GITT = plot_GITT_result(results_df, file_path, column='Resistance', save=save, png=png)
+
+
+    fig_GITT = plot_GITT_result(results_df, file_path, column='OCV', save=save, png=png)
+
+
+
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s', save=save)
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s', save=save)
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s', save=save)

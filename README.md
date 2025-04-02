@@ -25,9 +25,9 @@ An example notebook containing the different features of this package is given: 
 The usage of the main function:  
 
 ```python
-from battmoanalysis.processing import process_dqdv
+from src.processing import process_file
 
-df = process_dqdv(file_path)
+df = process_file(file_path)
 ```
 
 ## Requirements

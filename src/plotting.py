@@ -127,14 +127,14 @@ def plot_test_over_time(df_input,
         hovertext = ('Pulse: ' + df['Pulse'].astype(str)
                      + '<br>Cycle: ' + df['Cycle'].astype(str) 
                      + '<br>State: ' + df['State'].astype(str)
-                     + '<br>C_Rate: ' + df['C_Rate'].astype(str))
+                     + '<br>C_Rate (h): ' + df['C_Rate'].astype(str))
     else:
         df = df_input.copy()
         N = max(1, int(len(df) / 100000))
         df = df.iloc[::N]
         hovertext = ('Cycle: ' + df['Cycle'].astype(str) 
                      + '<br>State: ' + df['State'].astype(str)
-                     + '<br>C_Rate: ' + df['C_Rate'].astype(str)) 
+                     + '<br>C_Rate (h): ' + df['C_Rate'].astype(str)) 
 
     fig = go.Figure()
     for param in param_dict.keys():
@@ -163,7 +163,9 @@ def plot_test_over_time(df_input,
         )
     
     if save:
-        file_path = os.path.join(folder_path, f'{test}_{file_name}.html')
+        result_folder = os.path.join(folder_path, file_name)
+        os.makedirs(result_folder, exist_ok=True)
+        file_path = os.path.join(result_folder, f'{test}_over_time.html')
         fig.write_html(file_path)
     if png:
         png_image = fig.to_image(format="png", width=2000, height=800)
@@ -239,7 +241,9 @@ def plot_DQDV_result(df,
         )
     
     if save:
-        file_path_dqdv = os.path.join(folder_path, f'DQDV_{file_name}.html')
+        result_folder = os.path.join(folder_path, file_name)
+        os.makedirs(result_folder, exist_ok=True)
+        file_path_dqdv = os.path.join(result_folder, f'dQdV.html')
         fig_dqdv.write_html(file_path_dqdv)
     if png:
         png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
@@ -332,7 +336,9 @@ def plot_dqdv_heatmap(df,
         )
 
     if save:
-        file_path_heatmap = os.path.join(folder_path, f'dqdv_heatmap_{file_name}.html')
+        result_folder = os.path.join(folder_path, file_name)
+        os.makedirs(result_folder, exist_ok=True)
+        file_path_heatmap = os.path.join(result_folder, f'dqdv_heatmap.html')
         fig_dqdv.write_html(file_path_heatmap)
     if png:
         png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
@@ -393,7 +399,7 @@ def plot_pocv(df,
                     line=dict(width=3),
                     hovertext = f'Cycle: {cycle}<br>'
                     +'State: ' + df_state['State'].astype(str)
-                    +'C_Rate: ' + df_state['C_Rate'].astype(str),
+                    +'C_Rate (h): ' + df_state['C_Rate'].astype(str),
                     name=f'Cycle {cycle}, State {state}',
                     ))
     
@@ -413,7 +419,9 @@ def plot_pocv(df,
         )
     
     if save:
-        file_path_pocv = os.path.join(folder_path, f'pocv_{file_name}.html')
+        result_folder = os.path.join(folder_path, file_name)
+        os.makedirs(result_folder, exist_ok=True)
+        file_path_pocv = os.path.join(result_folder, f'pocv.html')
         fig_pocv.write_html(file_path_pocv)
     if png:
         png_image = fig_pocv.to_image(format="png", width=2000, height=800)
@@ -490,7 +498,9 @@ def plot_GITT_result(df,
         )
     
     if save:
-        file_path_GITT = os.path.join(folder_path, f'GITT_{file_name}.html')
+        result_folder = os.path.join(folder_path, file_name)
+        os.makedirs(result_folder, exist_ok=True)
+        file_path_GITT = os.path.join(result_folder, f'GITT_{column}.html')
         fig_GITT.write_html(file_path_GITT)
     if png:
         png_image = fig_GITT.to_image(format="png", width=2000, height=800)
@@ -566,7 +576,9 @@ def plot_HPPC_result(df,
         )
     
     if save:
-        file_path_HPPC = os.path.join(folder_path, f'HPPC_{file_name}.html')
+        result_folder = os.path.join(folder_path, file_name)
+        os.makedirs(result_folder, exist_ok=True)
+        file_path_HPPC = os.path.join(result_folder, f'HPPC_{column}.html')
         fig_HPPC.write_html(file_path_HPPC)
     if png:
         png_image = fig_HPPC.to_image(format="png", width=2000, height=800)
