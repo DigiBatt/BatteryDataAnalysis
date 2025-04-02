@@ -1,0 +1,194 @@
+BatteryDataAnalysis.src.processing
+==================================
+
+.. py:module:: BatteryDataAnalysis.src.processing
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.processing.process_file
+   BatteryDataAnalysis.src.processing.find_test
+   BatteryDataAnalysis.src.processing.process_dqdv
+   BatteryDataAnalysis.src.processing.process_GITT
+   BatteryDataAnalysis.src.processing.process_ICI
+   BatteryDataAnalysis.src.processing.process_HPPC
+
+
+Module Contents
+---------------
+
+.. py:function:: process_file(file_path, column_names=None, cycle=None, debug_func=None, my_func_list=[], save=False, png=False)
+
+   Processes the data for a given file in .parquet or .csv format
+
+   It detects the type of tests applied to the battery and process the data for each type of tests
+
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param column_names: Dictionary containing the column names to be used for the analysis
+                        The useful columns are: Voltage, Current, and SysTime (system time or test time) that should be values and the real column names should be their keys
+   :type column_names: Dict, optional
+   :param cycle: List of cycle numbers to process
+   :type cycle: int, optional
+   :param debug_func: Function to be called during the preprocessing of the data to debug a file
+   :type debug_func: function, optional
+   :param my_func_list: List of functions to add to the calculation process
+   :type my_func_list: list, optional
+   :param save: Whether to save the result plots in format .html (default is False).
+   :type save: bool, optional
+   :param png: Whether to save the result plots as png files (default is False).
+   :type png: bool, optional
+
+   :returns: * **df** (*pandas.DataFrame*) -- DataFrame containing the processed data.
+             * **result_dict** (*dict*) -- Dictionary containing the processed results for each test type.
+               Keys are test names ('GITT', 'ICI', 'HPPC') and values are DataFrames with the respective results for each test.
+
+   .. rubric:: Examples
+
+   Basic usage:
+
+   >>> df = process_file(file_path)
+   File : GITT_AG4_S_1577.parquet
+   Length : 9154638
+   Preprocessing Time : 41s
+   Find Test Time : 48s
+   Test : GITT ; Length : 9061575
+       Pulse  Cycle   TestTime       SOC       OCV    Ipulse  Diffusion Coefficient  Resistance      R_1s      R_30s      R_60s     R_180s      Tau    State
+   Pulse      0      1   46801.00  1.000000  2.484417 -0.043325           3.224942e-15   24.730671  6.169087  28.370994  30.130583  36.914223  3598.98     D
+   Pulse      1      1   53999.98  0.980011  0.575001 -0.043325           4.672011e-16    1.997885  1.474679   2.089985   2.411197   3.278645  3599.98     D
+   Pulse      2      1   61199.98  0.960011  0.379431 -0.043325           3.873728e-16    1.412661  1.106010   1.468100   1.685784   2.282023  3599.98     D
+   Pulse      3      1   68399.98  0.940010  0.272730 -0.043324           2.772498e-16    1.205467  0.979083   1.249654   1.411445   1.843224  3599.98     D
+   Pulse      4      1   75599.98  0.920010  0.216829 -0.043325           6.646707e-17    1.077636  0.915281   1.112744   1.224103   1.524546  3599.98     D
+   ...      ...    ...        ...       ...       ...       ...                    ...         ...       ...        ...        ...        ...      ...   ...
+   Pulse    133      2  962099.98  0.136391  0.087613 -0.043325           1.887492e-19    0.220889  0.143877   0.239615   0.273980   0.321392  3599.98     D
+   Pulse    134      2  969299.98  0.111716  0.087493 -0.043325           2.520212e-19    0.225816  0.147635   0.244767   0.279301   0.326996  3599.98     D
+   Pulse    135      2  976499.98  0.087041  0.087352 -0.043325           3.536782e-19    0.231572  0.152126   0.251083   0.285541   0.333647  3599.98     D
+   Pulse    136      2  983699.98  0.062366  0.087180 -0.043325           5.092976e-19    0.238380  0.157598   0.258096   0.292359   0.341250  3599.98     D
+   Pulse    137      2  990899.98  0.037691  0.086971 -0.043325           8.648767e-19    0.246495  0.163909   0.266569   0.300817   0.350488  3599.98     D
+   [138 rows x 15 columns]
+   GITT Time : 21s
+   Total Time : 115s
+
+   In addition, you can add a column_names dictionnary and a debug function if needed:
+
+   >>> column_names={'original_time_column': 'SysTime',
+   ...               'original_voltage_column': 'Voltage',
+   ...               'original_current_column': 'Current'}
+   >>> def my_debug_func(df):
+   ...     df = df[df['original_time_column'] < 1e6]
+   ...     return df
+   >>> df = process_file(file_path, column_names=column_names, debug_func=my_debug_func)
+   File : GITT_AG4_S_1577.parquet
+   Length : 9154638
+   Preprocessing Time : 41s
+   Find Test Time : 48s
+   Test : GITT ; Length : 9061575
+       Pulse  Cycle   TestTime       SOC       OCV    Ipulse  Diffusion Coefficient  Resistance      R_1s      R_30s      R_60s     R_180s      Tau    State
+   Pulse      0      1   46801.00  1.000000  2.484417 -0.043325           3.224942e-15   24.730671  6.169087  28.370994  30.130583  36.914223  3598.98     D
+   Pulse      1      1   53999.98  0.980011  0.575001 -0.043325           4.672011e-16    1.997885  1.474679   2.089985   2.411197   3.278645  3599.98     D
+   Pulse      2      1   61199.98  0.960011  0.379431 -0.043325           3.873728e-16    1.412661  1.106010   1.468100   1.685784   2.282023  3599.98     D
+   Pulse      3      1   68399.98  0.940010  0.272730 -0.043324           2.772498e-16    1.205467  0.979083   1.249654   1.411445   1.843224  3599.98     D
+   Pulse      4      1   75599.98  0.920010  0.216829 -0.043325           6.646707e-17    1.077636  0.915281   1.112744   1.224103   1.524546  3599.98     D
+   ...      ...    ...        ...       ...       ...       ...                    ...         ...       ...        ...        ...        ...      ...   ...
+   Pulse    133      2  962099.98  0.136391  0.087613 -0.043325           1.887492e-19    0.220889  0.143877   0.239615   0.273980   0.321392  3599.98     D
+   Pulse    134      2  969299.98  0.111716  0.087493 -0.043325           2.520212e-19    0.225816  0.147635   0.244767   0.279301   0.326996  3599.98     D
+   Pulse    135      2  976499.98  0.087041  0.087352 -0.043325           3.536782e-19    0.231572  0.152126   0.251083   0.285541   0.333647  3599.98     D
+   Pulse    136      2  983699.98  0.062366  0.087180 -0.043325           5.092976e-19    0.238380  0.157598   0.258096   0.292359   0.341250  3599.98     D
+   Pulse    137      2  990899.98  0.037691  0.086971 -0.043325           8.648767e-19    0.246495  0.163909   0.266569   0.300817   0.350488  3599.98     D
+   [138 rows x 15 columns]
+   GITT Time : 21s
+   Total Time : 115s
+
+
+.. py:function:: find_test(df_input)
+
+   Finds the test applied to the battery
+
+   Analyses the test type for each cycle according to its current pulses number
+   It needs the preprocessed data with in particular the columns Cycle, State and normcurrent
+
+   :returns: DataFrame containing the preprocessed data.
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: process_dqdv(df, file_path, heatmap=False, save=False, png=False)
+
+   Processes the CCCV data for a given preprocessed file
+
+   Plots the dQ/dV curves and the dQ/dV heatmap for every cycles
+
+   :param df: DataFrame containing the CCCV data to process.
+   :type df: pandas.DataFrame
+   :param file_path: Path to the file to process.
+   :type file_path: str
+   :param heatmap: Whether to plot the dQ/dV heatmap (default is False).
+   :type heatmap: bool, optional
+   :param save: Whether to save the plots in format .html(default is False).
+   :type save: bool, optional
+   :param png: Whether to save the plots as png files (default is False).
+   :type png: bool, optional
+
+   :returns: DataFrame containing the dQ/dV data.
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: process_GITT(df, file_path, my_func_list, save=False, png=False)
+
+   Processes the GITT data for a given preprocessed file
+
+   Plots the GITT Voltage curve and the diffusion coefficient over SOC for every cycles
+
+   :param df: DataFrame containing the GITT data to process
+   :type df: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots in format .html(default is False).
+   :type save: bool, optional
+   :param png: Whether to save the plots as png files (default is False).
+   :type png: bool, optional
+
+   :returns: * **df_nested** (*dict*) -- Dict containing pulses as keys and their respective DataFrames as values
+             * **results_df** (*pandas.DataFrame*) -- DataFrame containing the GITT parameters structured by pulse number
+
+
+.. py:function:: process_ICI(df, file_path, my_func_list, save=False, png=False)
+
+   Processes the ICI data for a given preprocessed file
+
+   Plots the ICI Voltage curve and the diffusion coefficient over SOC for every cycles
+
+   :param df: DataFrame containing the ICI data to process
+   :type df: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots in format .html(default is False).
+   :type save: bool, optional
+   :param png: Whether to save the plots as png files (default is False).
+   :type png: bool, optional
+
+   :returns: * **df_nested** (*dict*) -- Dict containing pulses as keys and their respective DataFrames as values
+             * **results_df** (*pandas.DataFrame*) -- DataFrame containing the ICI parameters structured by pulse number
+
+
+.. py:function:: process_HPPC(df, file_path, my_func_list, save=False, png=False)
+
+   Processes the HPPC data for a given preprocessed file
+
+   Plots the HPPC Voltage curve and the diffusion coefficient over SOC for every cycles
+
+   :param df: DataFrame containing the HPPC data to process
+   :type df: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots in format .html(default is False).
+   :type save: bool, optional
+   :param png: Whether to save the plots as png files (default is False).
+   :type png: bool, optional
+
+   :returns: * **df_nested** (*dict*) -- Dict containing pulses as keys and their respective DataFrames as values
+             * **results_df** (*pandas.DataFrame*) -- DataFrame containing the HPPC parameters structured by pulse number
+
+

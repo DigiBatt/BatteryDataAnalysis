@@ -1,0 +1,1074 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BatteryDataAnalysis.src.plotting &#8212; Battery Data Analysis Toolkit</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=cf300051" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/BatteryDataAnalysis/src/plotting';</script>
+    <link rel="icon" href="../../../_static/battinfologo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the ontology..."
+         aria-label="Search the ontology..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/battinfologo.jpg" class="logo__image only-light" alt="Battery Data Analysis Toolkit - Home"/>
+    <img src="../../../_static/battinfologo.jpg" class="logo__image only-dark pst-js-only" alt="Battery Data Analysis Toolkit - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/getstarted.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/about.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/faq.html">
+    FAQ
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/DigiBatt/BatteryDataAnalysis" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/getstarted.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/about.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/faq.html">
+    FAQ
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/DigiBatt/BatteryDataAnalysis" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">BatteryDataAnalysis.src.plotting</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for BatteryDataAnalysis.src.plotting</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">from</span> <span class="nn">plotly.subplots</span> <span class="kn">import</span> <span class="n">make_subplots</span>
+<span class="kn">from</span> <span class="nn">cmcrameri</span> <span class="kn">import</span> <span class="n">cm</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+
+<div class="viewcode-block" id="matplotlib_to_plotly_colorscale">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.matplotlib_to_plotly_colorscale">[docs]</a>
+<span class="k">def</span> <span class="nf">matplotlib_to_plotly_colorscale</span><span class="p">(</span><span class="n">colormap</span><span class="p">,</span> <span class="n">n_colors</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a matplotlib colormap to a Plotly colorscale</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    colormap : matplotlib colormap</span>
+<span class="sd">        Colormap to convert</span>
+<span class="sd">    n_colors : int, optional</span>
+<span class="sd">        Number of colors in the colormap (default is 256).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List</span>
+<span class="sd">        Plotly colorscale</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">colormap</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_colors</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_colors</span><span class="p">)]</span>
+    <span class="c1"># colorscale = [(0, f&quot;rgb({int(colors[0][0] * 255)}, {int(colors[0][1] * 255)}, {int(colors[0][2] * 255)})&quot;)]</span>
+    <span class="c1"># colorscale += [</span>
+    <span class="c1">#     (i / (2*(n_colors - 1)) + 0.5, f&quot;rgb({int(c[0] * 255)}, {int(c[1] * 255)}, {int(c[2] * 255)})&quot;)</span>
+    <span class="c1">#     for i, c in enumerate(colors)]</span>
+    
+    <span class="n">colorscale</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_colors</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;rgb(</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">colors</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">colorscale</span></div>
+
+
+
+<div class="viewcode-block" id="reduce_points_number">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.reduce_points_number">[docs]</a>
+<span class="k">def</span> <span class="nf">reduce_points_number</span><span class="p">(</span><span class="n">df_input</span><span class="p">,</span> <span class="n">n_cycle</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reduces the number of points in the dataframe</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    n_cycle : int</span>
+<span class="sd">        Number of points that we want to keep for a single cycle</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        DataFrame with reduced number of points</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_input</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_cycle</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_input</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))),</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_input</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">N</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_colorscale">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.get_colorscale">[docs]</a>
+<span class="k">def</span> <span class="nf">get_colorscale</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">nb_cycle</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the Plotly colorscale for a given state</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    state : [&#39;C&#39;, &#39;D&#39;]</span>
+<span class="sd">        State of the cell charging </span>
+<span class="sd">    nb_cycle : int</span>
+<span class="sd">        Total number of cycles</span>
+<span class="sd">    i : int</span>
+<span class="sd">        Cycle number</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Plotly colorscale</span>
+<span class="sd">        Plotly colorscale corresponding to the charging state</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colorscale_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;Blues&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;Reds&#39;</span><span class="p">}</span>
+    <span class="n">colorscale</span> <span class="o">=</span> <span class="n">colorscale_dict</span><span class="p">[</span><span class="n">state</span><span class="p">]</span>
+    <span class="n">color_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nb_cycle</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colorscale</span><span class="p">)</span>
+    <span class="n">rgba_color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">color_value</span><span class="p">)</span>
+    <span class="n">hex_color</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;rgba(</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">rgba_color</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">rgba_color</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">rgba_color</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">rgba_color</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+    <span class="k">return</span> <span class="n">hex_color</span></div>
+
+
+<div class="viewcode-block" id="title_size">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.title_size">[docs]</a>
+<span class="n">title_size</span> <span class="o">=</span> <span class="mi">45</span> <span class="c1"># [20,45]</span></div>
+
+<div class="viewcode-block" id="axis_size">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.axis_size">[docs]</a>
+<span class="n">axis_size</span> <span class="o">=</span> <span class="mi">35</span> <span class="c1"># [18,35]</span></div>
+
+<div class="viewcode-block" id="legend_size">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.legend_size">[docs]</a>
+<span class="n">legend_size</span> <span class="o">=</span> <span class="mi">35</span> <span class="c1"># [18,35]</span></div>
+
+<div class="viewcode-block" id="tickfont_size">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.tickfont_size">[docs]</a>
+<span class="n">tickfont_size</span> <span class="o">=</span> <span class="mi">35</span> <span class="c1"># [18,35]</span></div>
+
+<div class="viewcode-block" id="marker_size">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.marker_size">[docs]</a>
+<span class="n">marker_size</span> <span class="o">=</span> <span class="mi">10</span></div>
+
+<div class="viewcode-block" id="line_width">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.line_width">[docs]</a>
+<span class="n">line_width</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+<div class="viewcode-block" id="plot_test_over_time">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.plot_test_over_time">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_test_over_time</span><span class="p">(</span><span class="n">df_input</span><span class="p">,</span>
+                        <span class="n">file_path</span><span class="p">,</span>
+                        <span class="n">test</span><span class="o">=</span><span class="s1">&#39;CCCV&#39;</span><span class="p">,</span>
+                        <span class="n">pulse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the Current, Voltage and Capacity over TestTime for a given test type</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    test : str, optional</span>
+<span class="sd">        Type of test to plot (default is &#39;CCCV&#39;)</span>
+<span class="sd">    pulse : bool, optional</span>
+<span class="sd">        Whether the test type contains current pulses (default is False)</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots as .html files(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to display the plots as .png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    go.Figure</span>
+<span class="sd">        Plot as a Plotly figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Voltage&#39;</span><span class="p">:</span> <span class="s1">&#39;Voltage  /  V&#39;</span><span class="p">,</span> 
+                  <span class="s1">&#39;Current&#39;</span><span class="p">:</span> <span class="s1">&#39;Current  /  A&#39;</span><span class="p">,</span> 
+                  <span class="s1">&#39;Capacity&#39;</span><span class="p">:</span> <span class="s1">&#39;Capacity  /  Ah&#39;</span><span class="p">,}</span>
+
+    <span class="k">if</span> <span class="n">pulse</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_input</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100000</span><span class="p">))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">N</span><span class="p">]</span>
+        <span class="n">hovertext</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Pulse: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Pulse&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                     <span class="o">+</span> <span class="s1">&#39;&lt;br&gt;Cycle: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> 
+                     <span class="o">+</span> <span class="s1">&#39;&lt;br&gt;State: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                     <span class="o">+</span> <span class="s1">&#39;&lt;br&gt;C_Rate: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;C_Rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100000</span><span class="p">))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">N</span><span class="p">]</span>
+        <span class="n">hovertext</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Cycle: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> 
+                     <span class="o">+</span> <span class="s1">&#39;&lt;br&gt;State: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                     <span class="o">+</span> <span class="s1">&#39;&lt;br&gt;C_Rate: &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;C_Rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span> 
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;TestTime&#39;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">param</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">line_width</span><span class="p">),</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">hovertext</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">param_dict</span><span class="p">[</span><span class="n">param</span><span class="p">],</span>
+            <span class="p">))</span>
+    
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&lt;b&gt;Voltage Current and Capacity for </span><span class="si">{</span><span class="n">test</span><span class="si">}</span><span class="s1"> Test&lt;/b&gt;&lt;br&gt;&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;File : </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">title_size</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;&lt;b&gt;TestTime  /  s&lt;/b&gt;&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s1">&#39;&lt;b&gt;Voltage, Current and Capacity&lt;/b&gt;&#39;</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">legend</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">legend_size</span><span class="p">}}</span>
+        <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">test</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.html&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">png</span><span class="p">:</span>
+        <span class="n">png_image</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">png_image</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+
+<div class="viewcode-block" id="plot_DQDV_result">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.plot_DQDV_result">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_DQDV_result</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                     <span class="n">file_path</span><span class="p">,</span>
+                     <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the dQ/dV curve </span>
+
+<span class="sd">    It gives the derivative of Capacity over Voltage</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots as .html files(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to display the plots as .png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    go.Figure</span>
+<span class="sd">        Plot as a Plotly figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="n">fig_dqdv</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="n">nb_cycle</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+            <span class="n">df_state</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;smoothed_voltage&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_state</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+                <span class="n">hex_color</span> <span class="o">=</span> <span class="n">get_colorscale</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">nb_cycle</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;smoothed_voltage&#39;</span><span class="p">],</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;smoothed_dqdv&#39;</span><span class="p">],</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines+markers&#39;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">hex_color</span><span class="p">,</span>
+                        <span class="n">size</span><span class="o">=</span><span class="n">marker_size</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">line_width</span><span class="p">),</span>
+                    <span class="n">hovertext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cycle: </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">&lt;br&gt;&#39;</span>
+                    <span class="o">+</span><span class="s1">&#39;State: &#39;</span> <span class="o">+</span> <span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Cycle </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">, State </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="p">))</span>
+    
+    <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&lt;b&gt;dQ/dV curves over cycles&lt;/b&gt;&lt;br&gt;&#39;</span><span class="p">,</span>
+            <span class="c1"># f&#39;&lt;i&gt;File : {file_name}&lt;/i&gt;&#39;,</span>
+            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">title_size</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;&lt;b&gt;Voltage  /  V&lt;/b&gt;&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;&lt;b&gt;dQ/dV  /  Ah/V&lt;/b&gt;&quot;</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">legend</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">legend_size</span><span class="p">}}</span>
+        <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">file_path_dqdv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;DQDV_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.html&#39;</span><span class="p">)</span>
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">file_path_dqdv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">png</span><span class="p">:</span>
+        <span class="n">png_image</span> <span class="o">=</span> <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">png_image</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">fig_dqdv</span></div>
+
+
+
+<div class="viewcode-block" id="plot_dqdv_heatmap">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.plot_dqdv_heatmap">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_dqdv_heatmap</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                      <span class="n">file_path</span><span class="p">,</span>
+                      <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the dQ/dV heatmap </span>
+
+<span class="sd">    It gives a plot with Cycles over Voltage colored by the magnitude of dQ/dV</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots as .html files(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to display the plots as .png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    go.Figure</span>
+<span class="sd">        Plot as a Plotly figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="n">batlow_colorscale</span> <span class="o">=</span> <span class="n">matplotlib_to_plotly_colorscale</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">lipari</span><span class="p">)</span>
+
+    <span class="n">fig_dqdv</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">(</span>
+        <span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">shared_xaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">vertical_spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">subplot_titles</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Charge&#39;</span><span class="p">,</span> <span class="s1">&#39;Discharge&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i_charge</span><span class="p">,</span> <span class="n">charging_state</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]):</span>
+        <span class="n">df_charge</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">charging_state</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">charging_state</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+            <span class="n">colorbar_title</span> <span class="o">=</span> <span class="s1">&#39;log|dQ/dV| for &lt;b&gt;charge&lt;/b&gt;&#39;</span>
+            <span class="n">yanchor</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">colorbar_title</span> <span class="o">=</span> <span class="s1">&#39;log|dQ/dV| for &lt;b&gt;discharge&lt;/b&gt;&#39;</span>
+            <span class="n">yanchor</span><span class="o">=</span><span class="s1">&#39;top&#39;</span>
+
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Heatmap</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">df_charge</span><span class="p">[</span><span class="s2">&quot;smoothed_voltage&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">df_charge</span><span class="p">[</span><span class="s2">&quot;Cycle&quot;</span><span class="p">],</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">df_charge</span><span class="p">[</span><span class="s2">&quot;smoothed_dqdv&quot;</span><span class="p">])),</span>
+            <span class="n">colorscale</span><span class="o">=</span><span class="n">batlow_colorscale</span><span class="p">,</span>
+            <span class="c1"># colorbar_title=colorbar_title,</span>
+            <span class="n">colorbar</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">colorbar_title</span><span class="p">,</span>
+                    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">legend_size</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="n">yanchor</span><span class="o">=</span><span class="n">yanchor</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">row</span><span class="o">=</span><span class="n">i_charge</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Voltage (V)&quot;</span><span class="p">,</span>
+            <span class="n">title_font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">axis_size</span><span class="p">),</span>
+            <span class="n">row</span><span class="o">=</span><span class="n">i_charge</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Cycle&quot;</span><span class="p">,</span>
+            <span class="n">title_font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">axis_size</span><span class="p">),</span>
+            <span class="n">row</span><span class="o">=</span><span class="n">i_charge</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+        
+    <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;dQ/dV heatmap showing its magnitude&#39;s evolution through cycles&lt;br&gt;&quot;</span><span class="p">,</span>
+        <span class="c1"># f&#39;File : {file_name}&#39;,</span>
+        <span class="n">title_font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">title_size</span><span class="p">),</span>
+        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">file_path_heatmap</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;dqdv_heatmap_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.html&#39;</span><span class="p">)</span>
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">file_path_heatmap</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">png</span><span class="p">:</span>
+        <span class="n">png_image</span> <span class="o">=</span> <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">png_image</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig_dqdv</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig_dqdv</span></div>
+
+
+
+<div class="viewcode-block" id="plot_pocv">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.plot_pocv">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_pocv</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+              <span class="n">file_path</span><span class="p">,</span>
+              <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the POCV curve </span>
+
+<span class="sd">    It gives a plot of the Capacity over Voltage</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots as .html files(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to display the plots as .png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    go.Figure</span>
+<span class="sd">        Plot as a Plotly figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">reduce_points_number</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">n_cycle</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+
+    <span class="n">fig_pocv</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="n">nb_cycle</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+            <span class="n">df_state</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">)</span> 
+                          <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)</span> 
+                          <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;Voltage&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_state</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+                <span class="n">hex_color</span> <span class="o">=</span> <span class="n">get_colorscale</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">nb_cycle</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">fig_pocv</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;Capacity&#39;</span><span class="p">],</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;Voltage&#39;</span><span class="p">],</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines+markers&#39;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">hex_color</span><span class="p">,</span>
+                        <span class="n">size</span><span class="o">=</span><span class="n">marker_size</span><span class="p">,),</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+                    <span class="n">hovertext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cycle: </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">&lt;br&gt;&#39;</span>
+                    <span class="o">+</span><span class="s1">&#39;State: &#39;</span> <span class="o">+</span> <span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                    <span class="o">+</span><span class="s1">&#39;C_Rate: &#39;</span> <span class="o">+</span> <span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;C_Rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Cycle </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">, State </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="p">))</span>
+    
+    <span class="n">fig_pocv</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&lt;b&gt;POCV curve over cycles&lt;/b&gt;&lt;br&gt;&#39;</span><span class="p">,</span>
+            <span class="c1"># f&#39;File : {file_name}&#39;,</span>
+            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">title_size</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;&lt;b&gt;Capacity  /  Ah&lt;/b&gt;&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;&lt;b&gt;Voltage  /  V&lt;/b&gt;&quot;</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">legend</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">legend_size</span><span class="p">}}</span>
+        <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">file_path_pocv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;pocv_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.html&#39;</span><span class="p">)</span>
+        <span class="n">fig_pocv</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">file_path_pocv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">png</span><span class="p">:</span>
+        <span class="n">png_image</span> <span class="o">=</span> <span class="n">fig_pocv</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">png_image</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig_pocv</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig_pocv</span></div>
+
+
+
+<div class="viewcode-block" id="plot_GITT_result">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.plot_GITT_result">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_GITT_result</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                     <span class="n">file_path</span><span class="p">,</span>
+                     <span class="n">column</span><span class="o">=</span><span class="s1">&#39;Diffusion Coefficient&#39;</span><span class="p">,</span>
+                     <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the GITT results curve</span>
+
+<span class="sd">    It gives a plot of the selected parameter over SOC</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    column : str, optional</span>
+<span class="sd">        Column to plot (default is &#39;Diffusion Coefficient&#39;).</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots as .html files(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to display the plots as .png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    go.Figure</span>
+<span class="sd">        Plot as a Plotly figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="n">fig_GITT</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="n">nb_cycle</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+            <span class="n">df_state</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;SOC&#39;</span><span class="p">)</span>
+
+            <span class="n">hex_color</span> <span class="o">=</span> <span class="n">get_colorscale</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">nb_cycle</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+            <span class="n">fig_GITT</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;SOC&#39;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="n">column</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines+markers&#39;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">hex_color</span><span class="p">,</span>
+                          <span class="n">size</span><span class="o">=</span><span class="n">marker_size</span><span class="p">),</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">line_width</span><span class="p">),</span>
+                <span class="n">hovertext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cycle: </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">&lt;br&gt;&#39;</span>
+                <span class="o">+</span><span class="s1">&#39;Pulse: &#39;</span> <span class="o">+</span> <span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;Pulse&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Cycle </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">, State </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="p">))</span>
+    
+    <span class="n">fig_GITT</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&lt;b&gt;Parameter numerical results for GITT Test&lt;/b&gt;&lt;br&gt;&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;File : </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">title_size</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;SOC&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="n">column</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">legend</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">legend_size</span><span class="p">}}</span>
+        <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">file_path_GITT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;GITT_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.html&#39;</span><span class="p">)</span>
+        <span class="n">fig_GITT</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">file_path_GITT</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">png</span><span class="p">:</span>
+        <span class="n">png_image</span> <span class="o">=</span> <span class="n">fig_GITT</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">png_image</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig_GITT</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">fig_GITT</span></div>
+
+
+
+<div class="viewcode-block" id="plot_HPPC_result">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/plotting/index.html#BatteryDataAnalysis.src.plotting.plot_HPPC_result">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_HPPC_result</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                     <span class="n">file_path</span><span class="p">,</span>
+                     <span class="n">column</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span>
+                     <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the HPPC results curve</span>
+
+<span class="sd">    It gives a plot of the selected parameter over SOC for both charge and dicharge pulses</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_input : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the data to plot</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots as .html files(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to display the plots as .png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    go.Figure</span>
+<span class="sd">        Plot as a Plotly figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="n">fig_HPPC</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="n">nb_cycle</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+            <span class="n">df_state</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;SOC&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">,</span> <span class="s1">&#39;discharge&#39;</span><span class="p">]:</span>
+                <span class="n">hex_color</span> <span class="o">=</span> <span class="n">get_colorscale</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">nb_cycle</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">charge</span> <span class="o">==</span> <span class="s1">&#39;charge&#39;</span> <span class="k">else</span> <span class="n">get_colorscale</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="n">nb_cycle</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+                <span class="n">fig_HPPC</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;SOC&#39;</span><span class="p">],</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">df_state</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">charge</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines+markers&#39;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">hex_color</span><span class="p">,</span>
+                                <span class="n">size</span><span class="o">=</span><span class="n">marker_size</span><span class="p">,),</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">line_width</span><span class="p">),</span>
+                    <span class="n">hovertext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cycle: </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">&lt;br&gt;&#39;</span>
+                    <span class="o">+</span><span class="s1">&#39;Pulse: &#39;</span> <span class="o">+</span> <span class="n">df_state</span><span class="p">[</span><span class="s1">&#39;Pulse&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Cycle </span><span class="si">{</span><span class="n">cycle</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">charge</span><span class="si">}</span><span class="s1"> pulse&#39;</span><span class="p">,</span>
+                    <span class="p">))</span>
+    
+    <span class="n">fig_HPPC</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&lt;b&gt;Parameter numerical results for HPPC Test&lt;/b&gt;&lt;br&gt;&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;File : </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">title_size</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;SOC&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="n">column</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">axis_size</span><span class="p">}},</span>
+               <span class="s1">&#39;tickfont&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">tickfont_size</span><span class="p">}},</span>
+        <span class="n">legend</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">legend_size</span><span class="p">}}</span>
+        <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">file_path_HPPC</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;HPPC_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.html&#39;</span><span class="p">)</span>
+        <span class="n">fig_HPPC</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">file_path_HPPC</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">png</span><span class="p">:</span>
+        <span class="n">png_image</span> <span class="o">=</span> <span class="n">fig_HPPC</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">png_image</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig_HPPC</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">fig_HPPC</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__center">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

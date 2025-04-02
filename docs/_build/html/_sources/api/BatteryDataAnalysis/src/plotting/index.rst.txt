@@ -1,0 +1,221 @@
+BatteryDataAnalysis.src.plotting
+================================
+
+.. py:module:: BatteryDataAnalysis.src.plotting
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.plotting.title_size
+   BatteryDataAnalysis.src.plotting.axis_size
+   BatteryDataAnalysis.src.plotting.legend_size
+   BatteryDataAnalysis.src.plotting.tickfont_size
+   BatteryDataAnalysis.src.plotting.marker_size
+   BatteryDataAnalysis.src.plotting.line_width
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.plotting.matplotlib_to_plotly_colorscale
+   BatteryDataAnalysis.src.plotting.reduce_points_number
+   BatteryDataAnalysis.src.plotting.get_colorscale
+   BatteryDataAnalysis.src.plotting.plot_test_over_time
+   BatteryDataAnalysis.src.plotting.plot_DQDV_result
+   BatteryDataAnalysis.src.plotting.plot_dqdv_heatmap
+   BatteryDataAnalysis.src.plotting.plot_pocv
+   BatteryDataAnalysis.src.plotting.plot_GITT_result
+   BatteryDataAnalysis.src.plotting.plot_HPPC_result
+
+
+Module Contents
+---------------
+
+.. py:function:: matplotlib_to_plotly_colorscale(colormap, n_colors=256)
+
+   Converts a matplotlib colormap to a Plotly colorscale
+
+   :param colormap: Colormap to convert
+   :type colormap: matplotlib colormap
+   :param n_colors: Number of colors in the colormap (default is 256).
+   :type n_colors: int, optional
+
+   :returns: Plotly colorscale
+   :rtype: List
+
+
+.. py:function:: reduce_points_number(df_input, n_cycle)
+
+   Reduces the number of points in the dataframe
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param n_cycle: Number of points that we want to keep for a single cycle
+   :type n_cycle: int
+
+   :returns: DataFrame with reduced number of points
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: get_colorscale(state, nb_cycle, i)
+
+   Returns the Plotly colorscale for a given state
+
+   :param state: State of the cell charging
+   :type state: ['C', 'D']
+   :param nb_cycle: Total number of cycles
+   :type nb_cycle: int
+   :param i: Cycle number
+   :type i: int
+
+   :returns: Plotly colorscale corresponding to the charging state
+   :rtype: Plotly colorscale
+
+
+.. py:data:: title_size
+   :value: 45
+
+
+.. py:data:: axis_size
+   :value: 35
+
+
+.. py:data:: legend_size
+   :value: 35
+
+
+.. py:data:: tickfont_size
+   :value: 35
+
+
+.. py:data:: marker_size
+   :value: 10
+
+
+.. py:data:: line_width
+   :value: 3
+
+
+.. py:function:: plot_test_over_time(df_input, file_path, test='CCCV', pulse=False, save=False, png=False)
+
+   Plots the Current, Voltage and Capacity over TestTime for a given test type
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param test: Type of test to plot (default is 'CCCV')
+   :type test: str, optional
+   :param pulse: Whether the test type contains current pulses (default is False)
+   :type pulse: bool, optional
+   :param save: Whether to save the plots as .html files(default is False).
+   :type save: bool, optional
+   :param png: Whether to display the plots as .png files (default is False).
+   :type png: bool, optional
+
+   :returns: Plot as a Plotly figure
+   :rtype: go.Figure
+
+
+.. py:function:: plot_DQDV_result(df, file_path, save=False, png=False)
+
+   Plots the dQ/dV curve
+
+   It gives the derivative of Capacity over Voltage
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots as .html files(default is False).
+   :type save: bool, optional
+   :param png: Whether to display the plots as .png files (default is False).
+   :type png: bool, optional
+
+   :returns: Plot as a Plotly figure
+   :rtype: go.Figure
+
+
+.. py:function:: plot_dqdv_heatmap(df, file_path, save=False, png=False)
+
+   Plots the dQ/dV heatmap
+
+   It gives a plot with Cycles over Voltage colored by the magnitude of dQ/dV
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots as .html files(default is False).
+   :type save: bool, optional
+   :param png: Whether to display the plots as .png files (default is False).
+   :type png: bool, optional
+
+   :returns: Plot as a Plotly figure
+   :rtype: go.Figure
+
+
+.. py:function:: plot_pocv(df, file_path, save=False, png=False)
+
+   Plots the POCV curve
+
+   It gives a plot of the Capacity over Voltage
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots as .html files(default is False).
+   :type save: bool, optional
+   :param png: Whether to display the plots as .png files (default is False).
+   :type png: bool, optional
+
+   :returns: Plot as a Plotly figure
+   :rtype: go.Figure
+
+
+.. py:function:: plot_GITT_result(df, file_path, column='Diffusion Coefficient', save=False, png=False)
+
+   Plots the GITT results curve
+
+   It gives a plot of the selected parameter over SOC
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param column: Column to plot (default is 'Diffusion Coefficient').
+   :type column: str, optional
+   :param save: Whether to save the plots as .html files(default is False).
+   :type save: bool, optional
+   :param png: Whether to display the plots as .png files (default is False).
+   :type png: bool, optional
+
+   :returns: Plot as a Plotly figure
+   :rtype: go.Figure
+
+
+.. py:function:: plot_HPPC_result(df, file_path, column='R', save=False, png=False)
+
+   Plots the HPPC results curve
+
+   It gives a plot of the selected parameter over SOC for both charge and dicharge pulses
+
+   :param df_input: DataFrame containing the data to plot
+   :type df_input: pandas.DataFrame
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param save: Whether to save the plots as .html files(default is False).
+   :type save: bool, optional
+   :param png: Whether to display the plots as .png files (default is False).
+   :type png: bool, optional
+
+   :returns: Plot as a Plotly figure
+   :rtype: go.Figure
+
+

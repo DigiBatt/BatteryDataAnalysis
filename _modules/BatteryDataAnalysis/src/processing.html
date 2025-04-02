@@ -1,0 +1,848 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BatteryDataAnalysis.src.processing &#8212; Battery Data Analysis Toolkit</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=cf300051" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/BatteryDataAnalysis/src/processing';</script>
+    <link rel="icon" href="../../../_static/battinfologo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the ontology..."
+         aria-label="Search the ontology..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/battinfologo.jpg" class="logo__image only-light" alt="Battery Data Analysis Toolkit - Home"/>
+    <img src="../../../_static/battinfologo.jpg" class="logo__image only-dark pst-js-only" alt="Battery Data Analysis Toolkit - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/getstarted.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/about.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/faq.html">
+    FAQ
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/DigiBatt/BatteryDataAnalysis" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/getstarted.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/about.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../pages/faq.html">
+    FAQ
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/DigiBatt/BatteryDataAnalysis" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">BatteryDataAnalysis.src.processing</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for BatteryDataAnalysis.src.processing</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">preprocessing</span> <span class="kn">import</span> <span class="n">preprocessing_files</span>
+<span class="kn">from</span> <span class="nn">analysis_dqdv</span> <span class="kn">import</span> <span class="n">calculate_dqdv_for_all_cycle</span>
+<span class="kn">from</span> <span class="nn">analysis_GITT</span> <span class="kn">import</span> <span class="n">pulse_number_GITT</span><span class="p">,</span> <span class="n">global_calculation_GITT</span>
+<span class="kn">from</span> <span class="nn">analysis_HPPC</span> <span class="kn">import</span> <span class="n">pulse_number_HPPC</span><span class="p">,</span> <span class="n">global_calculation_HPPC</span>
+<span class="kn">from</span> <span class="nn">analysis_ICI</span> <span class="kn">import</span> <span class="n">pulse_number_ICI</span><span class="p">,</span> <span class="n">global_calculation_ICI</span>
+<span class="kn">from</span> <span class="nn">plotting</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<div class="viewcode-block" id="process_file">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/processing/index.html#BatteryDataAnalysis.src.processing.process_file">[docs]</a>
+<span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> 
+                 <span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">cycle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">debug_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">my_func_list</span><span class="o">=</span><span class="p">[],</span>
+                 <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processes the data for a given file in .parquet or .csv format</span>
+
+<span class="sd">    It detects the type of tests applied to the battery and process the data for each type of tests</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    column_names : Dict, optional</span>
+<span class="sd">        Dictionary containing the column names to be used for the analysis</span>
+<span class="sd">        The useful columns are: Voltage, Current, and SysTime (system time or test time) that should be values and the real column names should be their keys</span>
+<span class="sd">    cycle : int, optional</span>
+<span class="sd">        List of cycle numbers to process</span>
+<span class="sd">    debug_func : function, optional</span>
+<span class="sd">        Function to be called during the preprocessing of the data to debug a file</span>
+<span class="sd">    my_func_list : list, optional</span>
+<span class="sd">        List of functions to add to the calculation process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the result plots in format .html (default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to save the result plots as png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the processed data.</span>
+<span class="sd">    result_dict : dict</span>
+<span class="sd">        Dictionary containing the processed results for each test type.</span>
+<span class="sd">        Keys are test names (&#39;GITT&#39;, &#39;ICI&#39;, &#39;HPPC&#39;) and values are DataFrames with the respective results for each test.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Basic usage:</span>
+
+<span class="sd">    &gt;&gt;&gt; df = process_file(file_path)</span>
+<span class="sd">    File : GITT_AG4_S_1577.parquet</span>
+<span class="sd">    Length : 9154638</span>
+<span class="sd">    Preprocessing Time : 41s</span>
+<span class="sd">    Find Test Time : 48s</span>
+<span class="sd">    Test : GITT ; Length : 9061575</span>
+<span class="sd">        Pulse  Cycle   TestTime       SOC       OCV    Ipulse  Diffusion Coefficient  Resistance      R_1s      R_30s      R_60s     R_180s      Tau    State</span>
+<span class="sd">    Pulse      0      1   46801.00  1.000000  2.484417 -0.043325           3.224942e-15   24.730671  6.169087  28.370994  30.130583  36.914223  3598.98     D</span>
+<span class="sd">    Pulse      1      1   53999.98  0.980011  0.575001 -0.043325           4.672011e-16    1.997885  1.474679   2.089985   2.411197   3.278645  3599.98     D</span>
+<span class="sd">    Pulse      2      1   61199.98  0.960011  0.379431 -0.043325           3.873728e-16    1.412661  1.106010   1.468100   1.685784   2.282023  3599.98     D</span>
+<span class="sd">    Pulse      3      1   68399.98  0.940010  0.272730 -0.043324           2.772498e-16    1.205467  0.979083   1.249654   1.411445   1.843224  3599.98     D</span>
+<span class="sd">    Pulse      4      1   75599.98  0.920010  0.216829 -0.043325           6.646707e-17    1.077636  0.915281   1.112744   1.224103   1.524546  3599.98     D</span>
+<span class="sd">    ...      ...    ...        ...       ...       ...       ...                    ...         ...       ...        ...        ...        ...      ...   ...</span>
+<span class="sd">    Pulse    133      2  962099.98  0.136391  0.087613 -0.043325           1.887492e-19    0.220889  0.143877   0.239615   0.273980   0.321392  3599.98     D</span>
+<span class="sd">    Pulse    134      2  969299.98  0.111716  0.087493 -0.043325           2.520212e-19    0.225816  0.147635   0.244767   0.279301   0.326996  3599.98     D</span>
+<span class="sd">    Pulse    135      2  976499.98  0.087041  0.087352 -0.043325           3.536782e-19    0.231572  0.152126   0.251083   0.285541   0.333647  3599.98     D</span>
+<span class="sd">    Pulse    136      2  983699.98  0.062366  0.087180 -0.043325           5.092976e-19    0.238380  0.157598   0.258096   0.292359   0.341250  3599.98     D</span>
+<span class="sd">    Pulse    137      2  990899.98  0.037691  0.086971 -0.043325           8.648767e-19    0.246495  0.163909   0.266569   0.300817   0.350488  3599.98     D</span>
+<span class="sd">    [138 rows x 15 columns]</span>
+<span class="sd">    GITT Time : 21s</span>
+<span class="sd">    Total Time : 115s</span>
+
+<span class="sd">    In addition, you can add a column_names dictionnary and a debug function if needed:</span>
+
+<span class="sd">    &gt;&gt;&gt; column_names={&#39;original_time_column&#39;: &#39;SysTime&#39;, </span>
+<span class="sd">    ...               &#39;original_voltage_column&#39;: &#39;Voltage&#39;, </span>
+<span class="sd">    ...               &#39;original_current_column&#39;: &#39;Current&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; def my_debug_func(df):</span>
+<span class="sd">    ...     df = df[df[&#39;original_time_column&#39;] &lt; 1e6]</span>
+<span class="sd">    ...     return df</span>
+<span class="sd">    &gt;&gt;&gt; df = process_file(file_path, column_names=column_names, debug_func=my_debug_func)</span>
+<span class="sd">    File : GITT_AG4_S_1577.parquet</span>
+<span class="sd">    Length : 9154638</span>
+<span class="sd">    Preprocessing Time : 41s</span>
+<span class="sd">    Find Test Time : 48s</span>
+<span class="sd">    Test : GITT ; Length : 9061575</span>
+<span class="sd">        Pulse  Cycle   TestTime       SOC       OCV    Ipulse  Diffusion Coefficient  Resistance      R_1s      R_30s      R_60s     R_180s      Tau    State</span>
+<span class="sd">    Pulse      0      1   46801.00  1.000000  2.484417 -0.043325           3.224942e-15   24.730671  6.169087  28.370994  30.130583  36.914223  3598.98     D</span>
+<span class="sd">    Pulse      1      1   53999.98  0.980011  0.575001 -0.043325           4.672011e-16    1.997885  1.474679   2.089985   2.411197   3.278645  3599.98     D</span>
+<span class="sd">    Pulse      2      1   61199.98  0.960011  0.379431 -0.043325           3.873728e-16    1.412661  1.106010   1.468100   1.685784   2.282023  3599.98     D</span>
+<span class="sd">    Pulse      3      1   68399.98  0.940010  0.272730 -0.043324           2.772498e-16    1.205467  0.979083   1.249654   1.411445   1.843224  3599.98     D</span>
+<span class="sd">    Pulse      4      1   75599.98  0.920010  0.216829 -0.043325           6.646707e-17    1.077636  0.915281   1.112744   1.224103   1.524546  3599.98     D</span>
+<span class="sd">    ...      ...    ...        ...       ...       ...       ...                    ...         ...       ...        ...        ...        ...      ...   ...</span>
+<span class="sd">    Pulse    133      2  962099.98  0.136391  0.087613 -0.043325           1.887492e-19    0.220889  0.143877   0.239615   0.273980   0.321392  3599.98     D</span>
+<span class="sd">    Pulse    134      2  969299.98  0.111716  0.087493 -0.043325           2.520212e-19    0.225816  0.147635   0.244767   0.279301   0.326996  3599.98     D</span>
+<span class="sd">    Pulse    135      2  976499.98  0.087041  0.087352 -0.043325           3.536782e-19    0.231572  0.152126   0.251083   0.285541   0.333647  3599.98     D</span>
+<span class="sd">    Pulse    136      2  983699.98  0.062366  0.087180 -0.043325           5.092976e-19    0.238380  0.157598   0.258096   0.292359   0.341250  3599.98     D</span>
+<span class="sd">    Pulse    137      2  990899.98  0.037691  0.086971 -0.043325           8.648767e-19    0.246495  0.163909   0.266569   0.300817   0.350488  3599.98     D</span>
+<span class="sd">    [138 rows x 15 columns]</span>
+<span class="sd">    GITT Time : 21s</span>
+<span class="sd">    Total Time : 115s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">preprocessing_files</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">debug_func</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">find_test</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">test</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test :&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="s1">&#39;; Length :&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">test</span><span class="p">]))</span>
+            
+            <span class="n">df_test</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">test</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;GITT&#39;</span><span class="p">:</span>
+                <span class="n">df_test</span><span class="p">,</span> <span class="n">GITT_result_df</span> <span class="o">=</span> <span class="n">process_GITT</span><span class="p">(</span><span class="n">df_test</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">my_func_list</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="s1">&#39;GITT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GITT_result_df</span>
+
+            <span class="k">elif</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;ICI&#39;</span><span class="p">:</span>
+                <span class="n">df_test</span><span class="p">,</span> <span class="n">ICI_result_df</span> <span class="o">=</span> <span class="n">process_ICI</span><span class="p">(</span><span class="n">df_test</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">my_func_list</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="s1">&#39;ICI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ICI_result_df</span>
+
+            <span class="k">elif</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;HPPC&#39;</span><span class="p">:</span>
+                <span class="n">df_test</span><span class="p">,</span> <span class="n">HPPC_result_df</span> <span class="o">=</span> <span class="n">process_HPPC</span><span class="p">(</span><span class="n">df_test</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">my_func_list</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="s1">&#39;HPPC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">HPPC_result_df</span>
+
+            <span class="k">elif</span> <span class="n">test</span> <span class="o">==</span> <span class="s1">&#39;CCCV&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;CCCV&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">df_test</span> <span class="o">=</span> <span class="n">df_test</span><span class="p">[</span><span class="n">df_test</span><span class="p">[</span><span class="s1">&#39;C_Rate&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.2</span><span class="p">]</span>
+                <span class="n">df_test</span> <span class="o">=</span> <span class="n">process_dqdv</span><span class="p">(</span><span class="n">df_test</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Time : &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">result_dict</span></div>
+
+
+
+<div class="viewcode-block" id="find_test">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/processing/index.html#BatteryDataAnalysis.src.processing.find_test">[docs]</a>
+<span class="k">def</span> <span class="nf">find_test</span><span class="p">(</span><span class="n">df_input</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the test applied to the battery</span>
+
+<span class="sd">    Analyses the test type for each cycle according to its current pulses number</span>
+<span class="sd">    It needs the preprocessed data with in particular the columns Cycle, State and normcurrent</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the preprocessed data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+    <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">]:</span>
+            <span class="n">df_cycle</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_cycle</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="c1"># for pulse in [&#39;discharge_pulse&#39;, &#39;charge_pulse&#39;]:</span>
+                <span class="c1">#     pulse_number_list = []</span>
+                <span class="c1">#     pulse_sign = 1 if pulse == &#39;discharge_pulse&#39; else -1</span>
+                <span class="c1">#     pulse_count = (pulse_sign * df_cycle[&#39;normcurrent&#39;] &lt; 0).diff().sum()</span>
+                <span class="c1">#     df_cycle[pulse] = (pulse_sign * df_cycle[&#39;normcurrent&#39;] &lt; 0).diff().cumsum()</span>
+
+                <span class="c1">#     for pulse_number in df_cycle[pulse].unique():</span>
+                <span class="c1">#         if len(df_cycle[df_cycle[pulse] == pulse_number]) &lt; 10:</span>
+                <span class="c1">#             pulse_count -= 1</span>
+                <span class="c1">#     pulse_number_list.append(pulse_count)</span>
+
+                <span class="n">discharge_pulse</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;discharge_pulse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+                <span class="n">charge_pulse</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;charge_pulse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+
+                <span class="c1"># Remove pulses that last less than 10 data points (noise)</span>
+                <span class="k">for</span> <span class="n">pulse</span> <span class="ow">in</span> <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;discharge_pulse&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;discharge_pulse&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">pulse</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                        <span class="n">discharge_pulse</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                <span class="k">for</span> <span class="n">pulse</span> <span class="ow">in</span> <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;charge_pulse&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;charge_pulse&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">pulse</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                        <span class="n">charge_pulse</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                <span class="c1"># if charge and discharge pulse, it is HPPC</span>
+                <span class="k">if</span> <span class="n">discharge_pulse</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">charge_pulse</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">),</span> <span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;HPPC&#39;</span>
+
+                <span class="c1"># if charge or discharge pulse, it is either GITT or ICI</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">discharge_pulse</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="n">charge_pulse</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">):</span>
+                    <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;Pulse&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span><span class="o">.</span><span class="n">ffill</span><span class="p">()</span>
+                    <span class="n">relaxation_time</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">pulse</span> <span class="ow">in</span> <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;Pulse&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                        <span class="n">df_pulse</span> <span class="o">=</span> <span class="n">df_cycle</span><span class="p">[</span><span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;Pulse&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">pulse</span><span class="p">]</span>
+                        <span class="n">relaxation_time</span> <span class="o">+=</span> <span class="n">df_pulse</span><span class="p">[</span><span class="n">df_pulse</span><span class="p">[</span><span class="s1">&#39;normcurrent&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">][</span><span class="s1">&#39;TestTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+                    <span class="c1"># Threshold of 30% of relaxation time makes the difference between ICI and GITT</span>
+                    <span class="k">if</span> <span class="n">relaxation_time</span> <span class="o">/</span> <span class="n">df_cycle</span><span class="p">[</span><span class="s1">&#39;TestTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.3</span><span class="p">:</span>
+                        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">),</span> <span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ICI&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Cycle&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cycle</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span><span class="p">),</span> <span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;GITT&#39;</span>
+
+    <span class="c1"># If there is a complete cycle with no pulses, the test is CCCV</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">())</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">df_group</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">group</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;C&#39;</span> <span class="ow">in</span> <span class="n">df_group</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;D&#39;</span> <span class="ow">in</span> <span class="n">df_group</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="ow">and</span> <span class="n">df_group</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">]:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">group</span><span class="p">,</span> <span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;CCCV&#39;</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Find Test Time : &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="process_dqdv">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/processing/index.html#BatteryDataAnalysis.src.processing.process_dqdv">[docs]</a>
+<span class="k">def</span> <span class="nf">process_dqdv</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> 
+                 <span class="n">file_path</span><span class="p">,</span>
+                 <span class="n">heatmap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processes the CCCV data for a given preprocessed file</span>
+
+<span class="sd">    Plots the dQ/dV curves and the dQ/dV heatmap for every cycles</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the CCCV data to process.</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process.</span>
+<span class="sd">    heatmap : bool, optional</span>
+<span class="sd">        Whether to plot the dQ/dV heatmap (default is False).</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots in format .html(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to save the plots as png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the dQ/dV data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">df_dqdv</span> <span class="o">=</span> <span class="n">calculate_dqdv_for_all_cycle</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">df_dqdv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_test_over_time</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+        <span class="n">fig_dqdv</span> <span class="o">=</span> <span class="n">plot_DQDV_result</span><span class="p">(</span><span class="n">df_dqdv</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+        <span class="n">fig_pocv</span> <span class="o">=</span> <span class="n">plot_pocv</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">heatmap</span><span class="p">:</span>
+            <span class="n">heatmap_dqdv</span> <span class="o">=</span> <span class="n">plot_dqdv_heatmap</span><span class="p">(</span><span class="n">df_dqdv</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dQ/dV Time : &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_dqdv</span></div>
+
+
+
+<div class="viewcode-block" id="process_GITT">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/processing/index.html#BatteryDataAnalysis.src.processing.process_GITT">[docs]</a>
+<span class="k">def</span> <span class="nf">process_GITT</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> 
+                 <span class="n">file_path</span><span class="p">,</span>
+                 <span class="n">my_func_list</span><span class="p">,</span>
+                 <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processes the GITT data for a given preprocessed file</span>
+
+<span class="sd">    Plots the GITT Voltage curve and the diffusion coefficient over SOC for every cycles</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the GITT data to process</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots in format .html(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to save the plots as png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df_nested : dict</span>
+<span class="sd">        Dict containing pulses as keys and their respective DataFrames as values</span>
+<span class="sd">    results_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the GITT parameters structured by pulse number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">df_nested</span> <span class="o">=</span> <span class="n">pulse_number_GITT</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">results_df</span> <span class="o">=</span> <span class="n">global_calculation_GITT</span><span class="p">(</span><span class="n">df_nested</span><span class="p">,</span> <span class="n">my_func_list</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_test_over_time</span><span class="p">(</span><span class="n">df_nested</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="s1">&#39;GITT&#39;</span><span class="p">,</span> <span class="n">pulse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="n">fig_GITT</span> <span class="o">=</span> <span class="n">plot_GITT_result</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">&#39;Diffusion Coefficient&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="n">fig_GITT</span> <span class="o">=</span> <span class="n">plot_GITT_result</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">&#39;Resistance&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="c1"># fig_GITT = plot_GITT_result(results_df, file_path, column=&#39;R_30s&#39;, save=save)</span>
+    <span class="c1"># fig_GITT = plot_GITT_result(results_df, file_path, column=&#39;R_60s&#39;, save=save)</span>
+    <span class="c1"># fig_GITT = plot_GITT_result(results_df, file_path, column=&#39;R_180s&#39;, save=save)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;GITT Time : &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_nested</span><span class="p">,</span> <span class="n">results_df</span></div>
+
+
+
+<div class="viewcode-block" id="process_ICI">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/processing/index.html#BatteryDataAnalysis.src.processing.process_ICI">[docs]</a>
+<span class="k">def</span> <span class="nf">process_ICI</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> 
+                <span class="n">file_path</span><span class="p">,</span>
+                <span class="n">my_func_list</span><span class="p">,</span>
+                <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processes the ICI data for a given preprocessed file</span>
+
+<span class="sd">    Plots the ICI Voltage curve and the diffusion coefficient over SOC for every cycles</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the ICI data to process</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots in format .html(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to save the plots as png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df_nested : dict</span>
+<span class="sd">        Dict containing pulses as keys and their respective DataFrames as values</span>
+<span class="sd">    results_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the ICI parameters structured by pulse number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">df_nested</span> <span class="o">=</span> <span class="n">pulse_number_ICI</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">results_df</span> <span class="o">=</span> <span class="n">global_calculation_ICI</span><span class="p">(</span><span class="n">df_nested</span><span class="p">,</span> <span class="n">my_func_list</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_test_over_time</span><span class="p">(</span><span class="n">df_nested</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="s1">&#39;ICI&#39;</span><span class="p">,</span> <span class="n">pulse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="n">fig_GITT</span> <span class="o">=</span> <span class="n">plot_GITT_result</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">&#39;Diffusion Coefficient&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="n">fig_GITT</span> <span class="o">=</span> <span class="n">plot_GITT_result</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">&#39;Resistance&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ICI Time : &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_nested</span><span class="p">,</span> <span class="n">results_df</span></div>
+
+
+
+<div class="viewcode-block" id="process_HPPC">
+<a class="viewcode-back" href="../../../api/BatteryDataAnalysis/src/processing/index.html#BatteryDataAnalysis.src.processing.process_HPPC">[docs]</a>
+<span class="k">def</span> <span class="nf">process_HPPC</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> 
+                 <span class="n">file_path</span><span class="p">,</span>
+                 <span class="n">my_func_list</span><span class="p">,</span>
+                 <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">png</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processes the HPPC data for a given preprocessed file</span>
+
+<span class="sd">    Plots the HPPC Voltage curve and the diffusion coefficient over SOC for every cycles</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the HPPC data to process</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file to process</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        Whether to save the plots in format .html(default is False).</span>
+<span class="sd">    png : bool, optional</span>
+<span class="sd">        Whether to save the plots as png files (default is False).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df_nested : dict</span>
+<span class="sd">        Dict containing pulses as keys and their respective DataFrames as values</span>
+<span class="sd">    results_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame containing the HPPC parameters structured by pulse number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">df_nested</span> <span class="o">=</span> <span class="n">pulse_number_HPPC</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">results_df</span> <span class="o">=</span> <span class="n">global_calculation_HPPC</span><span class="p">(</span><span class="n">df_nested</span><span class="p">,</span> <span class="n">my_func_list</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">results_df</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_test_over_time</span><span class="p">(</span><span class="n">df_nested</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="s1">&#39;HPPC&#39;</span><span class="p">,</span> <span class="n">pulse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="n">fig_HPPC</span> <span class="o">=</span> <span class="n">plot_HPPC_result</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+    <span class="n">fig_HPPC</span> <span class="o">=</span> <span class="n">plot_HPPC_result</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span> <span class="n">png</span><span class="o">=</span><span class="n">png</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;HPPC Time : &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_nested</span><span class="p">,</span> <span class="n">results_df</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__center">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

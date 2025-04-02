@@ -1,0 +1,686 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Examples of custom functions &#8212; Battery Data Analysis Toolkit</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=cf300051" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/example_custom_func';</script>
+    <link rel="icon" href="../_static/battinfologo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the ontology..."
+         aria-label="Search the ontology..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/battinfologo.jpg" class="logo__image only-light" alt="Battery Data Analysis Toolkit - Home"/>
+    <img src="../_static/battinfologo.jpg" class="logo__image only-dark pst-js-only" alt="Battery Data Analysis Toolkit - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getstarted.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/about.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/faq.html">
+    FAQ
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/DigiBatt/BatteryDataAnalysis" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getstarted.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/about.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/faq.html">
+    FAQ
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/DigiBatt/BatteryDataAnalysis" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Examples of custom functions</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Examples-of-custom-functions">
+<h1>Examples of custom functions<a class="headerlink" href="#Examples-of-custom-functions" title="Link to this heading">#</a></h1>
+<p>In this example notebook, you will find examples of custom functions to calculate specific parameters with the <em>process_file</em> function.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">)))</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">processing</span> <span class="kn">import</span> <span class="n">process_file</span>
+</pre></div>
+</div>
+</div>
+<div class="line-block">
+<div class="line">To use the function correctly, you just have to select the parameters you want in argument and then to return the new parameter you want to calculate.</div>
+<div class="line">The parameters that you can select are presented in the API Documentation, in the section corresponding to GITT, ICI or HPPC Test depending on which one you want to analyze.</div>
+</div>
+<div class="line-block">
+<div class="line">For the first example, we want to calculate the DCIR after 1 second for a GITT Test.</div>
+<div class="line">We need to select in argument:</div>
+</div>
+<ul class="simple">
+<li><p>t0: The time just before the start of the pulse</p></li>
+<li><p>Voltage: The voltage curve interpolation</p></li>
+<li><p>Ipulse: The pulse mean current</p></li>
+</ul>
+<p>The formula is: DCIR = (Voltage(t0 + 1) - Voltage(t0)) / Ipulse</p>
+<p>Once defined, the function has to be part of the <em>process_file()</em> arguments as a list of functions. Here the list will only contain this function, but you can add as many as you need. The result is then available on the result DataFrame.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_example_func</span><span class="p">(</span><span class="n">Ipulse</span><span class="p">,</span> <span class="n">Voltage</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
+    <span class="n">DCIR</span> <span class="o">=</span> <span class="p">(</span><span class="n">Voltage</span><span class="p">(</span><span class="n">t0</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">Voltage</span><span class="p">(</span><span class="n">t0</span><span class="p">))</span> <span class="o">/</span> <span class="n">Ipulse</span>
+    <span class="k">return</span> <span class="n">DCIR</span>
+
+<span class="n">file_path_GITT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;example_file_GITT.parquet&#39;</span><span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">process_file</span><span class="p">(</span><span class="n">file_path_GITT</span><span class="p">,</span> <span class="n">my_func_list</span><span class="o">=</span><span class="p">[</span><span class="n">my_example_func</span><span class="p">],</span> <span class="n">png</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+File : GITT_AG4_S_1577.parquet
+Length : 20862255
+Preprocessing Time : 128s
+Find Test Time : 172s
+Test : GITT ; Length : 20769192
+       Pulse  Cycle State    TestTime       SOC       OCV    Ipulse  \
+Pulse      0      1     D    46801.00  1.000000  2.484417 -0.043325
+Pulse      1      1     D    53999.98  0.980011  0.575001 -0.043325
+Pulse      2      1     D    61199.98  0.960011  0.379431 -0.043325
+Pulse      3      1     D    68399.98  0.940010  0.272730 -0.043324
+Pulse      4      1     D    75599.98  0.920010  0.216829 -0.043325
+...      ...    ...   ...         ...       ...       ...       ...
+Pulse    391      4     C  2692799.98  0.880001  0.216267  0.043323
+Pulse    392      4     C  2699099.98  0.900001  0.217590  0.043323
+Pulse    393      4     C  2705399.98  0.920000  0.219228  0.043324
+Pulse    394      4     C  2711699.98  0.940000  0.236643  0.043324
+Pulse    395      4     C  2717999.98  0.960000  0.332785  0.043324
+
+       Diffusion Coefficient  Resistance  my_example_func
+Pulse           3.224942e-15   24.730671         6.169087
+Pulse           4.672011e-16    1.997885         1.474679
+Pulse           3.873728e-16    1.412661         1.106010
+Pulse           2.772498e-16    1.205467         0.979083
+Pulse           6.646707e-17    1.077636         0.915281
+...                      ...         ...              ...
+Pulse           1.087623e-16    0.103577         0.055529
+Pulse           9.125371e-17    0.103142         0.055165
+Pulse           6.979949e-16    0.104653         0.054815
+Pulse           9.657135e-16    0.112128         0.055882
+Pulse           9.748684e-16    0.132783         0.061250
+
+[396 rows x 10 columns]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_custom_func_3_1.png" src="../_images/examples_example_custom_func_3_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_custom_func_3_2.png" src="../_images/examples_example_custom_func_3_2.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_custom_func_3_3.png" src="../_images/examples_example_custom_func_3_3.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+GITT Time : 75s
+Total Time : 385s
+</pre></div></div>
+</div>
+<div class="line-block">
+<div class="line">For this second example, we want to calculate charge resistance for an HPPC Test.</div>
+<div class="line">Once again, the parameters that you can select are presented in the API Documentation, in the HPPC section in this case.</div>
+</div>
+<p>We need to select in argument:</p>
+<ul class="simple">
+<li><p>V3: The time just before the start of the charging pulse</p></li>
+<li><p>V4: The time just after the start of the charging pulse</p></li>
+<li><p>Icharge: The charging pulse mean current</p></li>
+</ul>
+<p>The formula is R_charge = (V4 - V3) / Icharge</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_second_example_func</span><span class="p">(</span><span class="n">V3</span><span class="p">,</span> <span class="n">V4</span><span class="p">,</span> <span class="n">Icharge</span><span class="p">):</span>
+    <span class="n">R_charge</span> <span class="o">=</span> <span class="p">(</span><span class="n">V4</span> <span class="o">-</span> <span class="n">V3</span><span class="p">)</span> <span class="o">/</span> <span class="n">Icharge</span>
+    <span class="k">return</span> <span class="n">R_charge</span>
+
+<span class="n">file_path_HPPC</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;example_file_HPPC.parquet&#39;</span><span class="p">)</span>
+
+<span class="n">column_names</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Time&#39;</span><span class="p">:</span> <span class="s1">&#39;SysTime&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="s1">&#39;Current&#39;</span><span class="p">,</span>
+    <span class="s1">&#39; W&#39;</span><span class="p">:</span> <span class="s1">&#39;Voltage&#39;</span><span class="p">,}</span>
+<span class="k">def</span> <span class="nf">my_debug_func</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="s1">&#39;ClimaTemp&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+ \d</span><span class="si">{2}</span><span class="s1">:\d</span><span class="si">{2}</span><span class="s1">:\d</span><span class="si">{2}</span><span class="s1">)\.?(\d+)?&#39;</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">process_file</span><span class="p">(</span><span class="n">file_path_HPPC</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">,</span> <span class="n">debug_func</span><span class="o">=</span><span class="n">my_debug_func</span><span class="p">,</span> <span class="n">my_func_list</span><span class="o">=</span><span class="p">[</span><span class="n">my_second_example_func</span><span class="p">],</span> <span class="n">png</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+File : HPPC_Samsung_16.csv
+Length : 11183731
+Preprocessing Time : 145s
+Find Test Time : 0s
+Test : CCCV ; Length : 59858
+Test : HPPC ; Length : 26178
+       Pulse  Cycle State   TestTime       SOC       OCV  R_charge  \
+Pulse      1      2     D  2575167.0  0.900947  4.081708  0.052368
+Pulse      2      2     D  2577779.0  0.801184  4.024439  0.050853
+Pulse      3      2     D  2580392.0  0.701569  3.918950  0.051392
+Pulse      4      2     D  2583004.0  0.601812  3.825683  0.049286
+Pulse      5      2     D  2585616.0  0.502200  3.726562  0.049310
+Pulse      6      2     D  2588229.0  0.402951  3.648988  0.052111
+Pulse      7      2     D  2590841.0  0.303177  3.568020  0.052914
+Pulse      8      2     D  2593453.0  0.203549  3.459047  0.054154
+Pulse      9      2     D  2596066.0  0.103779  3.304122  0.068713
+Pulse     10      2     D  2598710.0  0.004048  2.962429  0.133255
+
+       R_discharge   P_charge  P_discharge  my_second_example_func
+Pulse     0.020080   6.624421   196.928313                0.052368
+Pulse     0.018830  11.512180   202.401574                0.050853
+Pulse     0.020092  19.940770   176.567119                0.051392
+Pulse     0.019168  28.674555   172.908371                0.049286
+Pulse     0.018696  37.033110   164.020014                0.049310
+Pulse     0.019906  41.242265   144.314065                0.052111
+Pulse     0.020019  46.989840   133.382603                0.052914
+Pulse     0.019641  54.295257   122.084669                0.054154
+Pulse     0.025184  52.181407    79.835566                0.068713
+Pulse     0.028375  37.587409    40.753282                0.133255
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_custom_func_5_1.png" src="../_images/examples_example_custom_func_5_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_custom_func_5_2.png" src="../_images/examples_example_custom_func_5_2.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_custom_func_5_3.png" src="../_images/examples_example_custom_func_5_3.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+HPPC Time : 3s
+Total Time : 149s
+</pre></div></div>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/example_custom_func.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__center">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

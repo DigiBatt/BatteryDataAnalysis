@@ -1,0 +1,104 @@
+BatteryDataAnalysis.src.analysis_ICI
+====================================
+
+.. py:module:: BatteryDataAnalysis.src.analysis_ICI
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.analysis_ICI.pulse_number_ICI
+   BatteryDataAnalysis.src.analysis_ICI.global_calculation_ICI
+   BatteryDataAnalysis.src.analysis_ICI.calculate_relevant_points_ICI
+   BatteryDataAnalysis.src.analysis_ICI.calculate_diffusion_coefficient_ICI
+
+
+Module Contents
+---------------
+
+.. py:function:: pulse_number_ICI(df_input)
+
+   Pulse selection for ICI data
+
+   - For every cycles, it gives a pulse number for every relaxation pulse.
+   - Then it gives this number for the last point before the pulse until the last point before the end of the charging/discharging.
+   - Finally, it creates a nested Dataframe structuring the ICI data for each pulse.
+
+   Here is a schema of a selected pulse and its relevant points:
+
+   .. image:: ../../../../_static/pulse_ICI.png
+       :width: 2000px
+       :align: center
+       :alt: Example of a pulse selected by the function for ICI data
+
+   .. image:: ../../../../_static/pulse_ICI_relaxation.png
+       :width: 2000px
+       :align: center
+       :alt: Relaxation part of a pulse selected by the function for ICI data
+
+   The corresponding parameters that can be used in a custom function (see :func:`add_function`) are:
+   *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_ICI`.
+
+   :param df: DataFrame containing the ICI data to process
+   :type df: pandas.DataFrame
+
+   :rtype: Dict containing the nested DataFrames as values and their pulse number as keys
+
+
+.. py:function:: global_calculation_ICI(df_nested, my_func_list)
+
+   Calculates the ICI parameters
+
+   Given a nested DataFrame containing the ICI data, this function calculates the ICI parameters for each pulse
+
+   :param df_nested: Dict containing the nested DataFrames corresponding to each pulse
+   :type df_nested: Dict
+
+   :returns: Dict containing the nested DataFrames as values and their pulse number as keys
+   :rtype: dict
+
+
+.. py:function:: calculate_relevant_points_ICI(df_pulse)
+
+   Calculates the relevant points represented in the :func:`pulse_number_ICI` documentation.
+
+   These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
+
+   :param df_pulse: DataFrame containing the data corresponding to one pulse
+   :type df_pulse: pandas.DataFrame
+
+   :returns: Tuple containing the relevant points : V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse
+   :rtype: tuple
+
+
+.. py:function:: calculate_diffusion_coefficient_ICI(t1, t2, t3, delta_Ec, delta_Epulse)
+
+   Calculates diffusion coefficient for ICI test
+
+   See the :func:`pulse_number_ICI` documentation for the points definition.
+   The formula comes from the paper from Y. Chien et al. (2023)
+   *"Rapid determination of solid-state diffusion coefficients in Li-based batteries via intermittent current interruption method"*
+
+   The diffusion coefficient is calculated using the following formula:
+
+   .. math::
+
+       D = \frac{4}{9\pi} \cdot \text{radius}^2 \cdot \left( \frac{\frac{\Delta E_c}{t_3 - t_2}}{\frac{\Delta E_{\text{pulse}}}{\sqrt{t_2 - t_1}}} \right)^2
+
+   :param t1:
+   :type t1: float
+   :param t2:
+   :type t2: float
+   :param t3:
+   :type t3: float
+   :param delta_Ec:
+   :type delta_Ec: float
+   :param delta_Epulse:
+   :type delta_Epulse: float
+
+   :returns: Diffusion coefficient of the selected pulse
+   :rtype: float
+
+

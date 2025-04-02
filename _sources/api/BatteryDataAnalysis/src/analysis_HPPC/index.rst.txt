@@ -1,0 +1,95 @@
+BatteryDataAnalysis.src.analysis_HPPC
+=====================================
+
+.. py:module:: BatteryDataAnalysis.src.analysis_HPPC
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.analysis_HPPC.pulse_number_HPPC
+   BatteryDataAnalysis.src.analysis_HPPC.global_calculation_HPPC
+   BatteryDataAnalysis.src.analysis_HPPC.calculate_relevant_points_HPPC
+   BatteryDataAnalysis.src.analysis_HPPC.calculate_pulse_power_capability
+
+
+Module Contents
+---------------
+
+.. py:function:: pulse_number_HPPC(df_input)
+
+   Pulse selection for HPPC data
+
+   For every cycles, gives a pulse number for every HPPC pattern (containing a charge and discharge pulse followed by a relaxation time).
+   Then it gives this number for the last point before the first pulse until the last point before the end of the relaxation
+   Finally, it creates a nested Dataframe structuring the HPPC data for each pattern (called 'Pulse' to be consistent with GITT and ICI processing)
+
+   Here is a schema of a selected pulse and its relevant points:
+
+   .. image:: ../../../../_static/pulse_HPPC.png
+       :width: 2000px
+       :align: center
+       :alt: Example of a pulse selected by the function for HPPC data
+
+   .. image:: ../../../../_static/pulse_HPPC_zoom.png
+       :width: 2000px
+       :align: center
+       :alt: Current pulses part of a pulse selected by the function for HPPC data
+
+   The corresponding parameters that can be used in a custom function (see :func:`add_function`) are:
+   *V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Icharge, Idischarge* that are calculated in :func:`calculate_relevant_points_HPPC`.
+
+   :param df_input: DataFrame containing the HPPC data to process
+   :type df_input: pandas.DataFrame
+
+   :returns: Dict containing the nested DataFrames as values and their pulse number as keys
+   :rtype: dict
+
+
+.. py:function:: global_calculation_HPPC(df_nested, my_func_list)
+
+   Calculates the HPPC parameters
+
+   Given a nested DataFrame containing the HPPC data, this function calculates the HPPC parameters for each pulse
+
+   :param df_nested: Dict containing the nested DataFrames corresponding to each pulse
+   :type df_nested: Dict
+
+   :returns: DataFrame containing the HPPC parameters structured by pulse number
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: calculate_relevant_points_HPPC(df_pulse)
+
+   Calculates the relevant points represented in the :func:`pulse_number_GITT` documentation.
+
+   These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
+
+   :param df_pulse: DataFrame containing the data corresponding to one pulse
+   :type df_pulse: pandas.DataFrame
+
+   :returns: Tuple containing the relevant points : V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Icharge, Idischarge
+   :rtype: tuple
+
+
+.. py:function:: calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge)
+
+   Calculates Pulse Power for HPPC test
+
+   :param Vmin: Minimum voltage of the battery
+   :type Vmin: float
+   :param Vmax: Maximum voltage of the battery
+   :type Vmax: float
+   :param V0: Open Circuit Voltage of the pulse
+   :type V0: float
+   :param R_discharge: Discharge internal resistance of the pulse
+   :type R_discharge: float
+   :param R_charge: Charge internal resistance of the pulse
+   :type R_charge: float
+
+   :returns: Charge and discharge Pulse Power
+   :rtype: tuple
+
+

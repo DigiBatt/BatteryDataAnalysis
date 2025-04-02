@@ -1,0 +1,22 @@
+BatteryDataAnalysis.src
+=======================
+
+.. py:module:: BatteryDataAnalysis.src
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /api/BatteryDataAnalysis/src/analysis_GITT/index
+   /api/BatteryDataAnalysis/src/analysis_HPPC/index
+   /api/BatteryDataAnalysis/src/analysis_ICI/index
+   /api/BatteryDataAnalysis/src/analysis_dqdv/index
+   /api/BatteryDataAnalysis/src/create_custom_functions/index
+   /api/BatteryDataAnalysis/src/plotting/index
+   /api/BatteryDataAnalysis/src/preprocessing/index
+   /api/BatteryDataAnalysis/src/processing/index
+
+

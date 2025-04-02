@@ -1,0 +1,122 @@
+BatteryDataAnalysis.src.analysis_GITT
+=====================================
+
+.. py:module:: BatteryDataAnalysis.src.analysis_GITT
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.analysis_GITT.pulse_number_GITT
+   BatteryDataAnalysis.src.analysis_GITT.global_calculation_GITT
+   BatteryDataAnalysis.src.analysis_GITT.calculate_relevant_points_GITT
+   BatteryDataAnalysis.src.analysis_GITT.calculate_DCIR
+   BatteryDataAnalysis.src.analysis_GITT.calculate_diffusion_coefficient_GITT
+
+
+Module Contents
+---------------
+
+.. py:function:: pulse_number_GITT(df_input)
+
+   Pulse selection for GITT data
+
+   - For every cycles, gives a pulse number for every current pulses.
+   - Then it gives this number for the last point before the pulse until the last point before the end of the relaxation.
+   - Finally, it creates a nested Dataframe structuring the GITT data for each pulse.
+
+   Here is a schema of a selected pulse and its relevant points:
+
+   .. image:: ../../../../_static/pulse_GITT.png
+       :width: 2000px
+       :align: center
+       :alt: Example of a pulse selected by the function for GITT data
+
+   The corresponding parameters that can be used in a custom function (see :func:`add_function`) are:
+   *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_GITT`.
+
+   :param df: DataFrame containing the GITT data to process
+   :type df: pandas.DataFrame
+
+   :returns: Dict containing the nested DataFrames as values and their pulse number as keys
+   :rtype: dict
+
+
+.. py:function:: global_calculation_GITT(df_nested, my_func_list)
+
+   Calculates the GITT parameters
+
+   Given a nested DataFrame containing the GITT data, this function calculates the GITT parameters for each pulse
+
+   :param df_nested: Dict containing the nested DataFrames corresponding to each pulse
+   :type df_nested: Dict
+
+   :returns: DataFrame containing the GITT parameters structured by pulse number
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: calculate_relevant_points_GITT(df_pulse)
+
+   Calculates the relevant points represented in the :func:`pulse_number_GITT` documentation.
+
+   These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
+
+   :param df_pulse: DataFrame containing the data corresponding to one pulse
+   :type df_pulse: pandas.DataFrame
+
+   :returns: Tuple containing the relevant points : V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse
+   :rtype: tuple
+
+
+.. py:function:: calculate_DCIR(V0, Voltage, t0, t3, Ipulse, r_time)
+
+   Calculates the DCIR for GITT test
+
+   :param V0:
+   :type V0: float
+   :param Voltage: Interpolation function of the voltage
+   :type Voltage: interp1d
+   :param t0:
+   :type t0: float
+   :param t3:
+   :type t3: float
+   :param Ipulse:
+   :type Ipulse: float
+   :param r_time: Time after which DCIR is calculated
+   :type r_time: float
+
+   :returns: DCIR of the pulse
+   :rtype: float
+
+
+.. py:function:: calculate_diffusion_coefficient_GITT(delta_Eocv, delta_Epulse, tau)
+
+   Calculates diffusion coefficient for GITT test
+
+   See the :func:`pulse_number_GITT` documentation for the points definition.
+   The formula comes from the paper from T. Schied et al. (2021)
+   *"Determining the Diffusion Coefficient of Lithium Insertion Cathodes from GITT measurements: Theoretical Analysis for low Temperatures"*
+
+   The diffusion coefficient is calculated using the following formula:
+
+   .. math::
+
+       D = \frac{4}{9 \pi} \cdot \frac{\text{radius}^2}{\tau} \cdot \left(\frac{\Delta E_{OCV}}{\Delta E_{pulse}}\right)^2
+
+   :param V0:
+   :type V0: float
+   :param V1:
+   :type V1: float
+   :param V2:
+   :type V2: float
+   :param V3:
+   :type V3: float
+   :param tau: Time duration of the pulse
+   :type tau: float
+
+   :returns: Diffusion coefficient of the selected pulse
+   :rtype: float
+
+

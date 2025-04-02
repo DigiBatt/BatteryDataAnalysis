@@ -1,0 +1,63 @@
+BatteryDataAnalysis.src.preprocessing
+=====================================
+
+.. py:module:: BatteryDataAnalysis.src.preprocessing
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   BatteryDataAnalysis.src.preprocessing.preprocessing_files
+   BatteryDataAnalysis.src.preprocessing.standardize_column_names
+   BatteryDataAnalysis.src.preprocessing.process_useful_columns
+
+
+Module Contents
+---------------
+
+.. py:function:: preprocessing_files(file_path, column_names=None, cycle=None, debug_func=None)
+
+   Preprocessing the file to format it for future analysis
+
+   It reads the file and applies the preprocessing functions of renaming and calculating the useful columns:
+   TestTime, normcurrent, State, Cycle, Capacity, SOC and C-Rate
+
+   :param file_path: Path to the file to process
+   :type file_path: str
+   :param column_names: Dictionary containing the column names to be used for the analysis
+   :type column_names: Dict, optionnal
+   :param cycle: List of cycle numbers to process
+   :type cycle: int, optionnal
+   :param debug_func: Function to apply to the DataFrame before preprocessing to remove specific bugs of one dataset
+   :type debug_func: function, optionnal
+
+   :returns: DataFrame containing the preprocessed data
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: standardize_column_names(df_input, column_names)
+
+   Standardizes column names of the DataFrame using predefined mappings and fuzzy matching
+
+   :param df: The input DataFrame with raw column names
+   :type df: pandas.DataFrame
+
+   :returns: DataFrame with only the three columns: Voltage, Current and SysTime
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: process_useful_columns(df_input)
+
+   Processes useful columns for future analysis
+
+   The processed columns are: TestTime, Capacity, Cycle, State and SOC
+
+   :param df: The input DataFrame with standardized column names
+   :type df: pandas.DataFrame
+
+   :returns: DataFrame with processed columns
+   :rtype: pandas.DataFrame
+
+
