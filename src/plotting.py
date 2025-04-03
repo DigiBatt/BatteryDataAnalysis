@@ -87,10 +87,11 @@ line_width = 3
 
 def plot_test_over_time(df_input,
                         file_path,
+                        save,
+                        png,
+                        plot,
                         test='CCCV',
-                        pulse=False,
-                        save=False,
-                        png=False):
+                        pulse=False):
     """Plots the Current, Voltage and Capacity over TestTime for a given test type
 
     Parameters
@@ -170,7 +171,7 @@ def plot_test_over_time(df_input,
     if png:
         png_image = fig.to_image(format="png", width=2000, height=800)
         display(Image(data=png_image))
-    else:
+    if plot:
         fig.show()
 
     return fig
@@ -178,8 +179,9 @@ def plot_test_over_time(df_input,
 
 def plot_DQDV_result(df,
                      file_path,
-                     save=False,
-                     png=False):
+                     save,
+                     png,
+                     plot):
     """Plots the dQ/dV curve 
 
     It gives the derivative of Capacity over Voltage
@@ -248,7 +250,7 @@ def plot_DQDV_result(df,
     if png:
         png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
         display(Image(data=png_image))
-    else:
+    if plot:
         fig_dqdv.show()
     
     return fig_dqdv
@@ -256,8 +258,9 @@ def plot_DQDV_result(df,
 
 def plot_dqdv_heatmap(df,
                       file_path,
-                      save=False,
-                      png=False):
+                      save,
+                      png,
+                      plot):
     """Plots the dQ/dV heatmap 
 
     It gives a plot with Cycles over Voltage colored by the magnitude of dQ/dV
@@ -343,7 +346,7 @@ def plot_dqdv_heatmap(df,
     if png:
         png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
         display(Image(data=png_image))
-    else:
+    if plot:
         fig_dqdv.show()
 
     return fig_dqdv
@@ -351,8 +354,9 @@ def plot_dqdv_heatmap(df,
 
 def plot_pocv(df,
               file_path,
-              save=False,
-              png=False):
+              save,
+              png,
+              plot):
     """Plots the POCV curve 
 
     It gives a plot of the Capacity over Voltage
@@ -426,7 +430,7 @@ def plot_pocv(df,
     if png:
         png_image = fig_pocv.to_image(format="png", width=2000, height=800)
         display(Image(data=png_image))
-    else:
+    if plot:
         fig_pocv.show()
 
     return fig_pocv
@@ -434,9 +438,10 @@ def plot_pocv(df,
 
 def plot_GITT_result(df,
                      file_path,
-                     column='Diffusion Coefficient',
-                     save=False,
-                     png=False):
+                     save,
+                     png,
+                     plot,
+                     column='Diffusion Coefficient'):
     """Plots the GITT results curve
 
     It gives a plot of the selected parameter over SOC
@@ -505,7 +510,7 @@ def plot_GITT_result(df,
     if png:
         png_image = fig_GITT.to_image(format="png", width=2000, height=800)
         display(Image(data=png_image))
-    else:
+    if plot:
         fig_GITT.show()
     
     return fig_GITT
@@ -513,9 +518,10 @@ def plot_GITT_result(df,
 
 def plot_HPPC_result(df,
                      file_path,
-                     column='R',
-                     save=False,
-                     png=False):
+                     save,
+                     png,
+                     plot,
+                     column='R'):
     """Plots the HPPC results curve
 
     It gives a plot of the selected parameter over SOC for both charge and dicharge pulses
@@ -583,7 +589,7 @@ def plot_HPPC_result(df,
     if png:
         png_image = fig_HPPC.to_image(format="png", width=2000, height=800)
         display(Image(data=png_image))
-    else:
+    if plot:
         fig_HPPC.show()
     
     return fig_HPPC
