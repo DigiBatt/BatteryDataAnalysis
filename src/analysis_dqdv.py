@@ -26,7 +26,7 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
         sigma=None
         # Loop for charge and discharge cycles with the parameters computed at the first cycle
         for cycle in df['Cycle'].unique():
-            df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state)]
+            df_cycle = df[(df["Cycle"] == cycle) & (df["State"] == charging_state) & (df['normcurrent'] != 0)]
 
             if len(df_cycle) > 3:
                 df_smoothed, sigma = calculate_dqdv_for_one_cycle(df_cycle, 
@@ -35,8 +35,8 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
                 df_smoothed = df_smoothed.assign(Cycle=cycle, State=charging_state)
 
                 df_dqdv = pd.concat([df_dqdv, df_smoothed])
-            else:
-                print('No data for cycle '+str(cycle)+', '+str(charging_state))
+            # else:
+                # print('No data for cycle '+str(cycle)+', '+str(charging_state))
 
     if len(df_dqdv) > 3:
         volt_step = len(df['Cycle'].unique()) * (df_dqdv['smoothed_voltage'].max() - df_dqdv['smoothed_voltage'].min()) / 50000

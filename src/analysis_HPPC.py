@@ -51,6 +51,7 @@ def pulse_number_HPPC(df_input):
             # If charging the only negative current is the HPPC pulse
             if state == 'C':
                 df['discharge_pulse'] = (df['normcurrent'] < 0).astype(int)
+                df_state['charge_pulse'] = 0
                 
                 df_group = df_state[df_state['normcurrent'] < 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
                 pulse_time = df_group.median()
@@ -58,7 +59,7 @@ def pulse_number_HPPC(df_input):
                 # If a positive pulse is the same length as the negative pulse then it is the HPPC pulse (and not the relaxation)
                 for pulse in df_state['raw_pos_pulse_count'].unique():
                     df_pulse = df_state[(df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0)]
-                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5:
+                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 100: #1.5
                         df_state.loc[(df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0), 'charge_pulse'] = 1
                         pulse_count += 1
 
@@ -70,6 +71,7 @@ def pulse_number_HPPC(df_input):
             # If discharging the only positive current is the HPPC pulse
             elif state == 'D':
                 df_state['charge_pulse'] = (df_state['normcurrent'] > 0).astype(int)
+                df_state['discharge_pulse'] = 0
 
                 df_group = df_state[df_state['normcurrent'] > 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
                 pulse_time = df_group.median()
@@ -77,7 +79,7 @@ def pulse_number_HPPC(df_input):
                 # If a negative pulse is the same length as the positive pulse then it is the HPPC pulse (and not the relaxation)
                 for pulse in df_state['raw_neg_pulse_count'].unique():
                     df_pulse = df_state[(df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0)]
-                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5:
+                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 100: #1.5
                         df_state.loc[(df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0), 'discharge_pulse'] = 1
                         pulse_count += 1
 
@@ -86,10 +88,9 @@ def pulse_number_HPPC(df_input):
                 df_state['neg_pulse_count'] = df_state['neg_pulse_count'].ffill()
                 df_state['Pulse'] = np.maximum(df_state['neg_pulse_count'], df_state['raw_pos_pulse_count'])
 
-
             df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'Pulse'] = df_state['Pulse'].astype(int)
-            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'charge_pulse'] = df_state['charge_pulse'].fillna(0)
-            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'discharge_pulse'] = df_state['discharge_pulse'].fillna(0)
+            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'charge_pulse'] = df_state['charge_pulse']
+            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'discharge_pulse'] = df_state['discharge_pulse']
 
     df = df.dropna(subset=['Pulse'])
     df_nested = {int(pulse): df[df['Pulse'] == pulse] for pulse in df['Pulse'].unique()}
@@ -123,55 +124,57 @@ def global_calculation_HPPC(df_nested, my_func_list):
         df_discharge = df_pulse[df_pulse['discharge_pulse'] == 1]
 
         if len(df_charge) >= 2 and len(df_discharge) >= 2 and pulse != 0:
+            try:
+                V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Idischarge, Icharge = calculate_relevant_points_HPPC(df_pulse)
 
-            V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Idischarge, Icharge = calculate_relevant_points_HPPC(df_pulse)
+                R_discharge = abs((V1 - V0) / Idischarge) 
+                R_charge = abs((V4 - V3) / Icharge) 
+                P_discharge, P_charge = calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge)
 
-            R_discharge = abs((V1 - V0) / Idischarge) 
-            R_charge = abs((V4 - V3) / Icharge) 
-            P_discharge, P_charge = calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge)
+                df_coefficient = pd.DataFrame({'Pulse': pulse,
+                                            'Cycle': df_pulse['Cycle'].iloc[0],
+                                            'State': df_pulse['State'].iloc[0],
+                                            'TestTime': df_pulse['TestTime'].iloc[0],
+                                            'SOC': df_pulse['SOC'].iloc[0],
+                                            'OCV': V0,
+                                            'R_charge': R_charge,
+                                            'R_discharge': R_discharge,
+                                            'P_charge': P_charge,
+                                            'P_discharge': P_discharge,
+                                            },
+                                            index=['Pulse'])
+                
+                # Parameters that can be used in an external function
+                kwargs = {
+                    'V0': V0,
+                    'V1': V1,
+                    'V2': V2,
+                    'V3': V3,
+                    'V4': V4,
+                    'V5': V5,
+                    't0': t0,
+                    't1': t1,
+                    't2': t2,
+                    't3': t3,
+                    't4': t4,
+                    't5': t5,
+                    'Idischarge': Idischarge,
+                    'Icharge': Icharge,
+                    'R_charge': R_charge,
+                    'R_discharge': R_discharge,
+                    'Voltage': interp1d(df_pulse['TestTime'], df_pulse['Voltage'], kind='linear'),
+                    'Current': interp1d(df_pulse['TestTime'], df_pulse['Current'], kind='linear'),
+                    'Capacity': interp1d(df_pulse['TestTime'], df_pulse['Capacity'], kind='linear'),
+                    'State': df_pulse['State'].iloc[0],
+                }
 
-            df_coefficient = pd.DataFrame({'Pulse': pulse,
-                                           'Cycle': df_pulse['Cycle'].iloc[0],
-                                           'State': df_pulse['State'].iloc[0],
-                                           'TestTime': df_pulse['TestTime'].iloc[0],
-                                           'SOC': df_pulse['SOC'].iloc[0],
-                                           'OCV': V0,
-                                           'R_charge': R_charge,
-                                           'R_discharge': R_discharge,
-                                           'P_charge': P_charge,
-                                           'P_discharge': P_discharge,
-                                           },
-                                           index=['Pulse'])
-            
-            # Parameters that can be used in an external function
-            kwargs = {
-                'V0': V0,
-                'V1': V1,
-                'V2': V2,
-                'V3': V3,
-                'V4': V4,
-                'V5': V5,
-                't0': t0,
-                't1': t1,
-                't2': t2,
-                't3': t3,
-                't4': t4,
-                't5': t5,
-                'Idischarge': Idischarge,
-                'Icharge': Icharge,
-                'R_charge': R_charge,
-                'R_discharge': R_discharge,
-                'Voltage': interp1d(df_pulse['TestTime'], df_pulse['Voltage'], kind='linear'),
-                'Current': interp1d(df_pulse['TestTime'], df_pulse['Current'], kind='linear'),
-                'Capacity': interp1d(df_pulse['TestTime'], df_pulse['Capacity'], kind='linear'),
-                'State': df_pulse['State'].iloc[0],
-            }
-
-            for func in my_func_list:
-                var_name = func.__name__
-                new_var = add_function(func, **kwargs)
-                if new_var is not None:
-                    df_coefficient[var_name] = new_var
+                for func in my_func_list:
+                    var_name = func.__name__
+                    new_var = add_function(func, **kwargs)
+                    if new_var is not None:
+                        df_coefficient[var_name] = new_var
+            except Exception as e:
+                print(f'Error processing pulse {pulse}: {e}')
 
             df_total = pd.concat([df_total, df_coefficient])
     return df_total

@@ -150,7 +150,7 @@ def plot_test_over_time(df_input,
     
     fig.update_layout(
         title={
-            'text': f'<b>Voltage Current and Capacity for {test} Test</b><br>'
+            'text': f'<b>Voltage Current and Capacity for {test}</b><br>'
             f'File : {file_name}',
             'font': {'size': title_size}
         },

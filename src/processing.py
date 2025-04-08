@@ -106,8 +106,18 @@ def process_file(file_path,
 
     df_list = read_file(file_path, column_names, cycle, debug_func)
     result_dict_list = []
+    sheet_number = 1
     for df in df_list:
+        if len(df_list) > 1:
+            new_file_path = add_suffix_to_filename(file_path, sheet_number)
+            print(os.path.splitext(os.path.basename(new_file_path))[0])
+            sheet_number += 1
+        else:
+            new_file_path = file_path
+
         df = find_test(df)
+
+        fig_global = plot_test_over_time(df, new_file_path, save, png, plot, test='global_file')
 
         result_dict = {}
         for test in df['Test'].unique():
@@ -118,23 +128,27 @@ def process_file(file_path,
                 df_test = df[df['Test'] == test]
 
                 if test == 'GITT':
-                    df_test, GITT_result_df = process_GITT(df_test, file_path, my_func_list, save, png, plot)
+                    df_test, GITT_result_df = process_GITT(df_test, new_file_path, my_func_list, save, png, plot)
                     result_dict['GITT'] = GITT_result_df
 
                 elif test == 'ICI':
-                    df_test, ICI_result_df = process_ICI(df_test, file_path, my_func_list, save, png, plot)
+                    df_test, ICI_result_df = process_ICI(df_test, new_file_path, my_func_list, save, png, plot)
                     result_dict['ICI'] = ICI_result_df
 
                 elif test == 'HPPC':
-                    df_test, HPPC_result_df = process_HPPC(df_test, file_path, my_func_list, save, png, plot)
+                    df_test, HPPC_result_df = process_HPPC(df_test, new_file_path, my_func_list, save, png, plot)
                     result_dict['HPPC'] = HPPC_result_df
 
                 elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
                     df_test = df_test[df_test['C_Rate'] > 0.2]
-                    df_test = process_dqdv(df_test, file_path, save, png, plot)
+                    df_test = process_dqdv(df_test, new_file_path, save, png, plot)
 
-                else:
-                    df_test = process_dqdv(df_test, file_path, save, png, plot)
+                elif test == 'NA' and (df['Test'].unique() == ['NA']).all():
+                    # df_test = df_test[df_test['C_Rate'] > 0.2]
+                    df_test = process_dqdv(df_test, new_file_path, save, png, plot)
+
+                # else:
+                #     df_test = process_dqdv(df_test, new_file_path, save, png, plot)
 
                 result_dict_list.append(result_dict)
 
@@ -143,6 +157,14 @@ def process_file(file_path,
         return df_list[0], result_dict_list[0]
     else:
         return df_list, result_dict_list
+
+
+def add_suffix_to_filename(file_path, sheet_number):
+    """Ajoute un suffixe au nom du fichier avant l'extension"""
+    directory, filename = os.path.split(file_path)
+    name, ext = os.path.splitext(filename)
+    new_filename = f"{name} - sheet {sheet_number}{ext}"
+    return os.path.join(directory, new_filename)
 
 
 def find_test(df_input):
@@ -290,12 +312,15 @@ def process_GITT(df,
     results_df = global_calculation_GITT(df_nested, my_func_list)
     print(results_df)
 
-    fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='GITT', pulse=True)
-    fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
-    fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
+    try:
+        fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='GITT', pulse=True)
+        fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
+        fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
 
 
-    fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='OCV')
+        fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='OCV')
+    except:
+        print('Not possible to calculate GITT data')
 
 
 
@@ -341,9 +366,12 @@ def process_ICI(df,
     results_df = global_calculation_ICI(df_nested, my_func_list)
     print(results_df)
 
-    fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='ICI', pulse=True)
-    fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
-    fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
+    try:
+        fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='ICI', pulse=True)
+        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
+        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
+    except:
+        print('Not possible to calculate ICI data')
 
     print('ICI Time : '+str(int(time.time() - start_time))+'s')
     return df_nested, results_df
@@ -383,9 +411,12 @@ def process_HPPC(df,
     results_df = global_calculation_HPPC(df_nested, my_func_list)
     print(results_df)
 
-    fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='HPPC', pulse=True)
-    fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='R')
-    fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='P')
+    try:
+        fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='HPPC', pulse=True)
+        fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='R')
+        fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='P')
+    except:
+        print('Not possible to calculate HPPC data')
 
     print('HPPC Time : '+str(int(time.time() - start_time))+'s')
     return df_nested, results_df

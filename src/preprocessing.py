@@ -67,9 +67,10 @@ def standardize_column_names(df_input, column_names):
     df = df_input.copy()
 
     COLUMN_NAME_MAPPING = {
-        'SysTime': ['TestTime', 'Time', 'Time/Sec', 'Time [datetime]', 'SysTime', 'DPt Time', 'TestTime [h]', 't', 'DPtTime', 'time/s', 'test_time_millisecond', 'DPt-Time'],
-        'Voltage': ['Voltage', 'Voltage/V', 'V', 'Volt', "Voltage [V]", 'Volts', 'voltage_volt'],
-        'Current': ['Current', 'Current/mA', 'I', 'Current(A)', 'I/mA', "Current [mA]", 'Amps', 'current_ampere'],
+        'SysTime': ['TestTime', 'Time', 'Time/Sec', 'Time [datetime]', 'SysTime', 'DPt Time', 'TestTime [h]', 't', 
+                    'DPtTime', 'time/s', 'test_time_millisecond', 'DPt-Time', 'Duration (sec)', 'Date_Time'],
+        'Voltage': ['Voltage', 'Voltage/V', 'V', 'Volt', "Voltage [V]", 'Volts', 'voltage_volt', 'mV', 'V', 'Voltage(V)'],
+        'Current': ['Current', 'Current/mA', 'I', 'Current(A)', 'I/mA', "Current [mA]", 'Amps', 'current_ampere', 'mA', 'A'],
             }
     
     if column_names:
@@ -85,7 +86,7 @@ def standardize_column_names(df_input, column_names):
             for col in df.columns:
                 if standard_col not in df.columns:
                     best_match, score, _ = process.extractOne(col, COLUMN_NAME_MAPPING[standard_col])
-                    if score > 95:
+                    if score > 90:
                         df = convert_unit(df, col)
                         df = df.rename(columns={col: standard_col})
 
@@ -160,9 +161,9 @@ def process_useful_columns(df_input):
     # if df['Current'].max() > 20:
     #     df['Current'] = df['Current'] / 1000
 
-    print('State')
     ## Cycle and State
     # Rounding of the current near 0
+    df['Capacity'] = (df['Current'] * df['TestTime'].diff()).cumsum() / 3600
     df['normcurrent'] = df['Current']
 
     df_nocurrent = df[abs(df['Current']) <= abs(df['Current']).max() * 0.04]
@@ -182,15 +183,39 @@ def process_useful_columns(df_input):
 
     # Global charging/discharging state according to the duration of each local state
     threshold_pulse_duration = 200
+    successive_pulse_count = 0
+    successive_pulse_start = 0
+    successive_pulse_end = 0
     for group in df['Group'].unique():
         if df_group.loc[group] > threshold_pulse_duration:
             df.loc[df['Group'] == group, 'State'] = ('C' if df[df['Group'] == group]['Voltage'].iloc[-1] - df[df['Group'] == group]['Voltage'].iloc[0] >= 0
                                                      else 'D')
+            
+            if successive_pulse_end - successive_pulse_start > 200:
+                df.loc[(df['TestTime'] >= successive_pulse_start) & (df['TestTime'] <= successive_pulse_end), 
+                       'State'] = ('C' if successive_voltage_end - successive_voltage_start >= 0 
+                                   else 'D')
+            successive_pulse_count = 0
+        else:
+            if successive_pulse_count == 0:
+                successive_pulse_start = df[df['Group'] == group]['TestTime'].iloc[0]
+                successive_voltage_start = df[df['Group'] == group]['Voltage'].iloc[0]
+            successive_pulse_end = df[df['Group'] == group]['TestTime'].iloc[-1]
+            successive_voltage_end = df[df['Group'] == group]['Voltage'].iloc[-1]
+            successive_pulse_count += 1
+    
+    if successive_pulse_count > 0:
+        df.loc[(df['TestTime'] >= successive_pulse_start) & (df['TestTime'] <= successive_pulse_end), 
+               'State'] = ('C' if successive_voltage_end - successive_voltage_start >= 0 else 'D')
+
+            # if group + 10 in df['Group'].unique():
+            #     df.loc[df['Group'] == group, 'State'] = ('C' if df[df['Group'] == group + 10]['Capacity'].iloc[-1] - df[df['Group'] == group]['Capacity'].iloc[0] >= 0
+            #                                             else 'D')
+        
     # df[df['Group'] == group]['Voltage'].iloc[-1] - df[df['Group'] == group]['Voltage'].iloc[0] >= 0
     # df[df['Group'] == group]['normcurrent'].mean() >= 0 
     df['State'] = df['State'].ffill()
 
-    print('Cycle')
     # First cycle starts with the first discharge and ends with the end of the next charge    
     fist_discharge_time = df[df['State'] == 'D']['TestTime'].min()
     df_discharge = df[df['TestTime'] > fist_discharge_time]
@@ -200,7 +225,6 @@ def process_useful_columns(df_input):
                                                                ).astype(int)
     df['Cycle'] = df['Cycle'].astype(int)
 
-    print('Capacity')
     ## Capacity (Ah)
     if df['Cycle'].nunique() == 1:
         df['Capacity'] = (df['Current'] * df['TestTime'].diff()).cumsum() / 3600
@@ -211,11 +235,9 @@ def process_useful_columns(df_input):
         df['Capacity'] = df.groupby('Cycle')['Capacity'].transform(lambda x: x - x.min()).ffill().shift(-1)
         df.dropna(subset=['Capacity'])
 
-    print('SOC')
     ## State of charge
     df["SOC"] = df.groupby(["Cycle", 'State'])["Capacity"].transform(lambda x: (x - x.min()) / (x.max() - x.min()))
 
-    print('C_rate')
     ## C-Rate
     for cycle in df['Cycle'].unique():
         c_rate = 0
@@ -284,15 +306,21 @@ def read_file(file_path, column_names=None, cycle=None, debug_func=None):
     
     elif file_ext in ['.xlsx', '.xls']:
         engine = detect_excel_engine(file_path)
-        skip_rows = find_excel_header(file_path, engine)
+        sheets_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
 
-        sheets_dict = pd.read_excel(file_path, sheet_name=None, engine=engine, skiprows=skip_rows)
         df_list = []
-        for df in sheets_dict.values():
+        i = 1
+        for sheet_name in sheets_dict.keys():
+            skip_rows = find_excel_header(file_path, engine, sheet_name)
+            df = pd.read_excel(file_path, sheet_name=sheet_name, engine=engine, skiprows=skip_rows)
+
             try:
+                print(f'Sheet n°{i}: {sheet_name}')
+                i += 1
                 df_list.append(preprocessing_files(df, column_names, cycle, debug_func))
-            except:
-                pass    
+            except Exception as e:
+                print(f'Error preprocessing sheet: {e}') 
+
         return df_list
     
     else:
@@ -332,10 +360,19 @@ def find_header_row(file_path, encoding, sep, max_rows=15):
             continue
     return 0
 
-def find_excel_header(file_path, engine, max_rows=15):
-    """Finds the header row of the excel file"""
+# def find_excel_header(file_path, engine, max_rows=15):
+#     """Finds the header row of the excel file"""
+#     for i in range(max_rows):
+#         df_test = pd.read_excel(file_path, engine=engine, skiprows=i, nrows=15)
+#         if all(isinstance(col, str) for col in df_test.columns):
+#             if not any("Unnamed" in col for col in df_test.columns):
+#                 return i
+#     return 0
+
+def find_excel_header(file_path, engine, sheet_name, max_rows=15):
+    """Finds the header row of a sheet of the excel file"""
     for i in range(max_rows):
-        df_test = pd.read_excel(file_path, engine=engine, skiprows=i, nrows=15)
+        df_test = pd.read_excel(file_path, engine=engine, sheet_name=sheet_name, skiprows=i, nrows=15)
         if all(isinstance(col, str) for col in df_test.columns):
             if not any("Unnamed" in col for col in df_test.columns):
                 return i
@@ -351,5 +388,5 @@ def detect_excel_engine(file_path):
         else:
             return 'xlrd'
     except:
-        return 'auto'
+        return 'openpyxl'
 
