@@ -78,7 +78,7 @@ def global_calculation_ICI(df_nested, my_func_list):
     df_total = pd.DataFrame()
     for pulse, df_pulse in df_nested.items():
 
-        if len(df_pulse[df_pulse['Relaxation'] == 0]) > 5 and len(df_pulse[df_pulse['Relaxation'] == 1]) > 5:
+        if len(df_pulse[df_pulse['Relaxation'] == 0]) > 2 and len(df_pulse[df_pulse['Relaxation'] == 1]) > 2:
             try:
                 V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse = calculate_relevant_points_ICI(df_pulse)
 

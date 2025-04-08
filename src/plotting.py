@@ -441,7 +441,8 @@ def plot_GITT_result(df,
                      save,
                      png,
                      plot,
-                     column='Diffusion Coefficient'):
+                     column='Diffusion Coefficient',
+                     test='GITT'):
     """Plots the GITT results curve
 
     It gives a plot of the selected parameter over SOC
@@ -489,7 +490,7 @@ def plot_GITT_result(df,
     
     fig_GITT.update_layout(
         title={
-            'text': f'<b>Parameter numerical results for GITT Test</b><br>'
+            'text': f'<b>Parameter numerical results for {test} Test</b><br>'
             f'File : {file_name}',
             'font': {'size': title_size}
         },

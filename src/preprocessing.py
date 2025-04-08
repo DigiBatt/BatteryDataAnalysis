@@ -40,6 +40,7 @@ def preprocessing_files(df, column_names=None, cycle=None, debug_func=None):
     for col in ['SysTime', 'Voltage', 'Current']:
         if col not in df.columns:
             raise ValueError(f"Column '{col}' not found in the DataFrame.")
+    
 
     df = process_useful_columns(df)
 
@@ -80,14 +81,14 @@ def standardize_column_names(df_input, column_names):
         if standard_col not in df.columns:
             for col in df.columns:
                 if col in COLUMN_NAME_MAPPING[standard_col] and standard_col not in df.columns:
-                    df = convert_unit(df, col)
+                    df = convert_unit(df, col, standard_col)
                     df = df.rename(columns={col: standard_col})
 
             for col in df.columns:
                 if standard_col not in df.columns:
                     best_match, score, _ = process.extractOne(col, COLUMN_NAME_MAPPING[standard_col])
                     if score > 90:
-                        df = convert_unit(df, col)
+                        df = convert_unit(df, col, standard_col)
                         df = df.rename(columns={col: standard_col})
 
     for col in df.columns:
@@ -99,7 +100,7 @@ def standardize_column_names(df_input, column_names):
     return df
 
 
-def convert_unit(df_input, col):
+def convert_unit(df_input, col, standard_col):
     """Converts the unit of the column to the correct unit
 
     Works only if the unit is in the column name
@@ -117,13 +118,13 @@ def convert_unit(df_input, col):
         DataFrame with the unit converted
     """
     df = df_input.copy()
-    if col == 'Current':
+    if standard_col == 'Current':
         if 'mA' in col:
             df[col] = df[col] / 1000
-    elif col == 'Voltage':
+    elif standard_col == 'Voltage':
         if 'mV' in col:
             df[col] = df[col] / 1000
-    elif col == 'SysTime':
+    elif standard_col == 'SysTime':
         if 'ms' in col or 'millisecond' in col:
             df[col] = df[col] / 1000
     return df
@@ -154,7 +155,10 @@ def process_useful_columns(df_input):
         df["TestTime"] = (df["SysTime"] - df["SysTime"].min()).dt.total_seconds()
         df = df.dropna(subset=['TestTime'])
 
-    df = df.groupby(["TestTime"]).median().reset_index()
+    # df = df.groupby(["TestTime"]).median().reset_index()
+    df["TestTime"] = df["TestTime"].astype(int)
+    df = df.drop_duplicates(subset='TestTime')
+    # print('Systime')
 
     ## Current (A)
     # Not precise enough
@@ -170,12 +174,12 @@ def process_useful_columns(df_input):
     nocurrent_max = abs(df_nocurrent['Current']).max()
     
     if nocurrent_max != 0 and not np.isnan(nocurrent_max):
-        df.loc[abs(df['Current']) <= nocurrent_max, 'normcurrent'] = round(df['Current'] / (nocurrent_max * 2.1)) * (nocurrent_max * 2.1)
+        df.loc[abs(df['Current']) <= nocurrent_max, 'normcurrent'] = round(df['Current'] / (nocurrent_max * 1.9)) * (nocurrent_max * 1.9)
 
     # Local charging/discharging state and counting each state
     df.loc[df['normcurrent'] < 0, 'Local_state'] = 'D'
     df.loc[df['normcurrent'] > 0, 'Local_state'] = 'C'
-    # df['Local_state'] = df['Local_state'].ffill().infer_objects(copy=False)
+    df['Local_state'] = df['Local_state'].ffill().infer_objects(copy=False).fillna('R')
 
     df['Group'] = (df['Local_state'] != df['Local_state'].shift()).cumsum()
     df_group = df.groupby('Group')['TestTime'].agg(lambda x: x.max() - x.min())
@@ -197,6 +201,8 @@ def process_useful_columns(df_input):
                                    else 'D')
             successive_pulse_count = 0
         else:
+            # print(df[df['Group'] == group]['TestTime'].iloc[0])
+            # print(df[df['Group'] == group]['Local_state'].iloc[-1])
             if successive_pulse_count == 0:
                 successive_pulse_start = df[df['Group'] == group]['TestTime'].iloc[0]
                 successive_voltage_start = df[df['Group'] == group]['Voltage'].iloc[0]
@@ -208,10 +214,7 @@ def process_useful_columns(df_input):
         df.loc[(df['TestTime'] >= successive_pulse_start) & (df['TestTime'] <= successive_pulse_end), 
                'State'] = ('C' if successive_voltage_end - successive_voltage_start >= 0 else 'D')
 
-            # if group + 10 in df['Group'].unique():
-            #     df.loc[df['Group'] == group, 'State'] = ('C' if df[df['Group'] == group + 10]['Capacity'].iloc[-1] - df[df['Group'] == group]['Capacity'].iloc[0] >= 0
-            #                                             else 'D')
-        
+
     # df[df['Group'] == group]['Voltage'].iloc[-1] - df[df['Group'] == group]['Voltage'].iloc[0] >= 0
     # df[df['Group'] == group]['normcurrent'].mean() >= 0 
     df['State'] = df['State'].ffill()

@@ -368,8 +368,8 @@ def process_ICI(df,
 
     try:
         fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='ICI', pulse=True)
-        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
-        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
+        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient', test='ICI')
+        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance', test='ICI')
     except:
         print('Not possible to calculate ICI data')
 

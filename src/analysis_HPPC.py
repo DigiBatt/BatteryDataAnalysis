@@ -50,16 +50,16 @@ def pulse_number_HPPC(df_input):
 
             # If charging the only negative current is the HPPC pulse
             if state == 'C':
-                df['discharge_pulse'] = (df['normcurrent'] < 0).astype(int)
-                df_state['charge_pulse'] = 0
+                df_state['discharge_pulse'] = (df_state['normcurrent'] < 0).astype(int)
+                # df_state['charge_pulse'] = 0
                 
                 df_group = df_state[df_state['normcurrent'] < 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
-                pulse_time = df_group.median()
+                pulse_time = df_group.mean()
 
                 # If a positive pulse is the same length as the negative pulse then it is the HPPC pulse (and not the relaxation)
                 for pulse in df_state['raw_pos_pulse_count'].unique():
                     df_pulse = df_state[(df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0)]
-                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 100: #1.5
+                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5: #1.5
                         df_state.loc[(df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0), 'charge_pulse'] = 1
                         pulse_count += 1
 
@@ -71,15 +71,15 @@ def pulse_number_HPPC(df_input):
             # If discharging the only positive current is the HPPC pulse
             elif state == 'D':
                 df_state['charge_pulse'] = (df_state['normcurrent'] > 0).astype(int)
-                df_state['discharge_pulse'] = 0
+                # df_state['discharge_pulse'] = 0
 
                 df_group = df_state[df_state['normcurrent'] > 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
-                pulse_time = df_group.median()
+                pulse_time = df_group.mean()
 
                 # If a negative pulse is the same length as the positive pulse then it is the HPPC pulse (and not the relaxation)
                 for pulse in df_state['raw_neg_pulse_count'].unique():
                     df_pulse = df_state[(df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0)]
-                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 100: #1.5
+                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5: #1.5
                         df_state.loc[(df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0), 'discharge_pulse'] = 1
                         pulse_count += 1
 
