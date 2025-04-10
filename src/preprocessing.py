@@ -3,9 +3,82 @@ import time
 import pandas as pd
 import pyarrow.parquet as pq
 from rapidfuzz import process
+from sklearn.cluster import KMeans
 import numpy as np
 import chardet
 import json
+
+import plotly.graph_objects as go
+import plotly.express as px
+
+def read_file(file_path, column_names=None, cycle=None, debug_func=None):
+    """Reads the file and returns a list of DataFrames
+    
+    Parameters
+    ----------
+    file_path : str
+        Path to the file to process
+    
+    Returns
+    -------
+    list
+        List of DataFrames containing the data of the file
+    """
+    print('File : '+str(os.path.basename(file_path)))
+    file_ext = os.path.splitext(file_path)[1].lower()
+    file_dir = os.path.dirname(file_path)
+
+    # Verify if there is a column_names file in the root folder
+    json_path = os.path.join(file_dir, "column_names.json")
+    if os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as f:
+            column_names = json.load(f)
+
+    if file_ext == '.parquet':
+        df = pq.read_table(file_path).to_pandas()
+        df = preprocessing_files(df, column_names, cycle, debug_func)
+        return [df], [file_path]
+    
+    elif file_ext == '.csv':
+        encoding = detect_encoding(file_path)
+        sep = detect_separator(file_path, encoding)
+        skip_rows = find_header_row(file_path, encoding, sep)
+
+        df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows)
+        df = preprocessing_files(df, column_names, cycle, debug_func)
+        return [df], [file_path]
+    
+    elif file_ext == '.txt':
+        encoding = detect_encoding(file_path)
+        sep = detect_separator(file_path, encoding)
+        skip_rows = find_header_row(file_path, encoding, sep)
+
+        df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows, index_col=False)
+        df = preprocessing_files(df, column_names, cycle, debug_func)
+        return [df], [file_path]
+    
+    elif file_ext in ['.xlsx', '.xls']:
+        engine = detect_excel_engine(file_path)
+        sheets_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
+
+        df_list, file_path_list = [], []
+        for sheet_name in sheets_dict.keys():
+            skip_rows = find_excel_header(file_path, engine, sheet_name)
+            df = pd.read_excel(file_path, sheet_name=sheet_name, engine=engine, skiprows=skip_rows)
+
+            try:
+                print(f'\nSheet {sheet_name}')
+                df_list.append(preprocessing_files(df, column_names, cycle, debug_func))
+                new_file_path = add_suffix_to_filename(file_path, sheet_name)
+                file_path_list.append(new_file_path)
+            except Exception as e:
+                print(f'Error preprocessing sheet: {e}') 
+        return df_list, file_path_list
+    else:
+        raise ValueError(f"Unsupported file format : {file_ext}")
+
+
+
 
 def preprocessing_files(df, column_names=None, cycle=None, debug_func=None):
     """Preprocessing the file to format it for future analysis
@@ -40,7 +113,6 @@ def preprocessing_files(df, column_names=None, cycle=None, debug_func=None):
     for col in ['SysTime', 'Voltage', 'Current']:
         if col not in df.columns:
             raise ValueError(f"Column '{col}' not found in the DataFrame.")
-    
 
     df = process_useful_columns(df)
 
@@ -155,26 +227,52 @@ def process_useful_columns(df_input):
         df["TestTime"] = (df["SysTime"] - df["SysTime"].min()).dt.total_seconds()
         df = df.dropna(subset=['TestTime'])
 
-    # df = df.groupby(["TestTime"]).median().reset_index()
-    df["TestTime"] = df["TestTime"].astype(int)
-    df = df.drop_duplicates(subset='TestTime')
-    # print('Systime')
-
-    ## Current (A)
-    # Not precise enough
-    # if df['Current'].max() > 20:
-    #     df['Current'] = df['Current'] / 1000
+    # df["TestTime"] = df["TestTime"].astype(int)
+    df = df.groupby(["TestTime"]).median().reset_index()
 
     ## Cycle and State
-    # Rounding of the current near 0
-    df['Capacity'] = (df['Current'] * df['TestTime'].diff()).cumsum() / 3600
-    df['normcurrent'] = df['Current']
+    # Clustering of the current repartition
+    df.loc[df.index[0], 'Current'] = 0
+    X = df['Current'].values.reshape(-1, 1)
+    kmeans = KMeans(n_clusters=8, random_state=0)
+    df['Cluster'] = kmeans.fit_predict(X)
+    # centers = kmeans.cluster_centers_.flatten()
 
-    df_nocurrent = df[abs(df['Current']) <= abs(df['Current']).max() * 0.04]
-    nocurrent_max = abs(df_nocurrent['Current']).max()
-    
-    if nocurrent_max != 0 and not np.isnan(nocurrent_max):
-        df.loc[abs(df['Current']) <= nocurrent_max, 'normcurrent'] = round(df['Current'] / (nocurrent_max * 1.9)) * (nocurrent_max * 1.9)
+    # Rounding to 0 the cluster closest to 0
+    zero_cluster_idx = np.argmin(np.abs(kmeans.cluster_centers_.flatten()))
+    df['normcurrent'] = df.apply(lambda row: 0 if row['Cluster'] == zero_cluster_idx else row['Current'], axis=1)
+
+    # colors = px.colors.qualitative.Plotly
+    # bin_width = (df['Current'].max() - df['Current'].min()) / 1000
+    # fig = go.Figure()
+    # for i, center in enumerate(centers):
+    #     cluster_data = df[df['Cluster'] == i]['Current']
+    #     fig.add_trace(go.Histogram(
+    #         x=cluster_data,
+    #         xbins=dict(
+    #             start=df['Current'].min(),
+    #             end=df['Current'].max() + bin_width,
+    #             size=bin_width,
+    #         ),
+    #         name=f'Cluster {i} ({center})',
+    #         marker_color=colors[i % len(colors)],
+    #         opacity=1,
+    #         showlegend=True
+    #     ))
+
+    # fig.update_layout(
+    #     barmode='overlay',
+    #     title='Répartition du courant par cluster',
+    #     xaxis_title='Courant (A)',
+    #     yaxis_title='Fréquence',
+    # )
+    # fig.show()
+
+    # df_nocurrent = df[abs(df['Current']) <= abs(df['Current']).max() * 0.04]
+    # nocurrent_max = abs(df_nocurrent['Current']).max()
+    # df['normcurrent'] = df['Current']
+    # if nocurrent_max != 0 and not np.isnan(nocurrent_max):
+    #     df.loc[abs(df['Current']) <= nocurrent_max, 'normcurrent'] = round(df['Current'] / (nocurrent_max * 1.9)) * (nocurrent_max * 1.9)
 
     # Local charging/discharging state and counting each state
     df.loc[df['normcurrent'] < 0, 'Local_state'] = 'D'
@@ -182,41 +280,47 @@ def process_useful_columns(df_input):
     df['Local_state'] = df['Local_state'].ffill().infer_objects(copy=False).fillna('R')
 
     df['Group'] = (df['Local_state'] != df['Local_state'].shift()).cumsum()
-    df_group = df.groupby('Group')['TestTime'].agg(lambda x: x.max() - x.min())
-    # df_group['delta_V'] = df.groupby('Cycle').apply(lambda group: (group['Voltage'].iloc[-1] - group['Voltage'].iloc[0])).reset_index(level=0, drop=True)
+    df_groupby_testduration = df.groupby('Group')['TestTime'].agg(lambda x: x.max() - x.min())
 
     # Global charging/discharging state according to the duration of each local state
     threshold_pulse_duration = 200
-    successive_pulse_count = 0
-    successive_pulse_start = 0
-    successive_pulse_end = 0
+    successive_pulse_count, successive_pulse_start, successive_pulse_end = 0, 0, 0
     for group in df['Group'].unique():
-        if df_group.loc[group] > threshold_pulse_duration:
-            df.loc[df['Group'] == group, 'State'] = ('C' if df[df['Group'] == group]['Voltage'].iloc[-1] - df[df['Group'] == group]['Voltage'].iloc[0] >= 0
+        df_group = df[df['Group'] == group]
+        df_group_current = df_group[df_group['normcurrent'] != 0]
+        full_cycling = (df_group['Voltage'].max() >= 0.9*df['Voltage'].max() and df_group['Voltage'].min() <= 1.1*df['Voltage'].min())
+
+        # if a same local state is maintained for at least the thrsehold duration, the state corresponds to the voltage difference between the start and the end of the group
+        if (df_groupby_testduration.loc[group] > threshold_pulse_duration) and (len(df_group_current) != 0):
+            df.loc[df['Group'] == group, 'State'] = ('C' if df_group_current['Voltage'].iloc[-1] - df_group_current['Voltage'].iloc[0] >= 0
                                                      else 'D')
-            
+            # if the last groups were pulses: after the threshold duration, it keeps the global state between the start and the end of the pulses
             if successive_pulse_end - successive_pulse_start > 200:
                 df.loc[(df['TestTime'] >= successive_pulse_start) & (df['TestTime'] <= successive_pulse_end), 
-                       'State'] = ('C' if successive_voltage_end - successive_voltage_start >= 0 
-                                   else 'D')
+                        'State'] = ('C' if successive_voltage_end - successive_voltage_start >= 0 
+                                    else 'D')
             successive_pulse_count = 0
+
+        elif len(df_group_current) != 0:
+            # if it is not a fast cycling, it keeps the start and the end voltages of the successive pulses
+            if not full_cycling:
+                if successive_pulse_count == 0:
+                    successive_pulse_start = df_group['TestTime'].iloc[0]
+                    successive_voltage_start = df_group_current['Voltage'].iloc[0]
+                successive_pulse_end = df_group['TestTime'].iloc[-1]
+                successive_voltage_end = df_group_current['Voltage'].iloc[-1]
+                successive_pulse_count += 1
+            # if it is a fast cycling (cycling that lasts less than the threshold duration), the state corresponds to the voltage difference between the start and the end of the group
+            else:
+                df.loc[df['Group'] == group, 'State'] = ('C' if df_group['Voltage'].iloc[-1] - df_group['Voltage'].iloc[0] >= 0
+                                                         else 'D')
         else:
-            # print(df[df['Group'] == group]['TestTime'].iloc[0])
-            # print(df[df['Group'] == group]['Local_state'].iloc[-1])
-            if successive_pulse_count == 0:
-                successive_pulse_start = df[df['Group'] == group]['TestTime'].iloc[0]
-                successive_voltage_start = df[df['Group'] == group]['Voltage'].iloc[0]
-            successive_pulse_end = df[df['Group'] == group]['TestTime'].iloc[-1]
-            successive_voltage_end = df[df['Group'] == group]['Voltage'].iloc[-1]
-            successive_pulse_count += 1
-    
+            df.loc[df['Group'] == group, 'State'] = ('C' if df_group['Voltage'].iloc[-1] - df_group['Voltage'].iloc[0] >= 0
+                                                     else 'D')
+    # if the last groups of the dataframes are successive pulses
     if successive_pulse_count > 0:
         df.loc[(df['TestTime'] >= successive_pulse_start) & (df['TestTime'] <= successive_pulse_end), 
                'State'] = ('C' if successive_voltage_end - successive_voltage_start >= 0 else 'D')
-
-
-    # df[df['Group'] == group]['Voltage'].iloc[-1] - df[df['Group'] == group]['Voltage'].iloc[0] >= 0
-    # df[df['Group'] == group]['normcurrent'].mean() >= 0 
     df['State'] = df['State'].ffill()
 
     # First cycle starts with the first discharge and ends with the end of the next charge    
@@ -261,80 +365,12 @@ def process_useful_columns(df_input):
     return df
     
 
-def read_file(file_path, column_names=None, cycle=None, debug_func=None):
-    """Reads the file and returns a list of DataFrames
-    
-    Parameters
-    ----------
-    file_path : str
-        Path to the file to process
-    
-    Returns
-    -------
-    list
-        List of DataFrames containing the data of the file
-    """
-    print('File : '+str(os.path.basename(file_path)))
-    file_ext = os.path.splitext(file_path)[1].lower()
-    file_dir = os.path.dirname(file_path)
-
-    # Verify if there is a column_names file in the root folder
-    json_path = os.path.join(file_dir, "column_names.json")
-    if os.path.exists(json_path):
-        with open(json_path, "r", encoding="utf-8") as f:
-            column_names = json.load(f)
-
-    if file_ext == '.parquet':
-        df = pq.read_table(file_path).to_pandas()
-        df = preprocessing_files(df, column_names, cycle, debug_func)
-        return [df]
-    
-    elif file_ext == '.csv':
-        encoding = detect_encoding(file_path)
-        sep = detect_separator(file_path, encoding)
-        skip_rows = find_header_row(file_path, encoding, sep)
-
-        df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows)
-        df = preprocessing_files(df, column_names, cycle, debug_func)
-        return [df]
-    
-    elif file_ext == '.txt':
-        encoding = detect_encoding(file_path)
-        sep = detect_separator(file_path, encoding)
-        skip_rows = find_header_row(file_path, encoding, sep)
-
-        df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows, index_col=False)
-        df = preprocessing_files(df, column_names, cycle, debug_func)
-        return [df]
-    
-    elif file_ext in ['.xlsx', '.xls']:
-        engine = detect_excel_engine(file_path)
-        sheets_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
-
-        df_list = []
-        i = 1
-        for sheet_name in sheets_dict.keys():
-            skip_rows = find_excel_header(file_path, engine, sheet_name)
-            df = pd.read_excel(file_path, sheet_name=sheet_name, engine=engine, skiprows=skip_rows)
-
-            try:
-                print(f'Sheet n°{i}: {sheet_name}')
-                i += 1
-                df_list.append(preprocessing_files(df, column_names, cycle, debug_func))
-            except Exception as e:
-                print(f'Error preprocessing sheet: {e}') 
-
-        return df_list
-    
-    else:
-        raise ValueError(f"Unsupported file format : {file_ext}")
-    
-
 def detect_encoding(file_path, num_bytes=10000):
     """Detects the encoding of the file"""
     with open(file_path, 'rb') as f:
         raw_data = f.read(num_bytes)
     return chardet.detect(raw_data)['encoding']
+
 
 def detect_separator(file_path, encoding):
     """Detects the separator for the file."""
@@ -351,6 +387,7 @@ def detect_separator(file_path, encoding):
             best_sep = sep
     return best_sep
 
+
 def find_header_row(file_path, encoding, sep, max_rows=15):
     """Finds the header row of the csv file"""
     for i in range(max_rows):
@@ -363,14 +400,6 @@ def find_header_row(file_path, encoding, sep, max_rows=15):
             continue
     return 0
 
-# def find_excel_header(file_path, engine, max_rows=15):
-#     """Finds the header row of the excel file"""
-#     for i in range(max_rows):
-#         df_test = pd.read_excel(file_path, engine=engine, skiprows=i, nrows=15)
-#         if all(isinstance(col, str) for col in df_test.columns):
-#             if not any("Unnamed" in col for col in df_test.columns):
-#                 return i
-#     return 0
 
 def find_excel_header(file_path, engine, sheet_name, max_rows=15):
     """Finds the header row of a sheet of the excel file"""
@@ -381,15 +410,25 @@ def find_excel_header(file_path, engine, sheet_name, max_rows=15):
                 return i
     return 0
 
+
 def detect_excel_engine(file_path):
     """Detects the engine to use for reading the excel file"""
     try:
         with open(file_path, 'rb') as f:
             signature = f.read(4)
-        if signature == b'PK\x03\x04':  # Signature des fichiers .xlsx
+        # .xlsx files
+        if signature == b'PK\x03\x04':  
             return 'openpyxl'
         else:
+            # .xls files
             return 'xlrd'
     except:
         return 'openpyxl'
 
+
+def add_suffix_to_filename(file_path, sheet_name):
+    """Add the sheet name to the corresponding folder name"""
+    directory, filename = os.path.split(file_path)
+    name, ext = os.path.splitext(filename)
+    new_filename = f"{name} - sheet {sheet_name}{ext}"
+    return os.path.join(directory, new_filename)

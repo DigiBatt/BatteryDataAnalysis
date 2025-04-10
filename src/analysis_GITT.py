@@ -79,66 +79,70 @@ def global_calculation_GITT(df_nested, my_func_list):
         if enough_relaxation_data and enough_pulse_data and is_a_pulse:
             
 
-            # try:
-            V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse = calculate_relevant_points_GITT(df_pulse)
-            Voltage = interp1d(df_pulse['TestTime'], df_pulse['Voltage'], kind='linear')
-            Current = interp1d(df_pulse['TestTime'], df_pulse['Current'], kind='linear')
-            Capacity = interp1d(df_pulse['TestTime'], df_pulse['Capacity'], kind='linear')
+            try:
+                SOC = df_pulse['SOC'].iloc[0]
+                if SOC < 0.02 or SOC > 0.98:
+                    continue
+                V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse = calculate_relevant_points_GITT(df_pulse)
+                Voltage = interp1d(df_pulse['TestTime'], df_pulse['Voltage'], kind='linear')
+                Current = interp1d(df_pulse['TestTime'], df_pulse['Current'], kind='linear')
+                Capacity = interp1d(df_pulse['TestTime'], df_pulse['Capacity'], kind='linear')
 
-            tau = t2 - t1
-            resistance = abs((V1 - V0) / Ipulse)
-            D = calculate_diffusion_coefficient_GITT(delta_Eocv, delta_Epulse, tau)
+                tau = t2 - t1
+                resistance = abs((V1 - V0) / Ipulse)
+                D = calculate_diffusion_coefficient_GITT(delta_Eocv, delta_Epulse, tau)
 
-            R_1s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 1)
-            R_30s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 30)
-            R_60s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 60)
-            R_180s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 178)
+                R_1s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 1)
+                R_30s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 30)
+                R_60s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 60)
+                R_180s = calculate_DCIR(V0, Voltage, t0, t3, Ipulse, 178)
 
-            df_coefficient = pd.DataFrame({'Pulse': pulse,
-                            'Cycle': df_pulse['Cycle'].iloc[-1],
-                            'State': df_pulse['State'].iloc[-1],
-                            'TestTime': t0,
-                            'SOC': df_pulse['SOC'].iloc[0],
-                            'OCV': V0,
-                            'Ipulse': Ipulse,
-                            'Diffusion Coefficient': D,
-                            'Resistance': resistance,
-                            # 'R_1s': R_1s,
-                            # 'R_30s': R_30s,
-                            # 'R_60s': R_60s,
-                            # 'R_180s': R_180s,
-                            },
-                            index=['Pulse'])
+                df_coefficient = pd.DataFrame({'Pulse': pulse,
+                                'Cycle': df_pulse['Cycle'].iloc[-1],
+                                'State': df_pulse['State'].iloc[-1],
+                                'TestTime': t0,
+                                'SOC': SOC,
+                                'OCV': V0,
+                                'Ipulse': Ipulse,
+                                'Diffusion Coefficient': D,
+                                'Resistance': resistance,
+                                # 'R_1s': R_1s,
+                                # 'R_30s': R_30s,
+                                # 'R_60s': R_60s,
+                                # 'R_180s': R_180s,
+                                },
+                                index=['Pulse'])
 
-            # Parameters that can be used in an external function
-            kwargs = {
-                'V0': V0,
-                'V1': V1,
-                'V2': V2,
-                'V3': V3,
-                't0': t0,
-                't1': t1,
-                't2': t2,
-                't3': t3,
-                'Ipulse': Ipulse,
-                'delta_Eocv': delta_Eocv,
-                'delta_Edrop': delta_Edrop,
-                'delta_Epulse': delta_Epulse,
-                'Voltage': Voltage,
-                'Current': Current,
-                'Capacity': Capacity,
-                'df_pulse': df_pulse,
-                'State': df_pulse['State'].iloc[0],
-            }
+                # Parameters that can be used in an external function
+                kwargs = {
+                    'V0': V0,
+                    'V1': V1,
+                    'V2': V2,
+                    'V3': V3,
+                    't0': t0,
+                    't1': t1,
+                    't2': t2,
+                    't3': t3,
+                    'Ipulse': Ipulse,
+                    'delta_Eocv': delta_Eocv,
+                    'delta_Edrop': delta_Edrop,
+                    'delta_Epulse': delta_Epulse,
+                    'Voltage': Voltage,
+                    'Current': Current,
+                    'Capacity': Capacity,
+                    'df_pulse': df_pulse,
+                    'State': df_pulse['State'].iloc[0],
+                }
 
-            for func in my_func_list:
-                var_name = func.__name__
-                new_var = add_function(func, **kwargs)
-                if new_var is not None:
-                    df_coefficient[var_name] = new_var
+                for func in my_func_list:
+                    var_name = func.__name__
+                    new_var = add_function(func, **kwargs)
+                    if new_var is not None:
+                        df_coefficient[var_name] = new_var
 
-            # except Exception as e:
-            #     print(f'Error processing pulse {pulse}: {e}')
+            except Exception as e:
+                # print(f'Error processing pulse {pulse}: {e}')
+                continue
         
 
             df_total = pd.concat([df_total, df_coefficient])

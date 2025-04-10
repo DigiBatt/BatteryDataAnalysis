@@ -80,6 +80,9 @@ def global_calculation_ICI(df_nested, my_func_list):
 
         if len(df_pulse[df_pulse['Relaxation'] == 0]) > 2 and len(df_pulse[df_pulse['Relaxation'] == 1]) > 2:
             try:
+                SOC = df_pulse['SOC'].iloc[0]
+                if SOC < 0.02 or SOC > 0.98:
+                    continue
                 V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse = calculate_relevant_points_ICI(df_pulse)
 
                 tau = t2 - t1

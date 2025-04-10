@@ -51,7 +51,7 @@ def pulse_number_HPPC(df_input):
             # If charging the only negative current is the HPPC pulse
             if state == 'C':
                 df_state['discharge_pulse'] = (df_state['normcurrent'] < 0).astype(int)
-                # df_state['charge_pulse'] = 0
+                df_state['charge_pulse'] = 0
                 
                 df_group = df_state[df_state['normcurrent'] < 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
                 pulse_time = df_group.mean()
@@ -71,7 +71,7 @@ def pulse_number_HPPC(df_input):
             # If discharging the only positive current is the HPPC pulse
             elif state == 'D':
                 df_state['charge_pulse'] = (df_state['normcurrent'] > 0).astype(int)
-                # df_state['discharge_pulse'] = 0
+                df_state['discharge_pulse'] = 0
 
                 df_group = df_state[df_state['normcurrent'] > 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
                 pulse_time = df_group.mean()
@@ -125,6 +125,9 @@ def global_calculation_HPPC(df_nested, my_func_list):
 
         if len(df_charge) >= 2 and len(df_discharge) >= 2 and pulse != 0:
             try:
+                SOC = df_pulse['SOC'].iloc[0]
+                if SOC < 0.02 or SOC > 0.98:
+                    continue
                 V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Idischarge, Icharge = calculate_relevant_points_HPPC(df_pulse)
 
                 R_discharge = abs((V1 - V0) / Idischarge) 

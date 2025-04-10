@@ -104,19 +104,17 @@ def process_file(file_path,
     """
     start_time = time.time()
 
-    df_list = read_file(file_path, column_names, cycle, debug_func)
+    df_list, file_path_list = read_file(file_path, column_names, cycle, debug_func)
     result_dict_list = []
-    sheet_number = 1
-    for df in df_list:
-        if len(df_list) > 1:
-            new_file_path = add_suffix_to_filename(file_path, sheet_number)
-            print(os.path.splitext(os.path.basename(new_file_path))[0])
-            sheet_number += 1
-        else:
-            new_file_path = file_path
+    for i, df in enumerate(df_list):
+        new_file_path = file_path_list[i]
+
+        base_name = os.path.splitext(os.path.basename(new_file_path))[0]
+        if "- sheet " in base_name and new_file_path != file_path:
+            sheet_name = base_name.split("- sheet ")[-1]
+            print('\nSheet', sheet_name)
 
         df = find_test(df)
-
         fig_global = plot_test_over_time(df, new_file_path, save, png, plot, test='global_file')
 
         result_dict = {}
@@ -159,14 +157,6 @@ def process_file(file_path,
         return df_list, result_dict_list
 
 
-def add_suffix_to_filename(file_path, sheet_number):
-    """Ajoute un suffixe au nom du fichier avant l'extension"""
-    directory, filename = os.path.split(file_path)
-    name, ext = os.path.splitext(filename)
-    new_filename = f"{name} - sheet {sheet_number}{ext}"
-    return os.path.join(directory, new_filename)
-
-
 def find_test(df_input):
     """Finds the test applied to the battery
 
@@ -196,6 +186,7 @@ def find_test(df_input):
                 for pulse in df_cycle['discharge_pulse'].unique():
                     if len(df_cycle[df_cycle['discharge_pulse'] == pulse]) < 10:
                         discharge_pulse -= 1
+
                 for pulse in df_cycle['charge_pulse'].unique():
                     if len(df_cycle[df_cycle['charge_pulse'] == pulse]) < 10:
                         charge_pulse -= 1

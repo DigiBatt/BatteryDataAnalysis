@@ -118,7 +118,7 @@ def plot_test_over_time(df_input,
     folder_path = os.path.dirname(file_path)
 
     param_dict = {'Voltage': 'Voltage  /  V', 
-                  'Current': 'Current  /  A', 
+                  'normcurrent': 'normcurrent  /  A', 
                   'Capacity': 'Capacity  /  Ah',}
 
     if pulse:
