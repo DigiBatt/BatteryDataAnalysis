@@ -12,3 +12,5 @@ scipy==1.15.1
 whittaker-eilers==0.2.0
 xlrd==2.0.1
 zipp==3.15.0
+scikit-learn==1.6.1
+IPython==8.4.0

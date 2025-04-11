@@ -1,4 +1,4 @@
-from preprocessing import read_file, preprocessing_files
+from preprocessing import read_file
 from analysis_dqdv import calculate_dqdv_for_all_cycle
 from analysis_GITT import pulse_number_GITT, global_calculation_GITT
 from analysis_HPPC import pulse_number_HPPC, global_calculation_HPPC
@@ -16,7 +16,7 @@ def process_file(file_path,
                  save=True,
                  png=False,
                  plot=True):
-    """Processes the data for a given file in .parquet or .csv format
+    """Processes the data for a given file
 
     It detects the type of tests applied to the battery and process the data for each type of tests
 
@@ -162,6 +162,11 @@ def find_test(df_input):
 
     Analyses the test type for each cycle according to its current pulses number
     It needs the preprocessed data with in particular the columns Cycle, State and normcurrent
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the preprocessed data
 
     Returns
     -------
