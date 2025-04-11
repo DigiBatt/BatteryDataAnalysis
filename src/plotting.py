@@ -179,7 +179,7 @@ def plot_test_over_time(df_input, file_path, save, png, plot, test="CCCV", pulse
     if save:
         result_folder = os.path.join(folder_path, file_name)
         os.makedirs(result_folder, exist_ok=True)
-        file_path = os.path.join(result_folder, f"{test}_over_time.html")
+        file_path = os.path.join(result_folder, f"{test}_over_time.json")
         fig.write_json(file_path)
     if png:
         png_image = fig.to_image(format="png", width=2000, height=800)
@@ -200,7 +200,7 @@ def plot_DQDV_result(df, file_path, save, png, plot):
     df_input : pandas.DataFrame
         DataFrame containing the data to plot
     file_path : str
-        Path to the file to process
+        Path to the file to processn
     save : bool, optional
         Whether to save the plots as .html files(default is False).
     png : bool, optional
@@ -253,7 +253,7 @@ def plot_DQDV_result(df, file_path, save, png, plot):
     if save:
         result_folder = os.path.join(folder_path, file_name)
         os.makedirs(result_folder, exist_ok=True)
-        file_path_dqdv = os.path.join(result_folder, f"dQdV.html")
+        file_path_dqdv = os.path.join(result_folder, f"dQdV.json")
         fig_dqdv.write_json(file_path_dqdv)
     if png:
         png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
@@ -333,7 +333,7 @@ def plot_dqdv_heatmap(df, file_path, save, png, plot):
     if save:
         result_folder = os.path.join(folder_path, file_name)
         os.makedirs(result_folder, exist_ok=True)
-        file_path_heatmap = os.path.join(result_folder, f"dqdv_heatmap.html")
+        file_path_heatmap = os.path.join(result_folder, f"dqdv_heatmap.json")
         fig_dqdv.write_json(file_path_heatmap)
     if png:
         png_image = fig_dqdv.to_image(format="png", width=2000, height=800)
@@ -416,7 +416,7 @@ def plot_pocv(df, file_path, save, png, plot):
     if save:
         result_folder = os.path.join(folder_path, file_name)
         os.makedirs(result_folder, exist_ok=True)
-        file_path_pocv = os.path.join(result_folder, f"pocv.html")
+        file_path_pocv = os.path.join(result_folder, f"pocv.json")
         fig_pocv.write_json(file_path_pocv)
     if png:
         png_image = fig_pocv.to_image(format="png", width=2000, height=800)
@@ -488,7 +488,7 @@ def plot_GITT_result(df, file_path, save, png, plot, column="Diffusion Coefficie
     if save:
         result_folder = os.path.join(folder_path, file_name)
         os.makedirs(result_folder, exist_ok=True)
-        file_path_GITT = os.path.join(result_folder, f"GITT_{column}.html")
+        file_path_GITT = os.path.join(result_folder, f"GITT_{column}.json")
         fig_GITT.write_json(file_path_GITT)
     if png:
         png_image = fig_GITT.to_image(format="png", width=2000, height=800)
@@ -562,7 +562,7 @@ def plot_HPPC_result(df, file_path, save, png, plot, column="R"):
     if save:
         result_folder = os.path.join(folder_path, file_name)
         os.makedirs(result_folder, exist_ok=True)
-        file_path_HPPC = os.path.join(result_folder, f"HPPC_{column}.html")
+        file_path_HPPC = os.path.join(result_folder, f"HPPC_{column}.json")
         fig_HPPC.write_json(file_path_HPPC)
     if png:
         png_image = fig_HPPC.to_image(format="png", width=2000, height=800)
