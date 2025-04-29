@@ -13,6 +13,7 @@ def process_file(file_path,
                  cycle=None,
                  debug_func=None,
                  my_func_list=[],
+                 input='path',
                  save=True,
                  png=False,
                  plot=True):
@@ -104,7 +105,7 @@ def process_file(file_path,
     """
     start_time = time.time()
 
-    df_list, file_path_list = read_file(file_path, column_names, cycle, debug_func)
+    df_list, file_path_list = read_file(file_path, column_names, cycle, debug_func, input)
     result_dict_list = []
     for i, df in enumerate(df_list):
         new_file_path = file_path_list[i]

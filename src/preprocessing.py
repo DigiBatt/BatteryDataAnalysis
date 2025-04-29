@@ -8,10 +8,7 @@ import numpy as np
 import chardet
 import json
 
-import plotly.graph_objects as go
-import plotly.express as px
-
-def read_file(file_path, column_names=None, cycle=None, debug_func=None):
+def read_file(file_path, column_names=None, cycle=None, debug_func=None, input='path'):
     """Reads the file and returns a list of DataFrames
     
     Parameters
@@ -24,58 +21,65 @@ def read_file(file_path, column_names=None, cycle=None, debug_func=None):
     list
         List of DataFrames containing the data of the file
     """
-    print('File : '+str(os.path.basename(file_path)))
-    file_ext = os.path.splitext(file_path)[1].lower()
-    file_dir = os.path.dirname(file_path)
-
-    # Verify if there is a column_names file in the root folder
-    json_path = os.path.join(file_dir, "column_names.json")
-    if os.path.exists(json_path):
-        with open(json_path, "r", encoding="utf-8") as f:
-            column_names = json.load(f)
-
-    if file_ext == '.parquet':
-        df = pq.read_table(file_path).to_pandas()
-        df = preprocessing_files(df, column_names, cycle, debug_func)
+    if input == 'dataframe':
+        df = preprocessing_files(file_path, column_names, cycle, debug_func)
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dataframe.csv')
         return [df], [file_path]
-    
-    elif file_ext == '.csv':
-        encoding = detect_encoding(file_path)
-        sep = detect_separator(file_path, encoding)
-        skip_rows = find_header_row(file_path, encoding, sep)
 
-        df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows)
-        df = preprocessing_files(df, column_names, cycle, debug_func)
-        return [df], [file_path]
-    
-    elif file_ext == '.txt':
-        encoding = detect_encoding(file_path)
-        sep = detect_separator(file_path, encoding)
-        skip_rows = find_header_row(file_path, encoding, sep)
-
-        df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows, index_col=False)
-        df = preprocessing_files(df, column_names, cycle, debug_func)
-        return [df], [file_path]
-    
-    elif file_ext in ['.xlsx', '.xls']:
-        engine = detect_excel_engine(file_path)
-        sheets_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
-
-        df_list, file_path_list = [], []
-        for sheet_name in sheets_dict.keys():
-            skip_rows = find_excel_header(file_path, engine, sheet_name)
-            df = pd.read_excel(file_path, sheet_name=sheet_name, engine=engine, skiprows=skip_rows)
-
-            try:
-                print(f'\nSheet {sheet_name}')
-                df_list.append(preprocessing_files(df, column_names, cycle, debug_func))
-                new_file_path = add_suffix_to_filename(file_path, sheet_name)
-                file_path_list.append(new_file_path)
-            except Exception as e:
-                print(f'Error preprocessing sheet: {e}') 
-        return df_list, file_path_list
     else:
-        raise ValueError(f"Unsupported file format : {file_ext}")
+        print('File : '+str(os.path.basename(file_path)))
+        file_ext = os.path.splitext(file_path)[1].lower()
+        file_dir = os.path.dirname(file_path)
+
+        # Verify if there is a column_names file in the root folder
+        json_path = os.path.join(file_dir, "column_names.json")
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as f:
+                column_names = json.load(f)
+
+        if file_ext == '.parquet':
+            df = pq.read_table(file_path).to_pandas()
+            df = preprocessing_files(df, column_names, cycle, debug_func)
+            return [df], [file_path]
+        
+        elif file_ext == '.csv':
+            encoding = detect_encoding(file_path)
+            sep = detect_separator(file_path, encoding)
+            skip_rows = find_header_row(file_path, encoding, sep)
+
+            df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows)
+            df = preprocessing_files(df, column_names, cycle, debug_func)
+            return [df], [file_path]
+        
+        elif file_ext == '.txt':
+            encoding = detect_encoding(file_path)
+            sep = detect_separator(file_path, encoding)
+            skip_rows = find_header_row(file_path, encoding, sep)
+
+            df = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=skip_rows, index_col=False)
+            df = preprocessing_files(df, column_names, cycle, debug_func)
+            return [df], [file_path]
+        
+        elif file_ext in ['.xlsx', '.xls']:
+            engine = detect_excel_engine(file_path)
+            sheets_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
+
+            df_list, file_path_list = [], []
+            for sheet_name in sheets_dict.keys():
+                skip_rows = find_excel_header(file_path, engine, sheet_name)
+                df = pd.read_excel(file_path, sheet_name=sheet_name, engine=engine, skiprows=skip_rows)
+
+                try:
+                    print(f'\nSheet {sheet_name}')
+                    df_list.append(preprocessing_files(df, column_names, cycle, debug_func))
+                    new_file_path = add_suffix_to_filename(file_path, sheet_name)
+                    file_path_list.append(new_file_path)
+                except Exception as e:
+                    print(f'Error preprocessing sheet: {e}') 
+            return df_list, file_path_list
+        else:
+            raise ValueError(f"Unsupported file format : {file_ext}")
+
 
 
 
@@ -236,43 +240,10 @@ def process_useful_columns(df_input):
     X = df['Current'].values.reshape(-1, 1)
     kmeans = KMeans(n_clusters=8, random_state=0)
     df['Cluster'] = kmeans.fit_predict(X)
-    # centers = kmeans.cluster_centers_.flatten()
 
     # Rounding to 0 the cluster closest to 0
     zero_cluster_idx = np.argmin(np.abs(kmeans.cluster_centers_.flatten()))
     df['normcurrent'] = df.apply(lambda row: 0 if row['Cluster'] == zero_cluster_idx else row['Current'], axis=1)
-
-    # colors = px.colors.qualitative.Plotly
-    # bin_width = (df['Current'].max() - df['Current'].min()) / 1000
-    # fig = go.Figure()
-    # for i, center in enumerate(centers):
-    #     cluster_data = df[df['Cluster'] == i]['Current']
-    #     fig.add_trace(go.Histogram(
-    #         x=cluster_data,
-    #         xbins=dict(
-    #             start=df['Current'].min(),
-    #             end=df['Current'].max() + bin_width,
-    #             size=bin_width,
-    #         ),
-    #         name=f'Cluster {i} ({center})',
-    #         marker_color=colors[i % len(colors)],
-    #         opacity=1,
-    #         showlegend=True
-    #     ))
-
-    # fig.update_layout(
-    #     barmode='overlay',
-    #     title='Répartition du courant par cluster',
-    #     xaxis_title='Courant (A)',
-    #     yaxis_title='Fréquence',
-    # )
-    # fig.show()
-
-    # df_nocurrent = df[abs(df['Current']) <= abs(df['Current']).max() * 0.04]
-    # nocurrent_max = abs(df_nocurrent['Current']).max()
-    # df['normcurrent'] = df['Current']
-    # if nocurrent_max != 0 and not np.isnan(nocurrent_max):
-    #     df.loc[abs(df['Current']) <= nocurrent_max, 'normcurrent'] = round(df['Current'] / (nocurrent_max * 1.9)) * (nocurrent_max * 1.9)
 
     # Local charging/discharging state and counting each state
     df.loc[df['normcurrent'] < 0, 'Local_state'] = 'D'
