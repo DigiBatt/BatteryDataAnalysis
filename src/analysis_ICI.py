@@ -23,7 +23,7 @@ def pulse_number_ICI(df_input):
         :align: center
         :alt: Relaxation part of a pulse selected by the function for ICI data
 
-    The corresponding parameters that can be used in a custom function (see :func:`add_function`) are:
+    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`) are:
     *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_ICI`.
         
     Parameters
@@ -72,7 +72,7 @@ def global_calculation_ICI(df_nested, my_func_list):
 
     Returns
     -------
-    dict
+    Dict
         Dict containing the nested DataFrames as values and their pulse number as keys
     """
     df_total = pd.DataFrame()
@@ -127,17 +127,18 @@ def global_calculation_ICI(df_nested, my_func_list):
                     if new_var is not None:
                         df_coefficient[var_name] = new_var
 
+                df_total = pd.concat([df_total, df_coefficient])
+
             except Exception as e:
                 print(f'Error processing pulse {pulse}: {e}')
-
-            df_total = pd.concat([df_total, df_coefficient])
+                
     return df_total
 
 
 def calculate_relevant_points_ICI(df_pulse):
     """Calculates the relevant points represented in the :func:`pulse_number_ICI` documentation.  
 
-    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`).
     
     Parameters
     ----------
@@ -146,7 +147,7 @@ def calculate_relevant_points_ICI(df_pulse):
 
     Returns
     -------
-    tuple
+    Tuple
         Tuple containing the relevant points : V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse
     """
     df_relax = df_pulse[(df_pulse['Relaxation'] == 1)].copy()
@@ -203,7 +204,7 @@ def calculate_diffusion_coefficient_ICI(t1, t2, t3, delta_Ec, delta_Epulse):
 
     Returns
     -------
-    float
+    Float
         Diffusion coefficient of the selected pulse
     """
     radius = 5e-6

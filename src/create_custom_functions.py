@@ -32,7 +32,7 @@ def add_function(my_func, **kwargs):
 
     Returns
     -------
-    float
+    Float
         New parameter calculated by the function my_func
 
     Examples

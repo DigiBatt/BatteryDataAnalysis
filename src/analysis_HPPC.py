@@ -22,7 +22,7 @@ def pulse_number_HPPC(df_input):
         :align: center
         :alt: Current pulses part of a pulse selected by the function for HPPC data
 
-    The corresponding parameters that can be used in a custom function (see :func:`add_function`) are:
+    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`) are:
     *V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Icharge, Idischarge* that are calculated in :func:`calculate_relevant_points_HPPC`.
 
     Parameters
@@ -32,7 +32,7 @@ def pulse_number_HPPC(df_input):
 
     Returns
     -------
-    dict
+    ict
         Dict containing the nested DataFrames as values and their pulse number as keys
     """
     # A pulse starts the time just before the pulse and ends the time just before the next pulse at the end of the relaxation time
@@ -176,17 +176,19 @@ def global_calculation_HPPC(df_nested, my_func_list):
                     new_var = add_function(func, **kwargs)
                     if new_var is not None:
                         df_coefficient[var_name] = new_var
+
+                df_total = pd.concat([df_total, df_coefficient])
+
             except Exception as e:
                 print(f'Error processing pulse {pulse}: {e}')
 
-            df_total = pd.concat([df_total, df_coefficient])
     return df_total
 
 
 def calculate_relevant_points_HPPC(df_pulse):
-    """Calculates the relevant points represented in the :func:`pulse_number_GITT` documentation.  
+    """Calculates the relevant points represented in the :func:`pulse_number_HPPC` documentation.  
 
-    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`).
     
     Parameters
     ----------
@@ -195,7 +197,7 @@ def calculate_relevant_points_HPPC(df_pulse):
 
     Returns
     -------
-    tuple
+    Tuple
         Tuple containing the relevant points : V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Icharge, Idischarge
     """
     df = df_pulse.copy()
@@ -246,7 +248,7 @@ def calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge):
 
     Returns
     -------
-    tuple
+    Tuple
         Charge and discharge Pulse Power
     """
     P_discharge = Vmin * (V0 - Vmin) / R_discharge 

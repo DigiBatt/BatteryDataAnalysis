@@ -3,12 +3,26 @@ import os
 import zipfile
 import shutil
 import time
+import json
+import importlib.util
+import sys
 from processing import process_file
 
-def scrapping_zenodo():
-    ACCESS_TOKEN = '70zVqGpbBA0ueu68VJ2s02zNzRJKW7Kpju1xmj4n4oUoO5GT79XDx1FDyc8I'
-    community = "battery-knowledge-base"
-    download_folder = 'C:/Users/edgarl/OneDrive - SINTEF/Documents/Zenodo_crawling'
+def scrapping_zenodo(ACCESS_TOKEN, download_folder, community):
+    """Searches and downloads files from a given Zenodo community (for example "battery-knowledge-base")
+
+    In the given folder path, each record is stored in a separate folder named with the record ID.
+    Then, each data file is stored in a single folder with the same name as the file.
+
+    Parameters
+    ----------
+    ACCESS_TOKEN : str
+        Access token to access the Zenodo API.
+    download_folder : str
+        Path to the folder where the files will be downloaded.
+    community : str
+        Name of the Zenodo community to search for files.
+    """
     file_extensions = ['.csv', '.txt', '.parquet', '.xlsx', '.xls', '.json', '.zip']
     max_size = 0.5 * 1024**3  # 0.5 GB
     useless_file_list = ['requirements.txt', 'requirements-docs.txt']  #'readme.txt'
@@ -102,24 +116,69 @@ def scrapping_zenodo():
         print("Error :", response.status_code, response.text)
 
 
-def crawl_and_process():
-    directory_path = 'C:/Users/edgarl/OneDrive - SINTEF/Documents/Zenodo_crawling'
-    file_extensions = ['.csv', '.txt', '.parquet', '.xlsx', '.xls']
-    max_size = 0.5 * 1024**3  # 0.5 GB
+def crawl_and_process(directory_path):
+    """Crawls through the given directory and processes data files
+
+    The results are stored under HTML plots in the same folder as the data files, in a folder named as the data file name.
+    To improve the processing, 2 files can be added to the folder corresponding to the data file you want to process:
+
+    - ``column_names.json``: a JSON file with the column names to be used in the processing, under the template:
+
+    .. code-block:: json
+
+        {
+            "time_column_name": "SysTime",
+            "voltage_column_name": "Voltage",
+            "current_column_name": "Current"
+        }
+
+    - ``debug_func.py``: a Python file with a function named ``debug_func`` that takes a DataFrame as input and returns a modified DataFrame, under the template:
+
+    .. code-block:: python
+
+        def debug_func(df):
+            # Perform debugging operations on the DataFrame
+            return df
+
+    Parameters
+    ----------
+    directory_path : str
+        Path to the directory to crawl and process
+    """
+    max_size = 2 * 1024**3  # 2 GB
+    file_extensions = ['.csv', '.txt', '.parquet', '.xlsx', '.xls', '.json']
 
     for root, dirs, files in os.walk(directory_path):
+        print('root', root)
         for file in files:
-            # print('root', root)
-            # print('files', files)
             file_name, file_ext = os.path.splitext(file)
-            # file_folder = os.path.join(root, file_name)
             file_path = os.path.join(root, file)
-            if not any(f.endswith('.html') for f in os.listdir(root)):
-                if file_ext in file_extensions and os.path.getsize(file_path) < max_size:
-                    try:
-                        df, df_result = process_file(file_path, save=True)
-                    except Exception as e:
-                        print('Error processing file:', e)
 
-# scrapping_zenodo()
-# crawl_and_process()
+            # Try loading column_names if it exists
+            column_names = {}
+            json_path = os.path.join(root, "column_names.json")
+            if os.path.exists(json_path):
+                with open(json_path, "r", encoding="utf-8") as f:
+                    column_names = json.load(f)
+
+            # Try loading debug_func if it exists
+            debug_func = None
+            debug_func_path = os.path.join(root, "debug_func.py")
+            if os.path.exists(debug_func_path):
+                spec = importlib.util.spec_from_file_location("debug_module", debug_func_path)
+                debug_module = importlib.util.module_from_spec(spec)
+                sys.modules["debug_module"] = debug_module
+                spec.loader.exec_module(debug_module)
+
+                if hasattr(debug_module, "debug_func"):
+                    debug_func = getattr(debug_module, "debug_func")
+            
+            file_already_processed = any(d.startswith(file_name) for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)))
+            file_too_heavy = os.path.getsize(file_path) < max_size
+            good_extension = file_ext in file_extensions
+            if not file_already_processed and not file_too_heavy and good_extension:
+                try:
+                    df, df_result = process_file(file_path, column_names=column_names, debug_func=debug_func)
+                except Exception as e:
+                    print('Error processing file:', e)
+

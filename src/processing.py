@@ -16,7 +16,7 @@ def process_file(file_path,
                  input='path',
                  save=True,
                  png=False,
-                 plot=True):
+                 plot=False):
     """Processes the data for a given file
 
     It detects the type of tests applied to the battery and process the data for each type of tests
@@ -51,7 +51,7 @@ def process_file(file_path,
     --------
     Basic usage:
 
-    >>> df = process_file(file_path)
+    >>> df, result_dict = process_file(file_path)
     File : GITT_AG4_S_1577.parquet
     Length : 9154638
     Preprocessing Time : 41s
@@ -214,18 +214,6 @@ def find_test(df_input):
                         df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'Test'] = 'ICI'
                     else:
                         df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'Test'] = 'GITT'
-
-                else:
-                    volt_diff = df_cycle['Voltage'].diff()
-
-    # If there is a complete cycle with no pulses, the test is CCCV
-    # df['Group'] = (df['Test'] != df['Test'].shift()).cumsum()
-    # for group in df['Group'].unique():
-    #     df_group = df[df['Group'] == group]
-    #     if 'C' in df_group['State'].unique() and 'D' in df_group['State'].unique() and df_group['Test'].unique() == ['NA']:
-    #         df.loc[df['Group'] == group, 'Test'] = 'CCCV'
-
-    # df['Test'] = df['Test'].replace('NA', np.nan)
 
     print('Find Test Time : '+str(int(time.time() - start_time))+'s')
     return df

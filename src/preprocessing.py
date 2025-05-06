@@ -29,13 +29,6 @@ def read_file(file_path, column_names=None, cycle=None, debug_func=None, input='
     else:
         print('File : '+str(os.path.basename(file_path)))
         file_ext = os.path.splitext(file_path)[1].lower()
-        file_dir = os.path.dirname(file_path)
-
-        # Verify if there is a column_names file in the root folder
-        json_path = os.path.join(file_dir, "column_names.json")
-        if os.path.exists(json_path):
-            with open(json_path, "r", encoding="utf-8") as f:
-                column_names = json.load(f)
 
         if file_ext == '.parquet':
             df = pq.read_table(file_path).to_pandas()
@@ -79,9 +72,6 @@ def read_file(file_path, column_names=None, cycle=None, debug_func=None, input='
             return df_list, file_path_list
         else:
             raise ValueError(f"Unsupported file format : {file_ext}")
-
-
-
 
 
 def preprocessing_files(df, column_names=None, cycle=None, debug_func=None):
@@ -335,16 +325,36 @@ def process_useful_columns(df_input):
 
     return df
     
-
 def detect_encoding(file_path, num_bytes=10000):
-    """Detects the encoding of the file"""
+    """Detects the encoding of the file
+    
+    Parameters
+    -------
+    file_path : str
+    
+    Returns
+    -------
+    str
+        Encoding of the file
+    """
     with open(file_path, 'rb') as f:
         raw_data = f.read(num_bytes)
     return chardet.detect(raw_data)['encoding']
 
 
 def detect_separator(file_path, encoding):
-    """Detects the separator for the file."""
+    """Detects the separator for the file
+    
+    Parameters
+    -------
+    file_path : str
+    encoding : str
+    
+    Returns
+    -------
+    str
+        Separator of the file
+    """
     potential_separators = [',', ';', '\t', '|']
     with open(file_path, 'r', encoding=encoding) as f:
         first_lines = [f.readline() for _ in range(5)]
@@ -360,7 +370,20 @@ def detect_separator(file_path, encoding):
 
 
 def find_header_row(file_path, encoding, sep, max_rows=15):
-    """Finds the header row of the csv file"""
+    """Finds the header row of the csv file
+
+    Parameters
+    -------
+    file_path : str
+    encoding : str
+    sep : str
+    max_rows : int, optional
+    
+    Returns
+    -------
+    str
+        Header row of the file
+    """
     for i in range(max_rows):
         try:
             df_test = pd.read_csv(file_path, encoding=encoding, sep=sep, skiprows=i, nrows=15)
@@ -371,9 +394,21 @@ def find_header_row(file_path, encoding, sep, max_rows=15):
             continue
     return 0
 
-
 def find_excel_header(file_path, engine, sheet_name, max_rows=15):
-    """Finds the header row of a sheet of the excel file"""
+    """Finds the header row of a sheet of the excel file
+    
+    Parameters
+    -------
+    file_path : str
+    engine : str
+    sheet_name : str
+    max_rows : int, optional
+    
+    Returns
+    -------
+    str
+        Header row of the file
+    """
     for i in range(max_rows):
         df_test = pd.read_excel(file_path, engine=engine, sheet_name=sheet_name, skiprows=i, nrows=15)
         if all(isinstance(col, str) for col in df_test.columns):
@@ -381,24 +416,41 @@ def find_excel_header(file_path, engine, sheet_name, max_rows=15):
                 return i
     return 0
 
-
 def detect_excel_engine(file_path):
-    """Detects the engine to use for reading the excel file"""
+    """Detects the engine to use for reading the excel file
+
+    Parameters
+    -------
+    file_path : str
+    
+    Returns
+    -------
+    str
+        Engine to use for reading the excel file
+    """
     try:
         with open(file_path, 'rb') as f:
             signature = f.read(4)
-        # .xlsx files
-        if signature == b'PK\x03\x04':  
+        if signature == b'PK\x03\x04':  # .xlsx files
             return 'openpyxl'
-        else:
-            # .xls files
+        else:   # .xls files
             return 'xlrd'
     except:
         return 'openpyxl'
 
-
 def add_suffix_to_filename(file_path, sheet_name):
-    """Add the sheet name to the corresponding folder name"""
+    """Add the sheet name to the corresponding folder name
+
+    Parameters
+    -------
+    file_path : str
+    sheet_name : str
+    
+    Returns
+    -------
+    str
+        New file path with the sheet name added to the filename
+    """
     directory, filename = os.path.split(file_path)
     name, ext = os.path.splitext(filename)
     new_filename = f"{name} - sheet {sheet_name}{ext}"

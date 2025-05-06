@@ -7,6 +7,13 @@ from cmcrameri import cm
 import matplotlib.pyplot as plt
 from IPython.display import Image, display
 
+title_size = 45 # [20,45]
+axis_size = 35 # [18,35]
+legend_size = 35 # [18,35]
+tickfont_size = 35 # [18,35]
+marker_size = 10
+line_width = 3
+
 def matplotlib_to_plotly_colorscale(colormap, n_colors=256):
     """Converts a matplotlib colormap to a Plotly colorscale
 
@@ -22,12 +29,7 @@ def matplotlib_to_plotly_colorscale(colormap, n_colors=256):
     List
         Plotly colorscale
     """
-    colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]
-    # colorscale = [(0, f"rgb({int(colors[0][0] * 255)}, {int(colors[0][1] * 255)}, {int(colors[0][2] * 255)})")]
-    # colorscale += [
-    #     (i / (2*(n_colors - 1)) + 0.5, f"rgb({int(c[0] * 255)}, {int(c[1] * 255)}, {int(c[2] * 255)})")
-    #     for i, c in enumerate(colors)]
-    
+    colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]    
     colorscale = [(i / (n_colors - 1), f"rgb({int(c[0] * 255)}, {int(c[1] * 255)}, {int(c[2] * 255)})")for i, c in enumerate(colors)]
     return colorscale
 
@@ -77,13 +79,6 @@ def get_colorscale(state, nb_cycle, i):
     hex_color = f'rgba({int(rgba_color[0]*255)}, {int(rgba_color[1]*255)}, {int(rgba_color[2]*255)}, {rgba_color[3]})'
 
     return hex_color
-
-title_size = 45 # [20,45]
-axis_size = 35 # [18,35]
-legend_size = 35 # [18,35]
-tickfont_size = 35 # [18,35]
-marker_size = 10
-line_width = 3
 
 def plot_test_over_time(df_input,
                         file_path,

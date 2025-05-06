@@ -35,8 +35,6 @@ def calculate_dqdv_for_all_cycle(df, smoothing=True):
                 df_smoothed = df_smoothed.assign(Cycle=cycle, State=charging_state)
 
                 df_dqdv = pd.concat([df_dqdv, df_smoothed])
-            # else:
-                # print('No data for cycle '+str(cycle)+', '+str(charging_state))
 
     if len(df_dqdv) > 3:
         volt_step = len(df['Cycle'].unique()) * (df_dqdv['smoothed_voltage'].max() - df_dqdv['smoothed_voltage'].min()) / 50000

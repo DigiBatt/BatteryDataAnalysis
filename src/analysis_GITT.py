@@ -18,7 +18,8 @@ def pulse_number_GITT(df_input):
         :align: center
         :alt: Example of a pulse selected by the function for GITT data
 
-    The corresponding parameters that can be used in a custom function (see :func:`add_function`) are: 
+        
+    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`) are: 
     *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_GITT`.
     
     Parameters
@@ -140,19 +141,18 @@ def global_calculation_GITT(df_nested, my_func_list):
                     if new_var is not None:
                         df_coefficient[var_name] = new_var
 
-            except Exception as e:
-                # print(f'Error processing pulse {pulse}: {e}')
-                continue
-        
+                df_total = pd.concat([df_total, df_coefficient])
 
-            df_total = pd.concat([df_total, df_coefficient])
+            except Exception as e:
+                continue
+                    
     return df_total
 
 
 def calculate_relevant_points_GITT(df_pulse):
     """Calculates the relevant points represented in the :func:`pulse_number_GITT` documentation.  
 
-    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function`).
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`).
     
     Parameters
     ----------
@@ -161,7 +161,7 @@ def calculate_relevant_points_GITT(df_pulse):
 
     Returns
     -------
-    tuple
+    Tuple
         Tuple containing the relevant points : V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse
     """
     df_current = df_pulse[(df_pulse['Relaxation'] == 0)].copy()
@@ -211,7 +211,7 @@ def calculate_DCIR(V0, Voltage, t0, t3, Ipulse, r_time):
 
     Returns
     -------
-    float
+    Float
         DCIR of the pulse
     """
     if t0 + r_time <= t3:

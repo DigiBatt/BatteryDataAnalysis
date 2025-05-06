@@ -1,32 +1,47 @@
-Quick start
-================================
-Welcome to the Getting Started Guide for BatteryDataAnalysis
+Quick Start
+===========
+
+Welcome to the Getting Started Guide for **BatteryDataAnalysis**.
+
+BatteryDataAnalysis is a Python tool designed to help you process and analyze battery test data.
+It supports data in CSV or Parquet formats containing voltage, current, and time series.
+
+The package includes analysis tools for tests such as:
+
+- GITT (Galvanostatic Intermittent Titration Technique)
+- ICI (Intermittent Current Interruption)
+- HPPC (Hybrid Pulse Power Characterization)
+- dQ/dV (Differential Capacity Analysis)
 
 Getting Started with BatteryDataAnalysis
--------------------------------------------
+----------------------------------------
 
-BatteryDataAnalysis is a tool that can help you process and extract your battery data from various tests.
-The data should be in a parquet or csv format and contain Voltage, Current and Time series. 
-The package contains analysis tools for GITT, ICI, HPPC and dQ/dV tests.
+To begin using **BatteryDataAnalysis**, follow these steps:
 
-
-To begin using BatteryDataAnalysis:
-
-1. Install the package using pip:
+1. **Clone the repository locally** (if you want the source version):
 
    .. code-block:: console
 
-       pip install BatteryDataAnalysis
+       git clone https://github.com/DigiBatt/BatteryDataAnalysis.git
+       cd BatteryDataAnalysis
+       pip install .
 
-   For detailed installation instructions, including how to install specific versions or from source, see the :ref:`installation` section.
+   For more details, see the :ref:`installation` section.
 
-2. Once BatteryDataAnalysis is installed, you can import it in your Python scripts or Jupyter notebooks:
+2. **Import the library** in your Python scripts or Jupyter notebooks:
 
    .. code-block:: python
 
        import BatteryDataAnalysis
 
-   Now you're ready to utilise BatteryDataAnalysis's functionality in your projects!
+3. **Start analyzing your data**:
+
+   .. code-block:: python
+
+       from BatteryDataAnalysis.src.processing import process_file
+
+       df, result_dict = process_file("path/to/your/data.csv")
+
 
 Exploring Examples
 ------------------
