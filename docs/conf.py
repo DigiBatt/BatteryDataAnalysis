@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(os.path.join('..')))
+# sys.path.insert(0, os.path.abspath(os.path.join('../src/BatteryDataAnalysis')))
 matlab_src_dir = os.path.abspath('..')
 
 autoclass_content = 'both'
@@ -50,7 +50,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for autoapi -------------------------------------------------------
 autoapi_type = "python"
-autoapi_dirs = ['../src']
+autoapi_dirs = ['../src/BatteryDataAnalysis']
 autoapi_ignore = ['*run.py']
 autoapi_root = "api"
 # autoapi_member_order = "groupwise"

@@ -6,8 +6,7 @@
    Get Started <pages/getstarted>
    Examples <pages/examples>
    API Reference <api/index>
-   About <pages/about>
-   FAQ <pages/faq>
+   Contributions <pages/contribute>
 
 Battery Data Analysis Toolkit
 ================================

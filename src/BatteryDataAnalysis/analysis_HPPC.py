@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from create_custom_functions import add_function
+from .create_custom_functions import add_function
 from scipy.interpolate import interp1d
 
 def pulse_number_HPPC(df_input):
@@ -12,17 +12,17 @@ def pulse_number_HPPC(df_input):
     
     Here is a schema of a selected pulse and its relevant points:
 
-    .. image:: ../../../../_static/pulse_HPPC.png
+    .. image:: /_static/pulse_HPPC.png
         :width: 2000px
         :align: center
         :alt: Example of a pulse selected by the function for HPPC data
 
-    .. image:: ../../../../_static/pulse_HPPC_zoom.png
+    .. image:: /_static/pulse_HPPC_zoom.png
         :width: 2000px
         :align: center
         :alt: Current pulses part of a pulse selected by the function for HPPC data
 
-    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`) are:
+    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`) are:
     *V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Icharge, Idischarge* that are calculated in :func:`calculate_relevant_points_HPPC`.
 
     Parameters
@@ -188,7 +188,7 @@ def global_calculation_HPPC(df_nested, my_func_list):
 def calculate_relevant_points_HPPC(df_pulse):
     """Calculates the relevant points represented in the :func:`pulse_number_HPPC` documentation.  
 
-    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`).
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`).
     
     Parameters
     ----------

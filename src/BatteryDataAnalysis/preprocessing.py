@@ -6,7 +6,6 @@ from rapidfuzz import process
 from sklearn.cluster import KMeans
 import numpy as np
 import chardet
-import json
 
 def read_file(file_path, column_names=None, cycle=None, debug_func=None, input='path'):
     """Reads the file and returns a list of DataFrames
@@ -163,6 +162,7 @@ def standardize_column_names(df_input, column_names):
         else:
             df = df.dropna(subset=[col])
 
+    df = df.loc[:, ~df.columns.duplicated()]
     return df
 
 

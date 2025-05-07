@@ -2,11 +2,10 @@ import requests
 import os
 import zipfile
 import shutil
-import time
-import json
 import importlib.util
 import sys
-from processing import process_file
+import json
+from .processing import process_file
 
 def scrapping_zenodo(ACCESS_TOKEN, download_folder, community):
     """Searches and downloads files from a given Zenodo community (for example "battery-knowledge-base")
@@ -44,30 +43,27 @@ def scrapping_zenodo(ACCESS_TOKEN, download_folder, community):
             os.makedirs(record_folder, exist_ok=True)
             print('Paper title: ', record['metadata']['title'])
             
-            if "files" in record:
+            if "files" in record and record['metadata']['title'] != 'Lithium Ion Battery Test Dataset for Maritime Transport INR18650-MJ1':
                 for file in record["files"]:
                     file_key = file["key"]
                     file_name, file_ext = os.path.splitext(file_key)
-                    file_folder = os.path.join(record_folder, file_name)
+                    # file_folder = os.path.join(record_folder, file_name)
+
+                    file_folder = record_folder
                     file_path = os.path.join(file_folder, file_key)
 
                     if not os.path.exists(file_path):
                         download_url = f"https://zenodo.org/record/{record_id}/files/{file_key}?download=1"
                         response = requests.get(download_url)
-                        print('Requests remaining:', response.headers['X-RateLimit-Remaining'])
-                        time.sleep(1)
 
                         if response.status_code == 429:
                             print('Reset time of the current rate limit:',  response.headers['X-RateLimit-Reset'])
 
                         elif response.status_code == 200:
-                            print('response_statut == 200')
                             head_response = requests.head(download_url)
                             file_size = int(head_response.headers.get("Content-Length", 0))
 
                             if file_ext in file_extensions and file_key not in useless_file_list:
-                                print('file_ext in file_extensions')
-
                                 # Zip Folders
                                 if file_ext == ".zip":
                                     print(f"Downloading {file_key}")
@@ -87,7 +83,9 @@ def scrapping_zenodo(ACCESS_TOKEN, download_folder, community):
                                     for root, dirs, files in os.walk(extract_folder):
                                         for file_key in files:
                                             file_name, file_ext = os.path.splitext(file_key)
-                                            file_folder = os.path.join(record_folder, file_name)
+                                            # file_folder = os.path.join(record_folder, file_name)
+
+                                            file_folder = record_folder
                                             file_path = os.path.join(file_folder, file_key)
 
                                             if file_ext in file_extensions:
@@ -174,11 +172,10 @@ def crawl_and_process(directory_path):
                     debug_func = getattr(debug_module, "debug_func")
             
             file_already_processed = any(d.startswith(file_name) for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)))
-            file_too_heavy = os.path.getsize(file_path) < max_size
+            file_too_heavy = os.path.getsize(file_path) > max_size
             good_extension = file_ext in file_extensions
             if not file_already_processed and not file_too_heavy and good_extension:
                 try:
                     df, df_result = process_file(file_path, column_names=column_names, debug_func=debug_func)
                 except Exception as e:
                     print('Error processing file:', e)
-

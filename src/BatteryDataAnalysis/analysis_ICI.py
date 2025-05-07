@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from create_custom_functions import add_function
+from .create_custom_functions import add_function
 from whittaker_eilers import WhittakerSmoother
 from scipy.interpolate import interp1d
 
@@ -13,17 +13,17 @@ def pulse_number_ICI(df_input):
 
     Here is a schema of a selected pulse and its relevant points:
 
-    .. image:: ../../../../_static/pulse_ICI.png
+    .. image:: /_static/pulse_ICI.png
         :width: 2000px
         :align: center
         :alt: Example of a pulse selected by the function for ICI data
 
-    .. image:: ../../../../_static/pulse_ICI_relaxation.png
+    .. image:: /_static/pulse_ICI_relaxation.png
         :width: 2000px
         :align: center
         :alt: Relaxation part of a pulse selected by the function for ICI data
 
-    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`) are:
+    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`) are:
     *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Ec, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_ICI`.
         
     Parameters
@@ -138,7 +138,7 @@ def global_calculation_ICI(df_nested, my_func_list):
 def calculate_relevant_points_ICI(df_pulse):
     """Calculates the relevant points represented in the :func:`pulse_number_ICI` documentation.  
 
-    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`).
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`).
     
     Parameters
     ----------

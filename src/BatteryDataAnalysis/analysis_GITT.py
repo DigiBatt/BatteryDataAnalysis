@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from create_custom_functions import add_function
+from .create_custom_functions import add_function
 from whittaker_eilers import WhittakerSmoother
 from scipy.interpolate import interp1d
 
@@ -13,13 +13,13 @@ def pulse_number_GITT(df_input):
 
     Here is a schema of a selected pulse and its relevant points:
 
-    .. image:: ../../../../_static/pulse_GITT.png
+    .. image:: /_static/pulse_GITT.png
         :width: 2000px
         :align: center
         :alt: Example of a pulse selected by the function for GITT data
 
         
-    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`) are: 
+    The corresponding parameters that can be used in a custom function (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`) are: 
     *V0, V1, V2, V3, t0, t1, t2, t3, Ipulse, delta_Eocv, delta_Edrop, delta_Epulse* that are calculated in :func:`calculate_relevant_points_GITT`.
     
     Parameters
@@ -107,10 +107,6 @@ def global_calculation_GITT(df_nested, my_func_list):
                                 'Ipulse': Ipulse,
                                 'Diffusion Coefficient': D,
                                 'Resistance': resistance,
-                                # 'R_1s': R_1s,
-                                # 'R_30s': R_30s,
-                                # 'R_60s': R_60s,
-                                # 'R_180s': R_180s,
                                 },
                                 index=['Pulse'])
 
@@ -152,7 +148,7 @@ def global_calculation_GITT(df_nested, my_func_list):
 def calculate_relevant_points_GITT(df_pulse):
     """Calculates the relevant points represented in the :func:`pulse_number_GITT` documentation.  
 
-    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.src.create_custom_functions.add_function>`).
+    These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`).
     
     Parameters
     ----------

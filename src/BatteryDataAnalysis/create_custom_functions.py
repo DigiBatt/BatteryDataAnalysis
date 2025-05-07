@@ -4,11 +4,11 @@ def add_function(my_func, **kwargs):
     """Adds a function to the calculation process
 
     The user can create his own function to calculate a new parameter from the points given in the 
-    :func:`pulse_number_GITT <BatteryDataAnalysis.src.analysis_GITT.pulse_number_GITT>`, 
-    :func:`pulse_number_ICI <BatteryDataAnalysis.src.analysis_ICI.pulse_number_ICI>` 
-    or :func:`pulse_number_HPPC <BatteryDataAnalysis.src.analysis_HPPC.pulse_number_HPPC>` documentation.
+    :func:`pulse_number_GITT <BatteryDataAnalysis.analysis_GITT.pulse_number_GITT>`, 
+    :func:`pulse_number_ICI <BatteryDataAnalysis.analysis_ICI.pulse_number_ICI>` 
+    or :func:`pulse_number_HPPC <BatteryDataAnalysis.analysis_HPPC.pulse_number_HPPC>` documentation.
 
-    The new custom function must be an argument of :func:`process_file <BatteryDataAnalysis.src.processing.process_file>`, as detailled in the example.
+    The new custom function must be an argument of :func:`process_file <BatteryDataAnalysis.processing.process_file>`, as detailled in the example.
 
     Then, the new parameter is calculated and stored in the result DataFrame and plotted over SOC.
     
@@ -20,9 +20,9 @@ def add_function(my_func, **kwargs):
         Keyword arguments to pass to the function.  
         The parameters available are:  
 
-        - Specific parameters defined in :func:`pulse_number_GITT <BatteryDataAnalysis.src.analysis_GITT.pulse_number_GITT>`, 
-        :func:`pulse_number_ICI <BatteryDataAnalysis.src.analysis_ICI.pulse_number_ICI>` 
-        or :func:`pulse_number_HPPC <BatteryDataAnalysis.src.analysis_HPPC.pulse_number_HPPC>` : float values,
+        - Specific parameters defined in :func:`pulse_number_GITT <BatteryDataAnalysis.analysis_GITT.pulse_number_GITT>`, 
+        :func:`pulse_number_ICI <BatteryDataAnalysis.analysis_ICI.pulse_number_ICI>` 
+        or :func:`pulse_number_HPPC <BatteryDataAnalysis.analysis_HPPC.pulse_number_HPPC>` : float values,
 
         - Voltage, Current and Capacity : interpolation functions of time,
 
@@ -40,7 +40,7 @@ def add_function(my_func, **kwargs):
     >>> def my_example_func(Ipulse, Voltage, t0):
     ...     Internal_resistance = (Voltage(t0 + 1) - Voltage(t0)) / Ipulse
     ...     return Internal_resistance
-    >>> df = process_file(file_path, my_func_list=[my_example_func])
+    >>> df, result_dict = process_file(file_path, my_func_list=[my_example_func])
     File : GITT_AG4_S_1577.parquet
     Length : 9154638
     Preprocessing Time : 41s

@@ -1,9 +1,9 @@
-from preprocessing import read_file
-from analysis_dqdv import calculate_dqdv_for_all_cycle
-from analysis_GITT import pulse_number_GITT, global_calculation_GITT
-from analysis_HPPC import pulse_number_HPPC, global_calculation_HPPC
-from analysis_ICI import pulse_number_ICI, global_calculation_ICI
-from plotting import *
+from .preprocessing import read_file
+from .analysis_dqdv import calculate_dqdv_for_all_cycle
+from .analysis_GITT import pulse_number_GITT, global_calculation_GITT
+from .analysis_HPPC import pulse_number_HPPC, global_calculation_HPPC
+from .analysis_ICI import pulse_number_ICI, global_calculation_ICI
+from .plotting import *
 
 import time
 import pandas as pd
@@ -81,7 +81,7 @@ def process_file(file_path,
     >>> def my_debug_func(df):
     ...     df = df[df['original_time_column'] < 1e6]
     ...     return df
-    >>> df = process_file(file_path, column_names=column_names, debug_func=my_debug_func)
+    >>> df, result_dict = process_file(file_path, column_names=column_names, debug_func=my_debug_func)
     File : GITT_AG4_S_1577.parquet
     Length : 9154638
     Preprocessing Time : 41s
