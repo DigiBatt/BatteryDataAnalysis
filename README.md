@@ -10,6 +10,20 @@ The features available are:
 - **Battery tests analysis**: Analyze the different test type and for each, extract parameters of the battery (such as diffusion coefficient, internal resistance...). The different test types are slow CCCV (for dQ/dV analysis), GITT, ICI, HPPC.
 - **Visualization**: Generate interactive plots for visualizing battery data, including plots of parameters over the State of Charge and Voltage, Current and Capacity of the tests over time.
 
+
+## Installation
+
+To install the package locally, you have to clone the repository before installing the package:
+
+```bash
+git clone https://github.com/DigiBatt/BatteryDataAnalysis.git
+cd BatteryDataAnalysis
+pip install .
+```
+
+This will install the package and its dependencies on your local environment.
+
+
 ## Usage
 
 To correctly use this package, few steps are important:  
@@ -26,15 +40,10 @@ An example notebook containing the different features of this package is given: 
 The usage of the main function:  
 
 ```python
-from src.processing import process_file
+from BatteryDataAnalysis import process_file
 
 df, result_dict = process_file(file_path)
 ```
 
-## Requirements
 
-To install the required packages, you can use the following command:  
-
-```bash
-pip install -r requirements.txt
-```
+   
