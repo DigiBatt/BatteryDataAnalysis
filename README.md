@@ -45,5 +45,17 @@ from BatteryDataAnalysis import process_file
 df, result_dict = process_file(file_path)
 ```
 
+## Documentation
 
+To build the sphinx documentation, you can follow these steps: 
+
+```bash
+pip install -r requirements-docs.txt
+cd .\docs\
+.\make.bat clean
+.\make.bat html
+```
+
+You can then display the documentation on your browser by running the HTML file at the path:  
+C:/BatteryDataAnalysis/docs/_build/html/index.html
    
