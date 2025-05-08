@@ -25,6 +25,7 @@ To begin using **BatteryDataAnalysis**, follow these steps:
        git clone https://github.com/DigiBatt/BatteryDataAnalysis.git
        cd BatteryDataAnalysis
        pip install .
+       pip install -r requirements.txt
 
    This will install the package and its dependencies on your local environment.
 

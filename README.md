@@ -19,6 +19,7 @@ To install the package locally, you have to clone the repository before installi
 git clone https://github.com/DigiBatt/BatteryDataAnalysis.git
 cd BatteryDataAnalysis
 pip install .
+pip install -r requirements.txt
 ```
 
 This will install the package and its dependencies on your local environment.
