@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.BatteryDataAnalysis.create_custom_functions import add_function
+from .create_custom_functions import add_function
 from whittaker_eilers import WhittakerSmoother
 from scipy.interpolate import interp1d
 
