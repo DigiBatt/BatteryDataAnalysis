@@ -171,4 +171,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-src/run.py
+src/BatteryDataAnalysis/run.py

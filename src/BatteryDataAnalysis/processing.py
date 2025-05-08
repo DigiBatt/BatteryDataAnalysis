@@ -1,18 +1,25 @@
-from preprocessing import read_file, preprocessing_files
-from analysis_dqdv import calculate_dqdv_for_all_cycle
-from analysis_GITT import pulse_number_GITT, global_calculation_GITT
-from analysis_HPPC import pulse_number_HPPC, global_calculation_HPPC
-from analysis_ICI import pulse_number_ICI, global_calculation_ICI
-from plotting import *
+from .preprocessing import read_file
+from .analysis_dqdv import calculate_dqdv_for_all_cycle
+from .analysis_GITT import pulse_number_GITT, global_calculation_GITT
+from .analysis_HPPC import pulse_number_HPPC, global_calculation_HPPC
+from .analysis_ICI import pulse_number_ICI, global_calculation_ICI
+from .plotting import *
 
 import time
-import pandas as pd
 
 
 def process_file(
-    file_path, column_names=None, cycle=None, debug_func=None, my_func_list=[], save=True, png=False, plot=True
+    file_path,
+    column_names=None,
+    cycle=None,
+    debug_func=None,
+    my_func_list=[],
+    input="path",
+    save=True,
+    png=False,
+    plot=False,
 ):
-    """Processes the data for a given file in .parquet or .csv format
+    """Processes the data for a given file
 
     It detects the type of tests applied to the battery and process the data for each type of tests
 
@@ -46,7 +53,7 @@ def process_file(
     --------
     Basic usage:
 
-    >>> df = process_file(file_path)
+    >>> df, result_dict = process_file(file_path)
     File : GITT_AG4_S_1577.parquet
     Length : 9154638
     Preprocessing Time : 41s
@@ -76,7 +83,7 @@ def process_file(
     >>> def my_debug_func(df):
     ...     df = df[df['original_time_column'] < 1e6]
     ...     return df
-    >>> df = process_file(file_path, column_names=column_names, debug_func=my_debug_func)
+    >>> df, result_dict = process_file(file_path, column_names=column_names, debug_func=my_debug_func)
     File : GITT_AG4_S_1577.parquet
     Length : 9154638
     Preprocessing Time : 41s
@@ -100,19 +107,17 @@ def process_file(
     """
     start_time = time.time()
 
-    df_list = read_file(file_path, column_names, cycle, debug_func)
+    df_list, file_path_list = read_file(file_path, column_names, cycle, debug_func, input)
     result_dict_list = []
-    sheet_number = 1
-    for df in df_list:
-        if len(df_list) > 1:
-            new_file_path = add_suffix_to_filename(file_path, sheet_number)
-            print(os.path.splitext(os.path.basename(new_file_path))[0])
-            sheet_number += 1
-        else:
-            new_file_path = file_path
+    for i, df in enumerate(df_list):
+        new_file_path = file_path_list[i]
+
+        base_name = os.path.splitext(os.path.basename(new_file_path))[0]
+        if "- sheet " in base_name and new_file_path != file_path:
+            sheet_name = base_name.split("- sheet ")[-1]
+            print("\nSheet", sheet_name)
 
         df = find_test(df)
-
         fig_global = plot_test_over_time(df, new_file_path, save, png, plot, test="global_file")
 
         result_dict = {}
@@ -149,16 +154,10 @@ def process_file(
                 result_dict_list.append(result_dict)
 
     print("Total Time : " + str(int(time.time() - start_time)) + "s")
-
-    return df_list, result_dict_list
-
-
-def add_suffix_to_filename(file_path, sheet_number):
-    """Ajoute un suffixe au nom du fichier avant l'extension"""
-    directory, filename = os.path.split(file_path)
-    name, ext = os.path.splitext(filename)
-    new_filename = f"{name} - sheet {sheet_number}{ext}"
-    return os.path.join(directory, new_filename)
+    if len(df_list) == 1:
+        return df_list[0], result_dict_list[0]
+    else:
+        return df_list, result_dict_list
 
 
 def find_test(df_input):
@@ -166,6 +165,11 @@ def find_test(df_input):
 
     Analyses the test type for each cycle according to its current pulses number
     It needs the preprocessed data with in particular the columns Cycle, State and normcurrent
+
+    Parameters
+    ----------
+    df_input : pandas.DataFrame
+        DataFrame containing the preprocessed data
 
     Returns
     -------
@@ -190,6 +194,7 @@ def find_test(df_input):
                 for pulse in df_cycle["discharge_pulse"].unique():
                     if len(df_cycle[df_cycle["discharge_pulse"] == pulse]) < 10:
                         discharge_pulse -= 1
+
                 for pulse in df_cycle["charge_pulse"].unique():
                     if len(df_cycle[df_cycle["charge_pulse"] == pulse]) < 10:
                         charge_pulse -= 1
@@ -211,18 +216,6 @@ def find_test(df_input):
                         df.loc[(df["Cycle"] == cycle) & (df["State"] == state), "Test"] = "ICI"
                     else:
                         df.loc[(df["Cycle"] == cycle) & (df["State"] == state), "Test"] = "GITT"
-
-                else:
-                    volt_diff = df_cycle["Voltage"].diff()
-
-    # If there is a complete cycle with no pulses, the test is CCCV
-    # df['Group'] = (df['Test'] != df['Test'].shift()).cumsum()
-    # for group in df['Group'].unique():
-    #     df_group = df[df['Group'] == group]
-    #     if 'C' in df_group['State'].unique() and 'D' in df_group['State'].unique() and df_group['Test'].unique() == ['NA']:
-    #         df.loc[df['Group'] == group, 'Test'] = 'CCCV'
-
-    # df['Test'] = df['Test'].replace('NA', np.nan)
 
     print("Find Test Time : " + str(int(time.time() - start_time)) + "s")
     return df

@@ -2,21 +2,25 @@ import os
 import pyarrow.parquet as pq
 import plotly.express as px
 
-from src.preprocessing import preprocessing_files, standardize_column_names, charging_state, process_useful_columns
-from src.analysis_dqdv import calculate_dqdv_for_all_cycle
-from src.plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv
-from src.processing import process_dqdv
+from src.BatteryDataAnalysis.preprocessing import (
+    preprocessing_files,
+    standardize_column_names,
+    charging_state,
+    process_useful_columns,
+)
+from src.BatteryDataAnalysis.analysis_dqdv import calculate_dqdv_for_all_cycle
+from src.BatteryDataAnalysis.plotting import plot_dqdv, plot_dqdv_heatmap, plot_pocv
+from src.BatteryDataAnalysis.processing import process_dqdv
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-folder_path = os.path.join(script_dir, 'files')
+folder_path = os.path.join(script_dir, "files")
 
 for file_name in os.listdir(folder_path):
-    if file_name.endswith('.parquet'):
+    if file_name.endswith(".parquet"):
         file_path = os.path.join(folder_path, file_name)
 
         table = pq.read_table(file_path)
         df = table.to_pandas()
-
 
         # Test Preprocessing
         print(df.columns)
@@ -33,14 +37,12 @@ for file_name in os.listdir(folder_path):
         df_preprocessed = preprocessing_files(file_path, column_names=None)
         print(df_preprocessed.head())
 
-
         # Test Analysis
         df_dqdv = calculate_dqdv_for_all_cycle(df_preprocessed)
         print(df_dqdv.head())
 
-        fig = px.scatter(df_dqdv, x='smoothed_voltage', y='smoothed_dqdv', color='Cycle', title=file_name)
+        fig = px.scatter(df_dqdv, x="smoothed_voltage", y="smoothed_dqdv", color="Cycle", title=file_name)
         fig.show()
-
 
         # Test Plotting
         fig_dqdv = plot_dqdv(df_dqdv, file_path)
@@ -52,8 +54,5 @@ for file_name in os.listdir(folder_path):
         fig_pocv = plot_pocv(df_preprocessed, file_path)
         fig_pocv.show()
 
-
         # Test Processing
-        df = process_dqdv(file_path)  
-
-        
+        df = process_dqdv(file_path)
