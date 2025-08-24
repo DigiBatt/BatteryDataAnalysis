@@ -3,13 +3,14 @@ import numpy as np
 from .create_custom_functions import add_function
 from scipy.interpolate import interp1d
 
+
 def pulse_number_HPPC(df_input):
     """Pulse selection for HPPC data
 
     For every cycles, gives a pulse number for every HPPC pattern (containing a charge and discharge pulse followed by a relaxation time).
     Then it gives this number for the last point before the first pulse until the last point before the end of the relaxation
     Finally, it creates a nested Dataframe structuring the HPPC data for each pattern (called 'Pulse' to be consistent with GITT and ICI processing)
-    
+
     Here is a schema of a selected pulse and its relevant points:
 
     .. image:: /_static/pulse_HPPC.png
@@ -44,53 +45,109 @@ def pulse_number_HPPC(df_input):
             df_state = df[(df['State'] == state) & (df['Cycle'] == cycle)].copy()
 
             # Count the number of positive and negative current pulses (including relaxation)
-            df_state['raw_neg_pulse_count'] = (df_state['normcurrent'] < 0).astype(int).diff().fillna(0).gt(0).cumsum().ffill().shift(-1)
-            df_state['raw_pos_pulse_count'] = (df_state['normcurrent'] > 0).astype(int).diff().fillna(0).gt(0).cumsum().ffill().shift(-1)
+            df_state['raw_neg_pulse_count'] = (
+                (df_state['normcurrent'] < 0)
+                .astype(int)
+                .diff()
+                .fillna(0)
+                .gt(0)
+                .cumsum()
+                .ffill()
+                .shift(-1)
+            )
+            df_state['raw_pos_pulse_count'] = (
+                (df_state['normcurrent'] > 0)
+                .astype(int)
+                .diff()
+                .fillna(0)
+                .gt(0)
+                .cumsum()
+                .ffill()
+                .shift(-1)
+            )
             df_state = df_state.dropna(subset=['raw_neg_pulse_count', 'raw_pos_pulse_count'])
 
             # If charging the only negative current is the HPPC pulse
             if state == 'C':
                 df_state['discharge_pulse'] = (df_state['normcurrent'] < 0).astype(int)
                 df_state['charge_pulse'] = 0
-                
-                df_group = df_state[df_state['normcurrent'] < 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
+
+                df_group = (
+                    df_state[df_state['normcurrent'] < 0]
+                    .groupby('raw_neg_pulse_count')['TestTime']
+                    .agg(lambda x: x.max() - x.min())
+                )
                 pulse_time = df_group.mean()
 
                 # If a positive pulse is the same length as the negative pulse then it is the HPPC pulse (and not the relaxation)
                 for pulse in df_state['raw_pos_pulse_count'].unique():
-                    df_pulse = df_state[(df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0)]
-                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5: #1.5
-                        df_state.loc[(df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0), 'charge_pulse'] = 1
+                    df_pulse = df_state[
+                        (df_state['raw_pos_pulse_count'] == pulse) & (df_state['normcurrent'] > 0)
+                    ]
+                    if (
+                        df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5
+                    ):  # 1.5
+                        df_state.loc[
+                            (df_state['raw_pos_pulse_count'] == pulse)
+                            & (df_state['normcurrent'] > 0),
+                            'charge_pulse',
+                        ] = 1
                         pulse_count += 1
 
-                    df_state.loc[df_state['raw_pos_pulse_count'] == pulse, 'pos_pulse_count'] = pulse_count
+                    df_state.loc[df_state['raw_pos_pulse_count'] == pulse, 'pos_pulse_count'] = (
+                        pulse_count
+                    )
 
                 df_state['pos_pulse_count'] = df_state['pos_pulse_count'].ffill()
-                df_state['Pulse'] = np.maximum(df_state['raw_neg_pulse_count'], df_state['pos_pulse_count'])
+                df_state['Pulse'] = np.maximum(
+                    df_state['raw_neg_pulse_count'], df_state['pos_pulse_count']
+                )
 
             # If discharging the only positive current is the HPPC pulse
             elif state == 'D':
                 df_state['charge_pulse'] = (df_state['normcurrent'] > 0).astype(int)
                 df_state['discharge_pulse'] = 0
 
-                df_group = df_state[df_state['normcurrent'] > 0].groupby('raw_neg_pulse_count')['TestTime'].agg(lambda x: x.max() - x.min())
+                df_group = (
+                    df_state[df_state['normcurrent'] > 0]
+                    .groupby('raw_neg_pulse_count')['TestTime']
+                    .agg(lambda x: x.max() - x.min())
+                )
                 pulse_time = df_group.mean()
 
                 # If a negative pulse is the same length as the positive pulse then it is the HPPC pulse (and not the relaxation)
                 for pulse in df_state['raw_neg_pulse_count'].unique():
-                    df_pulse = df_state[(df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0)]
-                    if df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5: #1.5
-                        df_state.loc[(df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0), 'discharge_pulse'] = 1
+                    df_pulse = df_state[
+                        (df_state['raw_neg_pulse_count'] == pulse) & (df_state['normcurrent'] < 0)
+                    ]
+                    if (
+                        df_pulse['TestTime'].max() - df_pulse['TestTime'].min() < pulse_time * 1.5
+                    ):  # 1.5
+                        df_state.loc[
+                            (df_state['raw_neg_pulse_count'] == pulse)
+                            & (df_state['normcurrent'] < 0),
+                            'discharge_pulse',
+                        ] = 1
                         pulse_count += 1
 
-                    df_state.loc[df_state['raw_neg_pulse_count'] == pulse, 'neg_pulse_count'] = pulse_count
+                    df_state.loc[df_state['raw_neg_pulse_count'] == pulse, 'neg_pulse_count'] = (
+                        pulse_count
+                    )
 
                 df_state['neg_pulse_count'] = df_state['neg_pulse_count'].ffill()
-                df_state['Pulse'] = np.maximum(df_state['neg_pulse_count'], df_state['raw_pos_pulse_count'])
+                df_state['Pulse'] = np.maximum(
+                    df_state['neg_pulse_count'], df_state['raw_pos_pulse_count']
+                )
 
-            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'Pulse'] = df_state['Pulse'].astype(int)
-            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'charge_pulse'] = df_state['charge_pulse']
-            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'discharge_pulse'] = df_state['discharge_pulse']
+            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'Pulse'] = df_state[
+                'Pulse'
+            ].astype(int)
+            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'charge_pulse'] = df_state[
+                'charge_pulse'
+            ]
+            df.loc[(df['State'] == state) & (df['Cycle'] == cycle), 'discharge_pulse'] = df_state[
+                'discharge_pulse'
+            ]
 
     df = df.dropna(subset=['Pulse'])
     df_nested = {int(pulse): df[df['Pulse'] == pulse] for pulse in df['Pulse'].unique()}
@@ -102,7 +159,7 @@ def global_calculation_HPPC(df_nested, my_func_list):
     """Calculates the HPPC parameters
 
     Given a nested DataFrame containing the HPPC data, this function calculates the HPPC parameters for each pulse
-    
+
     Parameters
     ----------
     df_nested : Dict
@@ -128,25 +185,32 @@ def global_calculation_HPPC(df_nested, my_func_list):
                 SOC = df_pulse['SOC'].iloc[0]
                 if SOC < 0.02 or SOC > 0.98:
                     continue
-                V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Idischarge, Icharge = calculate_relevant_points_HPPC(df_pulse)
+                V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Idischarge, Icharge = (
+                    calculate_relevant_points_HPPC(df_pulse)
+                )
 
-                R_discharge = abs((V1 - V0) / Idischarge) 
-                R_charge = abs((V4 - V3) / Icharge) 
-                P_discharge, P_charge = calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge)
+                R_discharge = abs((V1 - V0) / Idischarge)
+                R_charge = abs((V4 - V3) / Icharge)
+                P_discharge, P_charge = calculate_pulse_power_capability(
+                    Vmin, Vmax, V0, R_discharge, R_charge
+                )
 
-                df_coefficient = pd.DataFrame({'Pulse': pulse,
-                                            'Cycle': df_pulse['Cycle'].iloc[0],
-                                            'State': df_pulse['State'].iloc[0],
-                                            'TestTime': df_pulse['TestTime'].iloc[0],
-                                            'SOC': df_pulse['SOC'].iloc[0],
-                                            'OCV': V0,
-                                            'R_charge': R_charge,
-                                            'R_discharge': R_discharge,
-                                            'P_charge': P_charge,
-                                            'P_discharge': P_discharge,
-                                            },
-                                            index=['Pulse'])
-                
+                df_coefficient = pd.DataFrame(
+                    {
+                        'Pulse': pulse,
+                        'Cycle': df_pulse['Cycle'].iloc[0],
+                        'State': df_pulse['State'].iloc[0],
+                        'TestTime': df_pulse['TestTime'].iloc[0],
+                        'SOC': df_pulse['SOC'].iloc[0],
+                        'OCV': V0,
+                        'R_charge': R_charge,
+                        'R_discharge': R_discharge,
+                        'P_charge': P_charge,
+                        'P_discharge': P_discharge,
+                    },
+                    index=['Pulse'],
+                )
+
                 # Parameters that can be used in an external function
                 kwargs = {
                     'V0': V0,
@@ -186,10 +250,10 @@ def global_calculation_HPPC(df_nested, my_func_list):
 
 
 def calculate_relevant_points_HPPC(df_pulse):
-    """Calculates the relevant points represented in the :func:`pulse_number_HPPC` documentation.  
+    """Calculates the relevant points represented in the :func:`pulse_number_HPPC` documentation.
 
     These parameters can be used in a custom function to calculate new parameters (see :func:`add_function <BatteryDataAnalysis.create_custom_functions.add_function>`).
-    
+
     Parameters
     ----------
     df_pulse : pandas.DataFrame
@@ -222,9 +286,9 @@ def calculate_relevant_points_HPPC(df_pulse):
 
     t5 = df_charge['TestTime'].iloc[-1]
     V5 = df_charge['Voltage'].iloc[-1]
-    
+
     t3 = df[(df['TestTime'] < t4) & (df['normcurrent'] == 0)]['TestTime'].iloc[-1]
-    V3 = df[df['TestTime'] == t2]['Voltage'].mean()    
+    V3 = df[df['TestTime'] == t2]['Voltage'].mean()
     Icharge = abs(df_charge[df_charge['normcurrent'] != 0]['Current']).mean()
 
     return V0, V1, V2, V3, V4, V5, t0, t1, t2, t3, t4, t5, Idischarge, Icharge
@@ -232,7 +296,7 @@ def calculate_relevant_points_HPPC(df_pulse):
 
 def calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge):
     """Calculates Pulse Power for HPPC test
-    
+
     Parameters
     ----------
     Vmin : float
@@ -251,7 +315,6 @@ def calculate_pulse_power_capability(Vmin, Vmax, V0, R_discharge, R_charge):
     Tuple
         Charge and discharge Pulse Power
     """
-    P_discharge = Vmin * (V0 - Vmin) / R_discharge 
-    P_charge = Vmax * (Vmax - V0) / R_charge 
+    P_discharge = Vmin * (V0 - Vmin) / R_discharge
+    P_charge = Vmax * (Vmax - V0) / R_charge
     return P_discharge, P_charge
-

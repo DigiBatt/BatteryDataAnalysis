@@ -8,15 +8,18 @@ from .plotting import *
 import time
 import pandas as pd
 
-def process_file(file_path, 
-                 column_names=None, 
-                 cycle=None,
-                 debug_func=None,
-                 my_func_list=[],
-                 input='path',
-                 save=True,
-                 png=False,
-                 plot=False):
+
+def process_file(
+    file_path,
+    column_names=None,
+    cycle=None,
+    debug_func=None,
+    my_func_list=[],
+    input='path',
+    save=True,
+    png=False,
+    plot=False,
+):
     """Processes the data for a given file
 
     It detects the type of tests applied to the battery and process the data for each type of tests
@@ -75,8 +78,8 @@ def process_file(file_path,
 
     In addition, you can add a column_names dictionnary and a debug function if needed:
 
-    >>> column_names={'original_time_column': 'SysTime', 
-    ...               'original_voltage_column': 'Voltage', 
+    >>> column_names={'original_time_column': 'SysTime',
+    ...               'original_voltage_column': 'Voltage',
     ...               'original_current_column': 'Current'}
     >>> def my_debug_func(df):
     ...     df = df[df['original_time_column'] < 1e6]
@@ -116,26 +119,32 @@ def process_file(file_path,
             print('\nSheet', sheet_name)
 
         df = find_test(df)
-        fig_global = plot_test_over_time(df, new_file_path, save, png, plot, test='global_file')
+        # fig_global = plot_test_over_time(df, new_file_path, save, png, plot, test='global_file')
 
         result_dict = {}
         for test in df['Test'].unique():
-            print(test)
-            if len(df[df['Test'] == test]) > 5: #not pd.isna(test) and 
+            test == 'GITT'
+            if len(df[df['Test'] == test]) > 5:  # not pd.isna(test) and
                 print('Test :', test, '; Length :', len(df[df['Test'] == test]))
-                
+
                 df_test = df[df['Test'] == test]
 
                 if test == 'GITT':
-                    df_test, GITT_result_df = process_GITT(df_test, new_file_path, my_func_list, save, png, plot)
+                    df_test, GITT_result_df = process_GITT(
+                        df_test, new_file_path, my_func_list, save, png, plot
+                    )
                     result_dict['GITT'] = GITT_result_df
 
                 elif test == 'ICI':
-                    df_test, ICI_result_df = process_ICI(df_test, new_file_path, my_func_list, save, png, plot)
+                    df_test, ICI_result_df = process_ICI(
+                        df_test, new_file_path, my_func_list, save, png, plot
+                    )
                     result_dict['ICI'] = ICI_result_df
 
                 elif test == 'HPPC':
-                    df_test, HPPC_result_df = process_HPPC(df_test, new_file_path, my_func_list, save, png, plot)
+                    df_test, HPPC_result_df = process_HPPC(
+                        df_test, new_file_path, my_func_list, save, png, plot
+                    )
                     result_dict['HPPC'] = HPPC_result_df
 
                 elif test == 'CCCV' and (df['Test'].unique() == ['CCCV']).all():
@@ -151,7 +160,7 @@ def process_file(file_path,
 
                 result_dict_list.append(result_dict)
 
-    print('Total Time : '+str(int(time.time() - start_time))+'s')
+    print('Total Time : ' + str(int(time.time() - start_time)) + 's')
     if len(df_list) == 1:
         return df_list[0], result_dict_list[0]
     else:
@@ -202,12 +211,14 @@ def find_test(df_input):
                     df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'Test'] = 'HPPC'
 
                 # if charge or discharge pulse, it is either GITT or ICI
-                elif (discharge_pulse > 5 or charge_pulse > 5):
+                elif discharge_pulse > 5 or charge_pulse > 5:
                     df_cycle['Pulse'] = (df_cycle['normcurrent'] != 0).diff().gt(0).cumsum().ffill()
                     relaxation_time = 0
                     for pulse in df_cycle['Pulse'].unique():
                         df_pulse = df_cycle[df_cycle['Pulse'] == pulse]
-                        relaxation_time += df_pulse[df_pulse['normcurrent'] == 0]['TestTime'].diff().sum()
+                        relaxation_time += (
+                            df_pulse[df_pulse['normcurrent'] == 0]['TestTime'].diff().sum()
+                        )
 
                     # Threshold of 30% of relaxation time makes the difference between ICI and GITT
                     if relaxation_time / df_cycle['TestTime'].diff().sum() < 0.3:
@@ -215,20 +226,15 @@ def find_test(df_input):
                     else:
                         df.loc[(df['Cycle'] == cycle) & (df['State'] == state), 'Test'] = 'GITT'
 
-    print('Find Test Time : '+str(int(time.time() - start_time))+'s')
+    print('Find Test Time : ' + str(int(time.time() - start_time)) + 's')
     return df
 
 
-def process_dqdv(df, 
-                 file_path,
-                 save,
-                 png,
-                 plot,
-                 heatmap=False):
+def process_dqdv(df, file_path, save, png, plot, heatmap=False):
     """Processes the CCCV data for a given preprocessed file
 
     Plots the dQ/dV curves and the dQ/dV heatmap for every cycles
-    
+
     Parameters
     ----------
     df : pandas.DataFrame
@@ -258,17 +264,12 @@ def process_dqdv(df,
 
         if heatmap:
             heatmap_dqdv = plot_dqdv_heatmap(df_dqdv, file_path, save, png, plot)
-    
-    print('dQ/dV Time : '+str(int(time.time() - start_time))+'s')
+
+    print('dQ/dV Time : ' + str(int(time.time() - start_time)) + 's')
     return df_dqdv
 
 
-def process_GITT(df, 
-                 file_path,
-                 my_func_list,
-                 save,
-                 png,
-                 plot):
+def process_GITT(df, file_path, my_func_list, save, png, plot):
     """Processes the GITT data for a given preprocessed file
 
     Plots the GITT Voltage curve and the diffusion coefficient over SOC for every cycles
@@ -297,32 +298,24 @@ def process_GITT(df,
     results_df = global_calculation_GITT(df_nested, my_func_list)
     print(results_df)
 
-    try:
-        fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='GITT', pulse=True)
-        fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
-        fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
+    # try:
+    #     fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='GITT', pulse=True)
+    #     fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient')
+    #     fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance')
 
-
-        fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='OCV')
-    except:
-        print('Not possible to calculate GITT data')
-
-
+    #     fig_GITT = plot_GITT_result(results_df, file_path, save, png, plot, column='OCV')
+    # except:
+    #     print('Not possible to calculate GITT data')
 
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_30s', save=save)
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_60s', save=save)
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s', save=save)
 
-    print('GITT Time : '+str(int(time.time() - start_time))+'s')
+    print('GITT Time : ' + str(int(time.time() - start_time)) + 's')
     return df_nested, results_df
 
 
-def process_ICI(df, 
-                file_path,
-                my_func_list,
-                save,
-                png,
-                plot):
+def process_ICI(df, file_path, my_func_list, save, png, plot):
     """Processes the ICI data for a given preprocessed file
 
     Plots the ICI Voltage curve and the diffusion coefficient over SOC for every cycles
@@ -353,21 +346,20 @@ def process_ICI(df,
 
     try:
         fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='ICI', pulse=True)
-        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Diffusion Coefficient', test='ICI')
-        fig_ICI = plot_GITT_result(results_df, file_path, save, png, plot, column='Resistance', test='ICI')
+        fig_ICI = plot_GITT_result(
+            results_df, file_path, save, png, plot, column='Diffusion Coefficient', test='ICI'
+        )
+        fig_ICI = plot_GITT_result(
+            results_df, file_path, save, png, plot, column='Resistance', test='ICI'
+        )
     except:
         print('Not possible to calculate ICI data')
 
-    print('ICI Time : '+str(int(time.time() - start_time))+'s')
+    print('ICI Time : ' + str(int(time.time() - start_time)) + 's')
     return df_nested, results_df
 
 
-def process_HPPC(df, 
-                 file_path,
-                 my_func_list,
-                 save,
-                 png,
-                 plot):
+def process_HPPC(df, file_path, my_func_list, save, png, plot):
     """Processes the HPPC data for a given preprocessed file
 
     Plots the HPPC Voltage curve and the diffusion coefficient over SOC for every cycles
@@ -396,12 +388,12 @@ def process_HPPC(df,
     results_df = global_calculation_HPPC(df_nested, my_func_list)
     print(results_df)
 
-    try:
-        fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='HPPC', pulse=True)
-        fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='R')
-        fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='P')
-    except:
-        print('Not possible to calculate HPPC data')
+    # try:
+    #     fig = plot_test_over_time(df_nested, file_path, save, png, plot, test='HPPC', pulse=True)
+    #     fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='R')
+    #     fig_HPPC = plot_HPPC_result(results_df, file_path, save, png, plot, column='P')
+    # except:
+    #     print('Not possible to calculate HPPC data')
 
-    print('HPPC Time : '+str(int(time.time() - start_time))+'s')
+    print('HPPC Time : ' + str(int(time.time() - start_time)) + 's')
     return df_nested, results_df
