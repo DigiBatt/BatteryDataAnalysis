@@ -130,7 +130,7 @@ def process_file(
                 df_test = df[df['Test'] == test]
 
                 if test == 'GITT':
-                    df_test, GITT_result_df = process_GITT(
+                    df_test_pulse, df_test_relax, GITT_result_df = process_GITT(
                         df_test, new_file_path, my_func_list, save, png, plot
                     )
                     result_dict['GITT'] = GITT_result_df
@@ -294,8 +294,8 @@ def process_GITT(df, file_path, my_func_list, save, png, plot):
     """
     start_time = time.time()
 
-    df_nested = pulse_number_GITT(df)
-    results_df = global_calculation_GITT(df_nested, my_func_list)
+    df_nested_pulse, df_nested_relax = pulse_number_GITT(df)
+    results_df = global_calculation_GITT(df_nested_pulse, df_nested_relax, my_func_list)
     print(results_df)
 
     # try:
@@ -312,7 +312,7 @@ def process_GITT(df, file_path, my_func_list, save, png, plot):
     # fig_GITT = plot_GITT_result(results_df, file_path, column='R_180s', save=save)
 
     print('GITT Time : ' + str(int(time.time() - start_time)) + 's')
-    return df_nested, results_df
+    return df_nested_pulse, df_nested_relax, results_df
 
 
 def process_ICI(df, file_path, my_func_list, save, png, plot):
