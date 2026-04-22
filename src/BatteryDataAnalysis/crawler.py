@@ -179,3 +179,85 @@ def crawl_and_process(directory_path):
                     df, df_result = process_file(file_path, column_names=column_names, debug_func=debug_func)
                 except Exception as e:
                     print('Error processing file:', e)
+
+def _crawl_and_process_internal(directory_path: str) -> dict:
+    """
+    Created for the use of an llm tool.
+    Internal function to crawl a directory and process battery data files.
+    Returns structured metadata about processed files.
+    
+    """
+    max_size = 2 * 1024**3  # 2 GB
+    file_extensions = ['.csv', '.txt', '.parquet', '.xlsx', '.xls', '.json']
+
+    processed_files = []
+    skipped_files = []
+    errors = []
+
+    for root, dirs, files in os.walk(directory_path):
+        for file in files:
+
+            if file.lower() == "column_names.json":
+                continue
+            file_name, file_ext = os.path.splitext(file)
+            file_path = os.path.join(root, file)
+
+            # Load optional column names
+            column_names = {}
+            json_path = os.path.join(root, "column_names.json")
+            if os.path.exists(json_path):
+                try:
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        column_names = json.load(f)
+                except Exception as e:
+                    errors.append(f"Failed loading column_names.json: {e}")
+
+            # Load optional debug function
+            debug_func = None
+            debug_func_path = os.path.join(root, "debug_func.py")
+            if os.path.exists(debug_func_path):
+                try:
+                    spec = importlib.util.spec_from_file_location(
+                        "debug_module", debug_func_path
+                    )
+                    debug_module = importlib.util.module_from_spec(spec)
+                    sys.modules["debug_module"] = debug_module
+                    spec.loader.exec_module(debug_module)
+
+                    if hasattr(debug_module, "debug_func"):
+                        debug_func = getattr(debug_module, "debug_func")
+                except Exception as e:
+                    errors.append(f"Failed loading debug_func.py: {e}")
+
+            file_already_processed = any(
+                d.startswith(file_name)
+                for d in os.listdir(root)
+                if os.path.isdir(os.path.join(root, d))
+            )
+
+            file_too_heavy = os.path.getsize(file_path) > max_size
+            good_extension = file_ext in file_extensions
+
+            if file_already_processed or file_too_heavy or not good_extension:
+                skipped_files.append(file_path)
+                continue
+
+            try:
+
+                print(f"Processing {file_path} with column_names={column_names} and debug_func={debug_func}")
+                process_file(
+                    file_path,
+                    column_names=column_names,
+                    debug_func=debug_func
+                )
+                processed_files.append(file_path)
+            except Exception as e:
+                errors.append(f"Error processing {file_path}: {e}")
+
+    return {
+        "status": "success" if not errors else "partial",
+        "processed_files": processed_files,
+        "skipped_files": skipped_files,
+        "errors": errors,
+        "root_directory": directory_path
+    }
